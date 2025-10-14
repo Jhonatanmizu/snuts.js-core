@@ -1,0 +1,17 @@
+{
+  "name": "snuts.js-core",
+  "version": "1.0.0",
+  "description": "core snuts.js",
+  "main": "index.js",
+  "repository": "https://github.com/Jhonatanmizu/snuts.js-core.git",
+  "author": "Jhonatanmizu <natanjesuss20gmail.com>",
+  "devDependencies": {
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@types/node": "^24.7.2"
+  }
+}
