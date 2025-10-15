@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import astService from "./ast.service.ts";
-import * as t from "@babel/types";
+import { AstNodeBuilder } from "../test/builders/astNodeBuilder.ts";
+import { Node } from "@babel/types";
 
 describe("astService", () => {
   describe("parseToAst()", () => {
@@ -20,71 +21,28 @@ describe("astService", () => {
   });
 
   describe("isFunction()", () => {
-    const functionNodes: [string, t.Node][] = [
-      [
-        "function declaration",
-        t.functionDeclaration(t.identifier("myFunc"), [], t.blockStatement([])),
-      ],
-      [
-        "function expression",
-        t.functionExpression(
-          t.identifier("myFuncExpr"),
-          [],
-          t.blockStatement([])
-        ),
-      ],
-      ["arrow function", t.arrowFunctionExpression([], t.blockStatement([]))],
-      [
-        "object method",
-        t.objectMethod(
-          "method",
-          t.identifier("myMethod"),
-          [],
-          t.blockStatement([])
-        ),
-      ],
-      [
-        "class method",
-        t.classMethod(
-          "method",
-          t.identifier("myClassMethod"),
-          [],
-          t.blockStatement([])
-        ),
-      ],
-      [
-        "private class method",
-        t.classPrivateMethod(
-          "method",
-          t.privateName(t.identifier("myPrivateMethod")),
-          [],
-          t.blockStatement([])
-        ),
-      ],
+    const functionNodes = [
+      ["function declaration", AstNodeBuilder.functionDeclaration()],
+      ["function expression", AstNodeBuilder.functionExpression()],
+      ["arrow function", AstNodeBuilder.arrowFunction()],
+      ["object method", AstNodeBuilder.objectMethod()],
+      ["class method", AstNodeBuilder.classMethod()],
+      ["private class method", AstNodeBuilder.classPrivateMethod()],
     ];
 
-    const nonFunctionNodes: [string, t.Node][] = [
-      [
-        "variable declaration",
-        t.variableDeclaration("const", [
-          t.variableDeclarator(t.identifier("a"), t.numericLiteral(1)),
-        ]),
-      ],
-      [
-        "string expression",
-        t.expressionStatement(t.stringLiteral("Hello, World!")),
-      ],
-      [
-        "class declaration",
-        t.classDeclaration(t.identifier("MyClass"), null, t.classBody([])),
-      ],
+    const nonFunctionNodes = [
+      ["variable declaration", AstNodeBuilder.variableDeclaration()],
+      ["string expression", AstNodeBuilder.expressionStatement()],
+      ["class declaration", AstNodeBuilder.classDeclaration()],
     ];
 
-    it.each(functionNodes)("should return true for %s", (_, node) => {
+    it.each(functionNodes)("should return true for %s", (...args) => {
+      const [_, node] = args as [string, Node];
       expect(astService.isFunction(node)).toBe(true);
     });
 
-    it.each(nonFunctionNodes)("should return false for %s", (_, node) => {
+    it.each(nonFunctionNodes)("should return false for %s", (...args) => {
+      const [_, node] = args as [string, Node];
       expect(astService.isFunction(node)).toBe(false);
     });
   });
