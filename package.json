@@ -5,13 +5,28 @@
   "main": "index.js",
   "repository": "https://github.com/Jhonatanmizu/snuts.js-core.git",
   "author": "Jhonatanmizu <natanjesuss20gmail.com>",
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsup lib/index.ts --dts --format cjs,esm --out-dir dist --clean",
+    "test": "vitest run --config  ./vitest.config.js lib/",
+    "test:watch": "vitest --config  ./vitest.config.js lib/",
+    "test:coverage": "vitest run --config  ./vitest.config.js --coverage lib/"
+  },
+  "type": "module",
   "devDependencies": {
+    "@types/babel__traverse": "^7.28.0",
+    "@vitest/coverage-v8": "3.2.4",
     "tsup": "^8.5.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@types/node": "^24.7.2"
+    "@babel/parser": "^7.28.4",
+    "@babel/traverse": "^7.28.4",
+    "@babel/types": "^7.28.4",
+    "@types/node": "^24.7.2",
+    "glob": "^11.0.3",
+    "rimraf": "^6.0.1"
   }
 }
