@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import astService from "./ast.service.ts";
-import { AstNodeBuilder } from "../test/builders/astNodeBuilder.ts";
+import astService from "@/ast/ast.service";
+import { AstNodeBuilder } from "@/test/builders/astNodeBuilder";
 import * as t from "@babel/types";
 
 describe("astService", () => {
@@ -93,7 +93,7 @@ describe("astService", () => {
       const ast = astService.parseToAst(code);
       const variableNode = ast.program.body[0];
 
-      expect(astService.isTestCase(variableNode)).toBe(false);
+      expect(astService.isTestCase(variableNode!)).toBe(false);
     });
 
     it("should return false for null node", () => {

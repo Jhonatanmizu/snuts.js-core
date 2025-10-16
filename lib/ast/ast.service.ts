@@ -2,8 +2,8 @@ import * as t from "@babel/types";
 import traverse, { NodePath } from "@babel/traverse";
 import { parse } from "@babel/parser";
 import fs from "node:fs";
-import { jestSuiteAliases, jestTestAliases } from "../shared/aliases";
-import * as astPlugins from "../shared/plugins";
+import { jestTestAliases } from "@/shared/aliases";
+import * as astPlugins from "@/shared/plugins";
 
 const { configsFlow, configsTypescript } = astPlugins;
 
