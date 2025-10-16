@@ -13,7 +13,14 @@
     "test:coverage": "vitest run --config  ./vitest.config.js --coverage lib/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,js,json,md}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
   "type": "module",
   "devDependencies": {
