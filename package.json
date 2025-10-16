@@ -19,7 +19,8 @@
   "lint-staged": {
     "*.{ts,js,json,md}": [
       "eslint --fix",
-      "prettier --write"
+      "prettier --write",
+      "vitest run --config  ./vitest.config.js lib/"
     ]
   },
   "type": "module",
