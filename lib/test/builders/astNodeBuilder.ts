@@ -16,20 +16,14 @@ export const AstNodeBuilder = {
     t.classMethod("method", t.identifier(name), [], t.blockStatement([])),
 
   classPrivateMethod: (name = "privateMethod") =>
-    t.classPrivateMethod(
-      "method",
-      t.privateName(t.identifier(name)),
-      [],
-      t.blockStatement([])
-    ),
+    t.classPrivateMethod("method", t.privateName(t.identifier(name)), [], t.blockStatement([])),
 
   variableDeclaration: (id = "a", value = 1) =>
     t.variableDeclaration("const", [
       t.variableDeclarator(t.identifier(id), t.numericLiteral(value)),
     ]),
 
-  expressionStatement: (value = "Hello, World!") =>
-    t.expressionStatement(t.stringLiteral(value)),
+  expressionStatement: (value = "Hello, World!") => t.expressionStatement(t.stringLiteral(value)),
 
   classDeclaration: (name = "MyClass") =>
     t.classDeclaration(t.identifier(name), null, t.classBody([])),
@@ -44,33 +38,28 @@ export const AstNodeBuilder = {
 
   nullLiteral: () => t.nullLiteral(),
 
-  arrayExpression: (elements: any[] = []) => t.arrayExpression(elements),
+  arrayExpression: (elements: t.Expression[] = []) => t.arrayExpression(elements),
 
-  objectExpression: (properties: any[] = []) => t.objectExpression(properties),
+  objectExpression: (properties: t.ObjectProperty[] = []) => t.objectExpression(properties),
 
-  callExpression: (calleeName = "fn", args: any[] = []) =>
+  callExpression: (calleeName = "fn", args: t.CallExpression[] = []) =>
     t.callExpression(t.identifier(calleeName), args),
 
   memberExpression: (objectName = "obj", propertyName = "prop") =>
     t.memberExpression(t.identifier(objectName), t.identifier(propertyName)),
 
   assignmentExpression: (leftName = "a", rightValue = 1) =>
-    t.assignmentExpression(
-      "=",
-      t.identifier(leftName),
-      t.numericLiteral(rightValue)
-    ),
+    t.assignmentExpression("=", t.identifier(leftName), t.numericLiteral(rightValue)),
 
-  returnStatement: (argument = t.identifier("result")) =>
-    t.returnStatement(argument),
+  returnStatement: (argument = t.identifier("result")) => t.returnStatement(argument),
 
   ifStatement: (
     test = t.booleanLiteral(true),
     consequent = t.blockStatement([]),
-    alternate = null
+    alternate = null,
   ) => t.ifStatement(test, consequent, alternate),
 
-  blockStatement: (body: any[] = []) => t.blockStatement(body),
+  blockStatement: (body: t.Statement[] = []) => t.blockStatement(body),
 
   forStatement: (
     init = t.variableDeclaration("let", [
@@ -78,25 +67,18 @@ export const AstNodeBuilder = {
     ]),
     test = t.binaryExpression("<", t.identifier("i"), t.numericLiteral(10)),
     update = t.updateExpression("++", t.identifier("i")),
-    body = t.blockStatement([])
+    body = t.blockStatement([]),
   ) => t.forStatement(init, test, update, body),
 
-  whileStatement: (
-    test = t.booleanLiteral(true),
-    body = t.blockStatement([])
-  ) => t.whileStatement(test, body),
+  whileStatement: (test = t.booleanLiteral(true), body = t.blockStatement([])) =>
+    t.whileStatement(test, body),
 
-  importDeclaration: (source = "module", specifiers: any[] = []) =>
+  importDeclaration: (source = "module", specifiers: t.ImportSpecifier[] = []) =>
     t.importDeclaration(specifiers, t.stringLiteral(source)),
 
   exportNamedDeclaration: (
     declaration = null,
-    specifiers: any[] = [],
-    source = null
-  ) =>
-    t.exportNamedDeclaration(
-      declaration,
-      specifiers,
-      source && t.stringLiteral(source)
-    ),
+    specifiers: t.ExportSpecifier[] = [],
+    source = null,
+  ) => t.exportNamedDeclaration(declaration, specifiers, source && t.stringLiteral(source)),
 };

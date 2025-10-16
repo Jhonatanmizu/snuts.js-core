@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
+import * as t from "@babel/types";
+
 import astService from "@/ast/ast.service";
 import { AstNodeBuilder } from "@/test/builders/astNodeBuilder";
-import * as t from "@babel/types";
 
 describe("astService", () => {
   describe("parseToAst()", () => {
@@ -37,12 +38,12 @@ describe("astService", () => {
     ];
 
     it.each(functionNodes)("should return true for %s", (...args) => {
-      const [_, node] = args as [string, t.Node];
+      const [, node] = args as [string, t.Node];
       expect(astService.isFunction(node)).toBe(true);
     });
 
     it.each(nonFunctionNodes)("should return false for %s", (...args) => {
-      const [_, node] = args as [string, t.Node];
+      const [, node] = args as [string, t.Node];
       expect(astService.isFunction(node)).toBe(false);
     });
   });

@@ -1,7 +1,9 @@
+import fs from "node:fs";
+
 import * as t from "@babel/types";
 import traverse, { NodePath } from "@babel/traverse";
 import { parse } from "@babel/parser";
-import fs from "node:fs";
+
 import { jestTestAliases } from "@/shared/aliases";
 import * as astPlugins from "@/shared/plugins";
 
@@ -45,10 +47,7 @@ class AstService {
     traverse(node, {
       CallExpression(path: NodePath<t.CallExpression>) {
         const callee = path.node.callee;
-        if (
-          t.isMemberExpression(callee) &&
-          t.isIdentifier(callee.object, { name: "expect" })
-        ) {
+        if (t.isMemberExpression(callee) && t.isIdentifier(callee.object, { name: "expect" })) {
           found = true;
           path.stop();
         }
@@ -63,10 +62,7 @@ class AstService {
 
     traverse(node, {
       CallExpression(path) {
-        if (
-          t.isIdentifier(path.node.callee) &&
-          jestTestAliases.includes(path.node.callee.name)
-        ) {
+        if (t.isIdentifier(path.node.callee) && jestTestAliases.includes(path.node.callee.name)) {
           count++;
         }
       },
