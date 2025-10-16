@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import astService from "./ast.service.ts";
 import { AstNodeBuilder } from "../test/builders/astNodeBuilder.ts";
-import { Node } from "@babel/types";
+import * as t from "@babel/types";
 
 describe("astService", () => {
   describe("parseToAst()", () => {
@@ -37,13 +37,67 @@ describe("astService", () => {
     ];
 
     it.each(functionNodes)("should return true for %s", (...args) => {
-      const [_, node] = args as [string, Node];
+      const [_, node] = args as [string, t.Node];
       expect(astService.isFunction(node)).toBe(true);
     });
 
     it.each(nonFunctionNodes)("should return false for %s", (...args) => {
-      const [_, node] = args as [string, Node];
+      const [_, node] = args as [string, t.Node];
       expect(astService.isFunction(node)).toBe(false);
+    });
+  });
+
+  describe("hasManyComments()", () => {
+    it("should return true if node has more than maxComments comments", () => {
+      const node = AstNodeBuilder.functionDeclaration("withComments");
+      node.leadingComments = [
+        { type: "CommentLine", value: " Comment 1" },
+        { type: "CommentLine", value: " Comment 2" },
+        { type: "CommentLine", value: " Comment 3" },
+      ];
+
+      expect(astService.hasManyComments(node, 2)).toBe(true);
+    });
+
+    it("should return false if node has comments equal to or less than maxComments", () => {
+      const node = AstNodeBuilder.functionDeclaration("withFewComments");
+      node.leadingComments = [{ type: "CommentLine", value: " Comment 1" }];
+
+      expect(astService.hasManyComments(node, 2)).toBe(false);
+    });
+
+    it("should return false for nodes without comments", () => {
+      const node = AstNodeBuilder.functionDeclaration("noComments");
+      expect(astService.hasManyComments(node, 0)).toBe(false);
+    });
+  });
+
+  describe("isTestCase()", () => {
+    it("should return true for a test case node using 'it'", () => {
+      const code = `it('should do something', () => {});`;
+      const testNode = astService.getTestNodeAst(code);
+
+      expect(testNode).toBeDefined();
+      expect(astService.isTestCase(testNode!)).toBe(true);
+    });
+
+    it("should return true for a test case node using 'test'", () => {
+      const code = `test('should do something', () => {});`;
+      const testNode = astService.getTestNodeAst(code);
+
+      expect(testNode).toBeDefined();
+      expect(astService.isTestCase(testNode!)).toBe(true);
+    });
+    it("should return false for a non-test case node", () => {
+      const code = `const a = 1;`;
+      const ast = astService.parseToAst(code);
+      const variableNode = ast.program.body[0];
+
+      expect(astService.isTestCase(variableNode)).toBe(false);
+    });
+
+    it("should return false for null node", () => {
+      expect(astService.isTestCase(null as unknown as t.Node)).toBe(false);
     });
   });
 });
