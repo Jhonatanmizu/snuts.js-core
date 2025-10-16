@@ -7,7 +7,7 @@ import * as astPlugins from "../shared/plugins";
 
 const { configsFlow, configsTypescript } = astPlugins;
 
-export class AstService {
+class AstService {
   constructor(private fileReader: typeof fs = fs) {}
 
   public parseToAst(code: string): t.File {
