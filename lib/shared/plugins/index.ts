@@ -8,9 +8,6 @@ export const defaultPlugins: ParserOptions["plugins"] = [
   "partialApplication",
   "exportDefaultFrom",
   ["pipelineOperator", { proposal: "minimal" }],
-  //   "@babel/plugin-proposal-do-expressions",
-  //   "@babel/plugin-proposal-destructuring-private",
-  //   "@babel/plugin-syntax-import-assertions",
   "importAttributes",
 ];
 
