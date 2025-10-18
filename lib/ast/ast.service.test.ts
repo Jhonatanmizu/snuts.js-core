@@ -74,21 +74,21 @@ describe("astService", () => {
   });
 
   describe("isTestCase()", () => {
-    it("should return true for a test case node using 'it'", () => {
-      const code = `it('should do something', () => {});`;
-      const testNode = astService.getTestNodeAst(code);
+    const testCases = [
+      "it('should do something', () => {});",
+      "test('should do something', () => {});",
+      "it.skip('should do something', () => {});",
+      "it.only('should do something', () => {});",
+      "test.skip('should do something', () => {});",
+      "test.only('should do something', () => {});",
+    ];
 
+    it.each(testCases)("should return true for test case '%s'", (code) => {
+      const testNode = astService.getTestNodeAst(code);
       expect(testNode).toBeDefined();
       expect(astService.isTestCase(testNode!)).toBe(true);
     });
 
-    it("should return true for a test case node using 'test'", () => {
-      const code = `test('should do something', () => {});`;
-      const testNode = astService.getTestNodeAst(code);
-
-      expect(testNode).toBeDefined();
-      expect(astService.isTestCase(testNode!)).toBe(true);
-    });
     it("should return false for a non-test case node", () => {
       const code = `const a = 1;`;
       const ast = astService.parseToAst(code);
@@ -99,6 +99,49 @@ describe("astService", () => {
 
     it("should return false for null node", () => {
       expect(astService.isTestCase(null as unknown as t.Node)).toBe(false);
+    });
+  });
+
+  describe("isHook()", () => {
+    const hookCases = [
+      "beforeEach(() => {});",
+      "beforeAll(() => {});",
+      "afterEach(() => {});",
+      "afterAll(() => {});",
+    ];
+
+    it.each(hookCases)("should return true for hook '%s'", (code) => {
+      const ast = astService.parseToAst(code);
+      const hookNode = ast.program.body[0];
+      expect(astService.isHook(hookNode!)).toBe(true);
+    });
+
+    it("should return false for a non-hook node", () => {
+      const code = `const a = 1;`;
+      const ast = astService.parseToAst(code);
+      const node = ast.program.body[0];
+      expect(astService.isHook(node!)).toBe(false);
+    });
+  });
+
+  describe("isDescribe()", () => {
+    const describeCases = [
+      "describe('my suite', () => {});",
+      "describe.skip('my suite', () => {});",
+      "describe.only('my suite', () => {});",
+    ];
+
+    it.each(describeCases)("should return true for describe block '%s'", (code) => {
+      const describeNode = astService.getDescribeNodeAst(code);
+      expect(describeNode).toBeDefined();
+      expect(astService.isDescribe(describeNode!)).toBe(true);
+    });
+
+    it("should return false for a non-describe block", () => {
+      const code = `const a = 1;`;
+      const ast = astService.parseToAst(code);
+      const node = ast.program.body[0];
+      expect(astService.isDescribe(node!)).toBe(false);
     });
   });
 });
