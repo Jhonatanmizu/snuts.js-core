@@ -23,9 +23,16 @@ class AstService {
     }
   }
 
+  public getSourceCode(filePath: string): string {
+    return this.fileReader.readFileSync(filePath, "utf-8");
+  }
+
   public parseFileToAst(filePath: string): t.File | null {
     try {
       const code = this.fileReader.readFileSync(filePath, "utf-8");
+      if (!code.trim()) {
+        return null;
+      }
       return this.parseToAst(code);
     } catch (error) {
       console.error(`[AstService] Failed to parse file: ${filePath}`, error);
