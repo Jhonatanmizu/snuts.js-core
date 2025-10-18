@@ -41,5 +41,7 @@ export default tseslint.config(js.configs.recommended, ...tseslint.configs.recom
     "dist",
     "node_modules",
     "coverage",
+    "bin/",
+    "vitest.config.js",
   ],
 });
