@@ -57,6 +57,31 @@ class AstService {
     return found;
   }
 
+  public testInfo(node: t.Node): {
+    name: string;
+    hasSetup: boolean;
+    hasAssert: boolean;
+    itCount: number;
+    describeCount: number;
+  } | null {
+    if (!this.isTestCase(node)) return null;
+
+    const args = (node as t.CallExpression).arguments;
+    const name = (args[0] as t.StringLiteral).value;
+    const func = args[1] as t.Node;
+
+    const hasSetup = this.isSetupMethod(func);
+    const hasAssert = this.isAssert(func);
+
+    return {
+      name,
+      hasSetup,
+      hasAssert,
+      itCount: this.itCount(func),
+      describeCount: this.describeCount(func),
+    };
+  }
+
   public itCount(node: t.Node): number {
     let count = 0;
 
@@ -69,6 +94,37 @@ class AstService {
     });
 
     return count;
+  }
+
+  public describeCount(node: t.Node): number {
+    let count = 0;
+
+    traverse(node, {
+      CallExpression(path) {
+        if (t.isIdentifier(path.node.callee, { name: "describe" })) {
+          count++;
+        }
+      },
+    });
+
+    return count;
+  }
+
+  public getDescribeNodeAst(code: string): t.Node | null {
+    const ast = this.parseToAst(code);
+    let describeNode: t.Node | null = null;
+
+    traverse(ast, {
+      CallExpression(path) {
+        const callee = path.node.callee;
+        if (t.isIdentifier(callee) && callee.name === "describe") {
+          describeNode = path.node;
+          path.stop();
+        }
+      },
+    });
+
+    return describeNode;
   }
 
   public getTestNodeAst(code: string): t.Node | null {
