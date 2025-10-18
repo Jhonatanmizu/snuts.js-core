@@ -44,10 +44,9 @@ class AstService {
     );
   }
 
-  public isAssert(node: t.Node): boolean {
+  public isAssert(path: NodePath): boolean {
     let found = false;
-
-    traverse(node, {
+    path.traverse({
       CallExpression(path: NodePath<t.CallExpression>) {
         const callee = path.node.callee;
         if (t.isMemberExpression(callee) && t.isIdentifier(callee.object, { name: "expect" })) {
@@ -56,60 +55,54 @@ class AstService {
         }
       },
     });
-
     return found;
   }
 
-  public testInfo(node: t.Node): {
+  public testInfo(path: NodePath<t.CallExpression>): {
     name: string;
-    hasHook: boolean;
     hasAssert: boolean;
     itCount: number;
     describeCount: number;
   } | null {
-    if (!this.isTestCase(node)) return null;
+    if (!this.isTestCase(path.node)) return null;
 
-    const args = (node as t.CallExpression).arguments;
+    const args = path.node.arguments;
     const name = (args[0] as t.StringLiteral).value;
-    const func = args[1] as t.Node;
+    const funcPath = path.get("arguments.1") as NodePath;
 
-    const hasHook = this.isHook(func);
-    const hasAssert = this.isAssert(func);
+    const hasAssert = this.isAssert(funcPath);
+    const itCount = this.itCount(funcPath);
+    const describeCount = this.describeCount(funcPath);
 
     return {
       name,
-      hasHook,
       hasAssert,
-      itCount: this.itCount(func),
-      describeCount: this.describeCount(func),
+      itCount,
+      describeCount,
     };
   }
 
-  public itCount(node: t.Node): number {
+  public itCount(path: NodePath): number {
     let count = 0;
-
-    traverse(node, {
+    path.traverse({
       CallExpression(path) {
         if (t.isIdentifier(path.node.callee) && jestTestAliases.includes(path.node.callee.name)) {
           count++;
         }
       },
     });
-
     return count;
   }
 
-  public describeCount(node: t.Node): number {
+  public describeCount(path: NodePath): number {
     let count = 0;
-
-    traverse(node, {
+    path.traverse({
       CallExpression(path) {
         if (t.isIdentifier(path.node.callee, { name: "describe" })) {
           count++;
         }
       },
     });
-
     return count;
   }
 
