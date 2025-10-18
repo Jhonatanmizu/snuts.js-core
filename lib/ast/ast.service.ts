@@ -4,7 +4,7 @@ import * as t from "@babel/types";
 import traverse, { NodePath } from "@babel/traverse";
 import { parse } from "@babel/parser";
 
-import { jestTestAliases } from "@/shared/aliases";
+import { jestTestAliases, jestSuiteAliases } from "@/shared/aliases";
 import * as astPlugins from "@/shared/plugins";
 
 const { configsFlow, configsTypescript } = astPlugins;
@@ -33,11 +33,14 @@ class AstService {
     }
   }
 
-  public isSetupMethod(node: t.Node): boolean {
+  public isHook(node: t.Node): boolean {
+    const hookNames = ["beforeAll", "beforeEach", "afterAll", "afterEach"];
+
     return (
       t.isExpressionStatement(node) &&
       t.isCallExpression(node.expression) &&
-      t.isIdentifier(node.expression.callee, { name: "beforeEach" })
+      t.isIdentifier(node.expression.callee) &&
+      hookNames.includes(node.expression.callee.name)
     );
   }
 
@@ -59,7 +62,7 @@ class AstService {
 
   public testInfo(node: t.Node): {
     name: string;
-    hasSetup: boolean;
+    hasHook: boolean;
     hasAssert: boolean;
     itCount: number;
     describeCount: number;
@@ -70,12 +73,12 @@ class AstService {
     const name = (args[0] as t.StringLiteral).value;
     const func = args[1] as t.Node;
 
-    const hasSetup = this.isSetupMethod(func);
+    const hasHook = this.isHook(func);
     const hasAssert = this.isAssert(func);
 
     return {
       name,
-      hasSetup,
+      hasHook,
       hasAssert,
       itCount: this.itCount(func),
       describeCount: this.describeCount(func),
@@ -110,14 +113,36 @@ class AstService {
     return count;
   }
 
+  public isDescribe(node: t.Node): boolean {
+    if (!t.isCallExpression(node)) return false;
+
+    const callee = node.callee;
+    const args = node.arguments;
+
+    let suiteName: string | null = null;
+
+    if (t.isIdentifier(callee)) {
+      suiteName = callee.name;
+    } else if (t.isMemberExpression(callee) && t.isIdentifier(callee.object)) {
+      suiteName = callee.object.name;
+    }
+
+    return (
+      suiteName !== null &&
+      jestSuiteAliases.includes(suiteName) &&
+      args.length > 1 &&
+      t.isStringLiteral(args[0]) &&
+      this.isFunction(args[1] as t.Node)
+    );
+  }
+
   public getDescribeNodeAst(code: string): t.Node | null {
     const ast = this.parseToAst(code);
     let describeNode: t.Node | null = null;
 
     traverse(ast, {
-      CallExpression(path) {
-        const callee = path.node.callee;
-        if (t.isIdentifier(callee) && callee.name === "describe") {
+      CallExpression: (path) => {
+        if (this.isDescribe(path.node)) {
           describeNode = path.node;
           path.stop();
         }
@@ -132,9 +157,8 @@ class AstService {
     let testNode: t.Node | null = null;
 
     traverse(ast, {
-      CallExpression(path) {
-        const callee = path.node.callee;
-        if (t.isIdentifier(callee) && jestTestAliases.includes(callee.name)) {
+      CallExpression: (path) => {
+        if (this.isTestCase(path.node)) {
           testNode = path.node;
           path.stop();
         }
@@ -156,11 +180,21 @@ class AstService {
 
   public isTestCase(node: t.Node): boolean {
     if (!t.isCallExpression(node)) return false;
+
     const callee = node.callee;
     const args = node.arguments;
+
+    let testName: string | null = null;
+
+    if (t.isIdentifier(callee)) {
+      testName = callee.name;
+    } else if (t.isMemberExpression(callee) && t.isIdentifier(callee.object)) {
+      testName = callee.object.name;
+    }
+
     return (
-      t.isIdentifier(callee) &&
-      jestTestAliases.includes(callee.name) &&
+      testName !== null &&
+      jestTestAliases.includes(testName) &&
       args.length > 1 &&
       t.isStringLiteral(args[0]) &&
       this.isFunction(args[1] as t.Node)
