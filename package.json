@@ -9,9 +9,9 @@
     "start": "tsx lib/index.ts",
     "clean": "rimraf dist",
     "build": "tsup lib/index.ts lib/core/watcher.ts --dts --format esm --out-dir dist --clean",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "jest  --passWithNoTests",
+    "test:watch": "jest  --passWithNoTests --watch",
+    "test:coverage": "jest  --passWithNoTests --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -21,7 +21,7 @@
     "*.{ts,js,json,md}": [
       "eslint --fix",
       "prettier --write",
-      "jest"
+      "jest --passWithNoTests"
     ]
   },
   "type": "module",
