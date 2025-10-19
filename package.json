@@ -49,11 +49,12 @@
   },
   "dependencies": {
     "@babel/parser": "^7.28.4",
-    "@babel/traverse": "^7.28.4",
     "@babel/types": "^7.28.4",
+    "@types/esquery": "^1.5.4",
     "@types/node": "^24.7.2",
     "chokidar": "^4.0.3",
     "commander": "^14.0.1",
+    "esquery": "^1.6.0",
     "glob": "^11.0.3",
     "lodash": "^4.17.21",
     "node-module-type": "^1.0.2",

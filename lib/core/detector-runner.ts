@@ -20,8 +20,8 @@ export class DetectorRunner {
         return [];
       }
 
-      ast = parsed;
-      sourceCode = await astService.getSourceCode(file);
+      ast = parsed.ast;
+      sourceCode = parsed.code;
     } catch (err) {
       logger.error({ err, file }, "Failed to parse file into AST");
       return [];

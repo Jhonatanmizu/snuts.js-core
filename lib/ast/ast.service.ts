@@ -2,13 +2,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import * as t from "@babel/types";
-import { NodePath } from "@babel/traverse";
 import { parse } from "@babel/parser";
+import esquery from "esquery";
 
 import { logger } from "@/shared/logger";
 import { jestTestAliases, jestSuiteAliases } from "@/shared/aliases";
 import * as astPlugins from "@/shared/plugins";
-import { traverse } from "@/shared/traverse";
+
 const { configsFlow, configsTypescript } = astPlugins;
 
 export interface ParsedFile {
@@ -17,16 +17,6 @@ export interface ParsedFile {
 }
 
 class AstService {
-  public traverse: typeof traverse = traverse;
-
-  // constructor() {
-  //   this.initialize();
-  // }
-
-  // private async initialize() {
-  //   this.traverse = traverse;
-  // }
-
   /**
    * Parse a given file path into an AST + source code.
    * Detects parser config based on file extension.
@@ -78,6 +68,13 @@ class AstService {
       logger.error({ err, file: filePath }, "Failed to read source file");
       return "";
     }
+  }
+
+  /**
+   * Query the AST using esquery.
+   */
+  public query(ast: t.Node, selector: string): t.Node[] {
+    return esquery(ast, selector);
   }
 
   // -----------------------
@@ -137,59 +134,18 @@ class AstService {
   }
 
   // -----------------------
-  // Traversal Utilities
-  // -----------------------
-
-  public isAssert(path: NodePath): boolean {
-    let found = false;
-    path.traverse({
-      CallExpression(inner: NodePath<t.CallExpression>) {
-        const callee = inner.node.callee;
-        if (t.isMemberExpression(callee) && t.isIdentifier(callee.object, { name: "expect" })) {
-          found = true;
-          inner.stop();
-        }
-      },
-    });
-    return found;
-  }
-
-  public itCount(path: NodePath): number {
-    return this.countCalls(path, jestTestAliases);
-  }
-
-  public describeCount(path: NodePath): number {
-    return this.countCalls(path, ["describe"]);
-  }
-
-  private countCalls(path: NodePath, names: string[]): number {
-    let count = 0;
-    path.traverse({
-      CallExpression(innerPath) {
-        if (t.isIdentifier(innerPath.node.callee) && names.includes(innerPath.node.callee.name)) {
-          count++;
-        }
-      },
-    });
-    return count;
-  }
-
-  // -----------------------
   // Metadata Extraction
   // -----------------------
 
-  public testInfo(path: NodePath<t.CallExpression>) {
-    if (!this.isTestCase(path.node)) return null;
+  public testInfo(node: t.CallExpression) {
+    if (!this.isTestCase(node)) return null;
 
-    const args = path.node.arguments;
+    const args = node.arguments;
     const name = t.isStringLiteral(args[0]) ? args[0].value : "Unnamed test";
-    const funcPath = path.get("arguments.1") as NodePath;
 
     return {
       name,
-      hasAssert: this.isAssert(funcPath),
-      itCount: this.itCount(funcPath),
-      describeCount: this.describeCount(funcPath),
+      // TODO: Add back hasAssert, itCount, describeCount
     };
   }
 
