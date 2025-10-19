@@ -2,14 +2,14 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "node",
     "lib": ["ES2022"],
     "allowJs": false,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./lib",
+    "rootDir": "./",
     "composite": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -22,13 +22,19 @@
     "moduleDetection": "force",
     "allowSyntheticDefaultImports": true,
     "noEmit": false,
-    "types": ["node", "vitest/globals"],
+    "types": ["node", "jest"],
 
     "baseUrl": ".",
     "paths": {
       "@/*": ["lib/*"]
     }
   },
-  "include": ["lib/**/*.ts", "lib/**/*.d.ts", "vitest.config.*", "tests/**/*.ts"],
+  "include": [
+    "lib/**/*.ts",
+    "lib/**/*.d.ts",
+    "vitest.config.*",
+    "tests/**/*.ts",
+    "vitest-globals.d.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

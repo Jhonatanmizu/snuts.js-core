@@ -1,10 +1,25 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "@jest/globals";
 import * as t from "@babel/types";
 
 import astService from "@/ast/ast.service";
 import { AstNodeBuilder } from "@/test/builders/astNodeBuilder";
+import { logger } from "@/shared/logger";
+
+jest.mock("@/shared/logger", () => ({
+  __esModule: true,
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
 
 describe("astService", () => {
+  beforeEach(() => {
+    (logger.warn as jest.Mock).mockClear();
+  });
+
   describe("parseToAst()", () => {
     it("should parse valid TypeScript code into a File AST", () => {
       const code = `const a: number = 1;`;
@@ -78,7 +93,7 @@ describe("astService", () => {
       const code = `it("is a test", () => {});`;
       const ast = astService.parseToAst(code);
       const nodes = astService.query(ast, "CallExpression");
-      const isTest = nodes.some(node => astService.isTestCase(node));
+      const isTest = nodes.some((node) => astService.isTestCase(node));
       expect(isTest).toBe(true);
     });
 
@@ -86,7 +101,7 @@ describe("astService", () => {
       const code = `const a = 1;`;
       const ast = astService.parseToAst(code);
       const nodes = astService.query(ast, "CallExpression");
-      const isTest = nodes.some(node => astService.isTestCase(node));
+      const isTest = nodes.some((node) => astService.isTestCase(node));
       expect(isTest).toBe(false);
     });
   });
@@ -118,7 +133,7 @@ describe("astService", () => {
       const code = `describe("a suite", () => {});`;
       const ast = astService.parseToAst(code);
       const nodes = astService.query(ast, "CallExpression");
-      const isDescribe = nodes.some(node => astService.isDescribe(node));
+      const isDescribe = nodes.some((node) => astService.isDescribe(node));
       expect(isDescribe).toBe(true);
     });
 
@@ -126,7 +141,7 @@ describe("astService", () => {
       const code = `const a = 1;`;
       const ast = astService.parseToAst(code);
       const nodes = astService.query(ast, "CallExpression");
-      const isDescribe = nodes.some(node => astService.isDescribe(node));
+      const isDescribe = nodes.some((node) => astService.isDescribe(node));
       expect(isDescribe).toBe(false);
     });
   });

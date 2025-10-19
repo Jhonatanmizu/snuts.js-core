@@ -1,12 +1,27 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "@jest/globals";
 
 import { ConditionalTestLogicDetector } from "./conditionalTestLogic";
 
 import astService from "@/ast/ast.service";
+import { logger } from "@/shared/logger";
+
+jest.mock("@/shared/logger", () => ({
+  __esModule: true,
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
 
 describe("ConditionalTestLogicDetector", () => {
   const detector = new ConditionalTestLogicDetector();
   const filePath = "test-file.ts";
+
+  beforeEach(() => {
+    (logger.warn as jest.Mock).mockClear();
+  });
 
   it("should detect if statement inside a test case", async () => {
     const code = `

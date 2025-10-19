@@ -74,7 +74,7 @@ class AstService {
    * Query the AST using esquery.
    */
   public query(ast: t.Node, selector: string): t.Node[] {
-    return esquery(ast, selector);
+    return esquery(ast as any, selector) as t.Node[];
   }
 
   // -----------------------

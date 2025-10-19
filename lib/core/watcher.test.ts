@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, jest, beforeEach, afterEach } from "@jest/globals";
 import chokidar from "chokidar";
 import { glob } from "glob";
+import * as t from "@babel/types";
 
 import { Watcher } from "./watcher";
 import { Detector, Smell } from "./detector.interface";
@@ -10,50 +11,54 @@ import { TEST_FILE_PATTERNS } from "@/shared/constants";
 import { logger } from "@/shared/logger";
 
 // Mock external dependencies
-vi.mock("chokidar", () => ({
+jest.mock("chokidar", () => ({
+  __esModule: true,
   default: {
-    watch: vi.fn(() => ({
-      on: vi.fn(),
+    watch: jest.fn(() => ({
+      on: jest.fn(),
     })),
   },
 }));
 
-vi.mock("glob", () => ({
-  glob: vi.fn(),
+jest.mock("glob", () => ({
+  __esModule: true,
+  glob: jest.fn<(pattern: string | string[], options?: any) => Promise<string[]>>(),
 }));
 
-vi.mock("./detector-runner", () => ({
-  DetectorRunner: vi.fn(() => ({
-    run: vi.fn(),
+jest.mock("./detector-runner", () => ({
+  __esModule: true,
+  DetectorRunner: jest.fn(() => ({
+    run: jest.fn(),
   })),
 }));
 
-vi.mock("@/shared/logger", () => ({
+jest.mock("@/shared/logger", () => ({
+  __esModule: true,
   logger: {
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
   },
 }));
 
 describe("Watcher", () => {
   const mockDetector: Detector = {
-    detect: vi.fn(),
+    detect: jest.fn<(ast: t.File, sourceCode: string, file: string) => Promise<Smell[]>>(),
   };
   const mockPaths = [process.cwd()];
 
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.clearAllMocks();
+    jest.useFakeTimers();
+    jest.clearAllMocks();
     // Reset mock implementations for each test
-    (glob as vi.Mock).mockResolvedValue([]);
-    (DetectorRunner as vi.Mock).mockClear();
-    (chokidar.watch as vi.Mock).mockClear();
+    (glob as jest.MockedFunction<typeof glob>).mockResolvedValue([]);
+    (DetectorRunner as jest.Mock).mockClear();
+    (chokidar.watch as jest.Mock).mockClear();
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    jest.useRealTimers();
   });
 
   it("should initialize DetectorRunner with provided detectors", () => {
@@ -66,10 +71,10 @@ describe("Watcher", () => {
 
   it("should find initial files and run detections", async () => {
     const mockFiles = ["file1.ts", "file2.ts"];
-    (glob as vi.Mock).mockResolvedValueOnce(mockFiles);
+    (glob as jest.MockedFunction<typeof glob>).mockResolvedValueOnce(mockFiles);
 
-    const mockRun = vi.fn().mockResolvedValue([]);
-    (DetectorRunner as vi.Mock).mockImplementation(() => ({
+    const mockRun = jest.fn<() => Promise<Smell[]>>().mockResolvedValue([]);
+    (DetectorRunner as jest.Mock).mockImplementation(() => ({
       run: mockRun,
     }));
 
@@ -86,8 +91,8 @@ describe("Watcher", () => {
   });
 
   it("should start watching for file changes", async () => {
-    const mockOn = vi.fn();
-    (chokidar.watch as vi.Mock).mockReturnValue({
+    const mockOn = jest.fn();
+    (chokidar.watch as jest.Mock).mockReturnValue({
       on: mockOn,
     });
 
@@ -107,13 +112,13 @@ describe("Watcher", () => {
   });
 
   it("should run detections when a file is added", async () => {
-    const mockOn = vi.fn();
-    const mockRun = vi.fn().mockResolvedValue([]);
+    const mockOn = jest.fn();
+    const mockRun = jest.fn<() => Promise<Smell[]>>().mockResolvedValue([]);
 
-    (chokidar.watch as vi.Mock).mockReturnValue({
+    (chokidar.watch as jest.Mock).mockReturnValue({
       on: mockOn,
     });
-    (DetectorRunner as vi.Mock).mockImplementation(() => ({
+    (DetectorRunner as jest.Mock).mockImplementation(() => ({
       run: mockRun,
     }));
 
@@ -123,23 +128,23 @@ describe("Watcher", () => {
     });
     await watcher.watch();
 
-    const addCallback = mockOn.mock.calls.find((call) => call[0] === "add")[1];
+    const addCallback = mockOn.mock.calls.find((call) => call[0] === "add")![1] as Function;
     const newFile = "new-file.ts";
     addCallback(newFile);
 
-    vi.runAllTimers();
+    jest.runAllTimers();
 
     expect(mockRun).toHaveBeenCalledWith(newFile);
   });
 
   it("should run detections when a file is changed", async () => {
-    const mockOn = vi.fn();
-    const mockRun = vi.fn().mockResolvedValue([]);
+    const mockOn = jest.fn();
+    const mockRun = jest.fn<() => Promise<Smell[]>>().mockResolvedValue([]);
 
-    (chokidar.watch as vi.Mock).mockReturnValue({
+    (chokidar.watch as jest.Mock).mockReturnValue({
       on: mockOn,
     });
-    (DetectorRunner as vi.Mock).mockImplementation(() => ({
+    (DetectorRunner as jest.Mock).mockImplementation(() => ({
       run: mockRun,
     }));
 
@@ -149,11 +154,11 @@ describe("Watcher", () => {
     });
     await watcher.watch();
 
-    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")[1];
+    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")![1] as Function;
     const changedFile = "changed-file.ts";
     changeCallback(changedFile);
 
-    vi.runAllTimers();
+    jest.runAllTimers();
 
     expect(mockRun).toHaveBeenCalledWith(changedFile);
   });
@@ -166,13 +171,13 @@ describe("Watcher", () => {
       message: "Smell detected",
       codeBlock: "if (true) {}",
     };
-    const mockRun = vi.fn().mockResolvedValue([mockSmell]);
-    (DetectorRunner as vi.Mock).mockImplementation(() => ({
+    const mockRun = jest.fn<() => Promise<Smell[]>>().mockResolvedValue([mockSmell]);
+    (DetectorRunner as jest.Mock).mockImplementation(() => ({
       run: mockRun,
     }));
 
-    const mockOn = vi.fn();
-    (chokidar.watch as vi.Mock).mockReturnValue({
+    const mockOn = jest.fn();
+    (chokidar.watch as jest.Mock).mockReturnValue({
       on: mockOn,
     });
 
@@ -183,23 +188,23 @@ describe("Watcher", () => {
     await watcher.watch();
 
     // Trigger a change event to make runDetections execute
-    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")[1];
+    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")![1] as Function;
     const changedFile = "changed-file.ts";
     changeCallback(changedFile);
 
-    vi.runAllTimers();
+    jest.runAllTimers();
 
     expect(logger.info).toHaveBeenCalledWith("👀 Watching for file changes...");
   });
 
   it("should not log anything if no smells are detected", async () => {
-    const mockRun = vi.fn().mockResolvedValue([]);
-    (DetectorRunner as vi.Mock).mockImplementation(() => ({
+    const mockRun = jest.fn<() => Promise<Smell[]>>().mockResolvedValue([]);
+    (DetectorRunner as jest.Mock).mockImplementation(() => ({
       run: mockRun,
     }));
 
-    const mockOn = vi.fn();
-    (chokidar.watch as vi.Mock).mockReturnValue({
+    const mockOn = jest.fn();
+    (chokidar.watch as jest.Mock).mockReturnValue({
       on: mockOn,
     });
 
@@ -210,11 +215,11 @@ describe("Watcher", () => {
     await watcher.watch();
 
     // Trigger a change event to make runDetections execute
-    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")[1];
+    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")![1] as Function;
     const changedFile = "changed-file.ts";
     changeCallback(changedFile);
 
-    vi.runAllTimers();
+    jest.runAllTimers();
 
     expect(logger.info).toHaveBeenCalledWith("👀 Watching for file changes...");
   });
