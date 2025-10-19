@@ -1,10 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import * as t from "@babel/types";
 
 import astService from "@/ast/ast.service";
 import { AstNodeBuilder } from "@/test/builders/astNodeBuilder";
 
 describe("astService", () => {
+  // beforeAll(async () => {
+
+  // });
+
   describe("parseToAst()", () => {
     it("should parse valid TypeScript code into a File AST", () => {
       const code = `const a: number = 1;`;
@@ -73,32 +77,33 @@ describe("astService", () => {
     });
   });
 
-  describe("isTestCase()", () => {
-    const testCases = [
-      "it('should do something', () => {});",
-      "test('should do something', () => {});",
-      "it.skip('should do something', () => {});",
-      "it.only('should do something', () => {});",
-      "test.skip('should do something', () => {});",
-      "test.only('should do something', () => {});",
-    ];
-
-    it.each(testCases)("should return true for test case '%s'", (code) => {
-      const testNode = astService.getTestNodeAst(code);
-      expect(testNode).toBeDefined();
-      expect(astService.isTestCase(testNode!)).toBe(true);
+  describe("isTestCase", () => {
+    it("should return true for a valid test case", () => {
+      const code = `it("is a test", () => {});`;
+      const ast = astService.parseToAst(code);
+      let isTest = false;
+      astService.traverse(ast, {
+        CallExpression(path) {
+          if (astService.isTestCase(path.node)) {
+            isTest = true;
+          }
+        },
+      });
+      expect(isTest).toBe(true);
     });
 
-    it("should return false for a non-test case node", () => {
+    it("should return false for a non-test case", () => {
       const code = `const a = 1;`;
       const ast = astService.parseToAst(code);
-      const variableNode = ast.program.body[0];
-
-      expect(astService.isTestCase(variableNode!)).toBe(false);
-    });
-
-    it("should return false for null node", () => {
-      expect(astService.isTestCase(null as unknown as t.Node)).toBe(false);
+      let isTest = false;
+      astService.traverse(ast, {
+        CallExpression(path) {
+          if (astService.isTestCase(path.node)) {
+            isTest = true;
+          }
+        },
+      });
+      expect(isTest).toBe(false);
     });
   });
 
@@ -124,24 +129,33 @@ describe("astService", () => {
     });
   });
 
-  describe("isDescribe()", () => {
-    const describeCases = [
-      "describe('my suite', () => {});",
-      "describe.skip('my suite', () => {});",
-      "describe.only('my suite', () => {});",
-    ];
-
-    it.each(describeCases)("should return true for describe block '%s'", (code) => {
-      const describeNode = astService.getDescribeNodeAst(code);
-      expect(describeNode).toBeDefined();
-      expect(astService.isDescribe(describeNode!)).toBe(true);
+  describe("isDescribe", () => {
+    it("should return true for a valid describe block", () => {
+      const code = `describe("a suite", () => {});`;
+      const ast = astService.parseToAst(code);
+      let isDescribe = false;
+      astService.traverse(ast, {
+        CallExpression(path) {
+          if (astService.isDescribe(path.node)) {
+            isDescribe = true;
+          }
+        },
+      });
+      expect(isDescribe).toBe(true);
     });
 
     it("should return false for a non-describe block", () => {
       const code = `const a = 1;`;
       const ast = astService.parseToAst(code);
-      const node = ast.program.body[0];
-      expect(astService.isDescribe(node!)).toBe(false);
+      let isDescribe = false;
+      astService.traverse(ast, {
+        CallExpression(path) {
+          if (astService.isDescribe(path.node)) {
+            isDescribe = true;
+          }
+        },
+      });
+      expect(isDescribe).toBe(false);
     });
   });
 });

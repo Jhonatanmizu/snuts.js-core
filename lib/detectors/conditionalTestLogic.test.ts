@@ -22,13 +22,13 @@ describe("ConditionalTestLogicDetector", () => {
     const smells = await detector.detect(ast, code, filePath);
 
     expect(smells).toHaveLength(1);
-    expect(smells[0]?.message).toBe("Conditional test logic detected");
+    expect(smells[0]?.message).toBe("Conditional logic inside test case detected");
     expect(smells[0]?.file).toBe(filePath);
     expect(smells[0]?.start.line).toBe(4);
     expect(smells[0]?.codeBlock).toContain("if (true)");
   });
 
-  it("should detect conditional logic outside a test case but inside a describe block", async () => {
+  it("should not detect conditional logic outside a test case", async () => {
     const code = `
       describe('my suite', () => {
         if (true) {
@@ -41,11 +41,7 @@ describe("ConditionalTestLogicDetector", () => {
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
 
-    expect(smells).toHaveLength(1);
-    expect(smells[0]?.message).toBe("Conditional logic outside of test case detected");
-    expect(smells[0]?.file).toBe(filePath);
-    expect(smells[0]?.start.line).toBe(3);
-    expect(smells[0]?.codeBlock).toContain("if (true)");
+    expect(smells).toHaveLength(0);
   });
 
   it("should not detect conditional logic if none exists", async () => {
@@ -62,33 +58,28 @@ describe("ConditionalTestLogicDetector", () => {
     expect(smells).toHaveLength(0);
   });
 
-  it("should handle multiple conditional logic blocks", async () => {
+  it("should handle multiple conditional logic blocks inside a test case", async () => {
     const code = `
       describe('my suite', () => {
-        if (false) {
-          // outside test case
-        }
         it('my test', () => {
           if (true) {
             expect(true).toBe(true);
           }
+          if (false) {
+            // another one
+          }
         });
-        if (1 === 1) {
-          // outside test case
-        }
       });
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
 
-    expect(smells).toHaveLength(3);
-    expect(smells.filter((s) => s.message === "Conditional test logic detected")).toHaveLength(1);
-    expect(
-      smells.filter((s) => s.message === "Conditional logic outside of test case detected"),
-    ).toHaveLength(2);
+    expect(smells).toHaveLength(2);
+    expect(smells[0]?.message).toBe("Conditional logic inside test case detected");
+    expect(smells[1]?.message).toBe("Conditional logic inside test case detected");
   });
 
-  it("should handle nested conditional logic", async () => {
+  it("should handle nested conditional logic inside a test case", async () => {
     const code = `
       describe('my suite', () => {
         it('my test', () => {
@@ -104,7 +95,7 @@ describe("ConditionalTestLogicDetector", () => {
     const smells = await detector.detect(ast, code, filePath);
 
     expect(smells).toHaveLength(2);
-    expect(smells[0]?.message).toBe("Conditional test logic detected");
-    expect(smells[1]?.message).toBe("Conditional test logic detected");
+    expect(smells[0]?.message).toBe("Conditional logic inside test case detected");
+    expect(smells[1]?.message).toBe("Conditional logic inside test case detected");
   });
 });

@@ -3,22 +3,19 @@
   "version": "1.0.0",
   "description": "core snuts.js",
   "main": "index.js",
-  "bin": {
-    "snuts": "./bin/snuts.js"
-  },
   "repository": "https://github.com/Jhonatanmizu/snuts.js-core.git",
   "author": "Jhonatanmizu <natanjesuss20gmail.com>",
   "scripts": {
+    "start": "tsx lib/index.ts",
     "clean": "rimraf dist",
-    "build": "tsup lib/index.ts --dts --format cjs,esm --out-dir dist --clean",
+    "build": "tsup lib/index.ts lib/core/watcher.ts --dts --format esm --out-dir dist --clean",
     "test": "vitest run --config  ./vitest.config.js lib/",
     "test:watch": "vitest --config  ./vitest.config.js lib/",
     "test:coverage": "vitest run --config  ./vitest.config.js --coverage lib/",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "prepare": "husky",
-    "snuts:watch": "tsx ./bin/snuts.js watch \"lib/**/*.{test,tests,spec,specs}.{js,ts,jsx,tsx},lib/**/*test_*.{js,ts,jsx,tsx},lib/**/*test-*.{js,ts,jsx,tsx},lib/**/*Spec*.{js,ts,jsx,tsx}\""
+    "prepare": "husky"
   },
   "lint-staged": {
     "*.{ts,js,json,md}": [
@@ -32,6 +29,7 @@
     "@eslint/js": "^9.37.0",
     "@types/babel__traverse": "^7.28.0",
     "@types/chokidar": "^2.1.7",
+    "@types/lodash": "^4.17.20",
     "@typescript-eslint/eslint-plugin": "^8.46.1",
     "@typescript-eslint/parser": "^8.46.1",
     "@vitest/coverage-v8": "3.2.4",
@@ -57,6 +55,10 @@
     "chokidar": "^4.0.3",
     "commander": "^14.0.1",
     "glob": "^11.0.3",
+    "lodash": "^4.17.21",
+    "node-module-type": "^1.0.2",
+    "pino": "^10.1.0",
+    "pino-pretty": "^13.1.2",
     "rimraf": "^6.0.1"
   }
 }

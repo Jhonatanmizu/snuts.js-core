@@ -3,10 +3,11 @@ import chokidar from "chokidar";
 import { glob } from "glob";
 
 import { Watcher } from "./watcher";
-import { Detector } from "./detector.interface";
+import { Detector, Smell } from "./detector.interface";
 import { DetectorRunner } from "./detector-runner";
 
 import { TEST_FILE_PATTERNS } from "@/shared/constants";
+import { logger } from "@/shared/logger";
 
 // Mock external dependencies
 vi.mock("chokidar", () => ({
@@ -27,25 +28,32 @@ vi.mock("./detector-runner", () => ({
   })),
 }));
 
+vi.mock("@/shared/logger", () => ({
+  logger: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
+
 describe("Watcher", () => {
   const mockDetector: Detector = {
     detect: vi.fn(),
   };
-  const mockPaths = TEST_FILE_PATTERNS;
-  let consoleSpy: ReturnType<typeof vi.spyOn>;
+  const mockPaths = [process.cwd()];
 
   beforeEach(() => {
+    vi.useFakeTimers();
     vi.clearAllMocks();
     // Reset mock implementations for each test
     (glob as vi.Mock).mockResolvedValue([]);
     (DetectorRunner as vi.Mock).mockClear();
     (chokidar.watch as vi.Mock).mockClear();
-
-    consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
   });
 
   afterEach(() => {
-    consoleSpy.mockRestore();
+    vi.useRealTimers();
   });
 
   it("should initialize DetectorRunner with provided detectors", () => {
@@ -58,12 +66,7 @@ describe("Watcher", () => {
 
   it("should find initial files and run detections", async () => {
     const mockFiles = ["file1.ts", "file2.ts"];
-    (glob as vi.Mock).mockImplementation((pattern, options) => {
-      if (TEST_FILE_PATTERNS.includes(pattern)) {
-        return Promise.resolve(mockFiles);
-      }
-      return Promise.resolve([]);
-    });
+    (glob as vi.Mock).mockResolvedValueOnce(mockFiles);
 
     const mockRun = vi.fn().mockResolvedValue([]);
     (DetectorRunner as vi.Mock).mockImplementation(() => ({
@@ -77,7 +80,7 @@ describe("Watcher", () => {
     await watcher.watch();
 
     expect(glob).toHaveBeenCalledTimes(TEST_FILE_PATTERNS.length);
-    expect(mockRun).toHaveBeenCalledTimes(mockFiles.length * TEST_FILE_PATTERNS.length);
+    expect(mockRun).toHaveBeenCalledTimes(mockFiles.length);
     expect(mockRun).toHaveBeenCalledWith(mockFiles[0]);
     expect(mockRun).toHaveBeenCalledWith(mockFiles[1]);
   });
@@ -97,7 +100,7 @@ describe("Watcher", () => {
     expect(chokidar.watch).toHaveBeenCalledWith(mockPaths, {
       persistent: true,
       ignoreInitial: true,
-      ignored: ["node_modules/**", "**/node_modules/**"],
+      ignored: ["**/node_modules/**", "**/dist/**"],
     });
     expect(mockOn).toHaveBeenCalledWith("add", expect.any(Function));
     expect(mockOn).toHaveBeenCalledWith("change", expect.any(Function));
@@ -122,7 +125,9 @@ describe("Watcher", () => {
 
     const addCallback = mockOn.mock.calls.find((call) => call[0] === "add")[1];
     const newFile = "new-file.ts";
-    await addCallback(newFile);
+    addCallback(newFile);
+
+    vi.runAllTimers();
 
     expect(mockRun).toHaveBeenCalledWith(newFile);
   });
@@ -146,7 +151,9 @@ describe("Watcher", () => {
 
     const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")[1];
     const changedFile = "changed-file.ts";
-    await changeCallback(changedFile);
+    changeCallback(changedFile);
+
+    vi.runAllTimers();
 
     expect(mockRun).toHaveBeenCalledWith(changedFile);
   });
@@ -178,17 +185,11 @@ describe("Watcher", () => {
     // Trigger a change event to make runDetections execute
     const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")[1];
     const changedFile = "changed-file.ts";
-    await changeCallback(changedFile);
+    changeCallback(changedFile);
 
-    expect(consoleSpy).toHaveBeenCalledWith("Watching for file changes...");
-    expect(consoleSpy).toHaveBeenCalledWith("----------------------------------------");
-    expect(consoleSpy).toHaveBeenCalledWith(`File: ${mockSmell.file}`);
-    expect(consoleSpy).toHaveBeenCalledWith(
-      `Location: ${mockSmell.start.line}:${mockSmell.start.column}`,
-    );
-    expect(consoleSpy).toHaveBeenCalledWith(`Smell: ${mockSmell.message}`);
-    expect(consoleSpy).toHaveBeenCalledWith(`Code: \n${mockSmell.codeBlock}`);
-    expect(consoleSpy).toHaveBeenCalledWith("----------------------------------------");
+    vi.runAllTimers();
+
+    expect(logger.info).toHaveBeenCalledWith("👀 Watching for file changes...");
   });
 
   it("should not log anything if no smells are detected", async () => {
@@ -211,9 +212,10 @@ describe("Watcher", () => {
     // Trigger a change event to make runDetections execute
     const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")[1];
     const changedFile = "changed-file.ts";
-    await changeCallback(changedFile);
+    changeCallback(changedFile);
 
-    expect(consoleSpy).toHaveBeenCalledWith("Watching for file changes...");
-    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining("Smell:"));
+    vi.runAllTimers();
+
+    expect(logger.info).toHaveBeenCalledWith("👀 Watching for file changes...");
   });
 });

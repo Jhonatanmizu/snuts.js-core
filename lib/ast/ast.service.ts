@@ -1,116 +1,108 @@
-import fs from "node:fs";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 import * as t from "@babel/types";
-import traverse, { NodePath } from "@babel/traverse";
+import { NodePath } from "@babel/traverse";
 import { parse } from "@babel/parser";
 
+import { logger } from "@/shared/logger";
 import { jestTestAliases, jestSuiteAliases } from "@/shared/aliases";
 import * as astPlugins from "@/shared/plugins";
-
+import { traverse } from "@/shared/traverse";
 const { configsFlow, configsTypescript } = astPlugins;
 
+export interface ParsedFile {
+  ast: t.File;
+  code: string;
+}
+
 class AstService {
-  constructor(private fileReader: typeof fs = fs) {}
+  public traverse: typeof traverse = traverse;
 
-  public parseToAst(code: string): t.File {
-    if (!code.trim()) {
-      throw new Error("Empty code cannot be parsed");
-    }
+  // constructor() {
+  //   this.initialize();
+  // }
+
+  // private async initialize() {
+  //   this.traverse = traverse;
+  // }
+
+  /**
+   * Parse a given file path into an AST + source code.
+   * Detects parser config based on file extension.
+   */
+  public async parseFileToAst(filePath: string): Promise<ParsedFile | null> {
     try {
-      return parse(code, configsFlow);
-    } catch {
-      return parse(code, configsTypescript);
-    }
-  }
-
-  public getSourceCode(filePath: string): string {
-    return this.fileReader.readFileSync(filePath, "utf-8");
-  }
-
-  public parseFileToAst(filePath: string): t.File | null {
-    try {
-      const code = this.fileReader.readFileSync(filePath, "utf-8");
+      const code = await fs.readFile(filePath, "utf-8");
       if (!code.trim()) {
+        logger.warn({ file: filePath }, "Skipping empty file");
         return null;
       }
-      return this.parseToAst(code);
-    } catch (error) {
-      console.error(`[AstService] Failed to parse file: ${filePath}`, error);
+
+      const ast = this.parseToAst(code, filePath);
+      return { ast, code };
+    } catch (err) {
+      logger.error({ err, file: filePath }, "Failed to parse file into AST");
       return null;
     }
   }
 
-  public isHook(node: t.Node): boolean {
-    const hookNames = ["beforeAll", "beforeEach", "afterAll", "afterEach"];
+  /**
+   * Parse code string to AST using heuristics.
+   * Falls back between Flow and TypeScript parsers.
+   */
+  public parseToAst(code: string, filePath?: string): t.File {
+    if (!code.trim()) {
+      throw new Error("Empty code cannot be parsed");
+    }
+
+    const ext = filePath ? path.extname(filePath) : "";
+
+    const config = ext === ".ts" || ext === ".tsx" ? configsTypescript : configsFlow;
+
+    try {
+      return parse(code, config);
+    } catch (err) {
+      logger.warn({ err, file: filePath }, "Primary parser failed, attempting fallback parser");
+      return parse(code, ext === ".ts" ? configsFlow : configsTypescript);
+    }
+  }
+
+  /**
+   * Reads the file content (non-parsed).
+   */
+  public async getSourceCode(filePath: string): Promise<string> {
+    try {
+      return await fs.readFile(filePath, "utf-8");
+    } catch (err) {
+      logger.error({ err, file: filePath }, "Failed to read source file");
+      return "";
+    }
+  }
+
+  // -----------------------
+  // Test / Suite Detection
+  // -----------------------
+
+  public isTestCase(node: t.Node): boolean {
+    if (!t.isCallExpression(node)) return false;
+
+    const callee = node.callee;
+    const args = node.arguments;
+
+    const testName = t.isIdentifier(callee)
+      ? callee.name
+      : t.isMemberExpression(callee) && t.isIdentifier(callee.object)
+        ? callee.object.name
+        : null;
 
     return (
-      t.isExpressionStatement(node) &&
-      t.isCallExpression(node.expression) &&
-      t.isIdentifier(node.expression.callee) &&
-      hookNames.includes(node.expression.callee.name)
+      !!testName &&
+      jestTestAliases.includes(testName) &&
+      args.length > 1 &&
+      t.isStringLiteral(args[0]) &&
+      this.isFunction(args[1] as t.Node)
     );
-  }
-
-  public isAssert(path: NodePath): boolean {
-    let found = false;
-    path.traverse({
-      CallExpression(path: NodePath<t.CallExpression>) {
-        const callee = path.node.callee;
-        if (t.isMemberExpression(callee) && t.isIdentifier(callee.object, { name: "expect" })) {
-          found = true;
-          path.stop();
-        }
-      },
-    });
-    return found;
-  }
-
-  public testInfo(path: NodePath<t.CallExpression>): {
-    name: string;
-    hasAssert: boolean;
-    itCount: number;
-    describeCount: number;
-  } | null {
-    if (!this.isTestCase(path.node)) return null;
-
-    const args = path.node.arguments;
-    const name = (args[0] as t.StringLiteral).value;
-    const funcPath = path.get("arguments.1") as NodePath;
-
-    const hasAssert = this.isAssert(funcPath);
-    const itCount = this.itCount(funcPath);
-    const describeCount = this.describeCount(funcPath);
-
-    return {
-      name,
-      hasAssert,
-      itCount,
-      describeCount,
-    };
-  }
-
-  public itCount(path: NodePath): number {
-    let count = 0;
-    path.traverse({
-      CallExpression(path) {
-        if (t.isIdentifier(path.node.callee) && jestTestAliases.includes(path.node.callee.name)) {
-          count++;
-        }
-      },
-    });
-    return count;
-  }
-
-  public describeCount(path: NodePath): number {
-    let count = 0;
-    path.traverse({
-      CallExpression(path) {
-        if (t.isIdentifier(path.node.callee, { name: "describe" })) {
-          count++;
-        }
-      },
-    });
-    return count;
   }
 
   public isDescribe(node: t.Node): boolean {
@@ -119,16 +111,14 @@ class AstService {
     const callee = node.callee;
     const args = node.arguments;
 
-    let suiteName: string | null = null;
-
-    if (t.isIdentifier(callee)) {
-      suiteName = callee.name;
-    } else if (t.isMemberExpression(callee) && t.isIdentifier(callee.object)) {
-      suiteName = callee.object.name;
-    }
+    const suiteName = t.isIdentifier(callee)
+      ? callee.name
+      : t.isMemberExpression(callee) && t.isIdentifier(callee.object)
+        ? callee.object.name
+        : null;
 
     return (
-      suiteName !== null &&
+      !!suiteName &&
       jestSuiteAliases.includes(suiteName) &&
       args.length > 1 &&
       t.isStringLiteral(args[0]) &&
@@ -136,69 +126,84 @@ class AstService {
     );
   }
 
-  public getDescribeNodeAst(code: string): t.Node | null {
-    const ast = this.parseToAst(code);
-    let describeNode: t.Node | null = null;
+  public isHook(node: t.Node): boolean {
+    const hookNames = ["beforeAll", "beforeEach", "afterAll", "afterEach"];
+    return (
+      t.isExpressionStatement(node) &&
+      t.isCallExpression(node.expression) &&
+      t.isIdentifier(node.expression.callee) &&
+      hookNames.includes(node.expression.callee.name)
+    );
+  }
 
-    traverse(ast, {
-      CallExpression: (path) => {
-        if (this.isDescribe(path.node)) {
-          describeNode = path.node;
-          path.stop();
+  // -----------------------
+  // Traversal Utilities
+  // -----------------------
+
+  public isAssert(path: NodePath): boolean {
+    let found = false;
+    path.traverse({
+      CallExpression(inner: NodePath<t.CallExpression>) {
+        const callee = inner.node.callee;
+        if (t.isMemberExpression(callee) && t.isIdentifier(callee.object, { name: "expect" })) {
+          found = true;
+          inner.stop();
         }
       },
     });
-
-    return describeNode;
+    return found;
   }
 
-  public getTestNodeAst(code: string): t.Node | null {
-    const ast = this.parseToAst(code);
-    let testNode: t.Node | null = null;
+  public itCount(path: NodePath): number {
+    return this.countCalls(path, jestTestAliases);
+  }
 
-    traverse(ast, {
-      CallExpression: (path) => {
-        if (this.isTestCase(path.node)) {
-          testNode = path.node;
-          path.stop();
+  public describeCount(path: NodePath): number {
+    return this.countCalls(path, ["describe"]);
+  }
+
+  private countCalls(path: NodePath, names: string[]): number {
+    let count = 0;
+    path.traverse({
+      CallExpression(innerPath) {
+        if (t.isIdentifier(innerPath.node.callee) && names.includes(innerPath.node.callee.name)) {
+          count++;
         }
       },
     });
-
-    return testNode;
+    return count;
   }
+
+  // -----------------------
+  // Metadata Extraction
+  // -----------------------
+
+  public testInfo(path: NodePath<t.CallExpression>) {
+    if (!this.isTestCase(path.node)) return null;
+
+    const args = path.node.arguments;
+    const name = t.isStringLiteral(args[0]) ? args[0].value : "Unnamed test";
+    const funcPath = path.get("arguments.1") as NodePath;
+
+    return {
+      name,
+      hasAssert: this.isAssert(funcPath),
+      itCount: this.itCount(funcPath),
+      describeCount: this.describeCount(funcPath),
+    };
+  }
+
+  // -----------------------
+  // Misc Helpers
+  // -----------------------
 
   public hasManyComments(node: t.Node, maxComments: number): boolean {
-    if (!node) return false;
     const comments = [
-      ...(node.leadingComments || []),
-      ...(node.trailingComments || []),
-      ...(node.innerComments || []),
+      ...(node.leadingComments ?? []),
+      ...(node.trailingComments ?? []),
+      ...(node.innerComments ?? []),
     ];
     return comments.length > maxComments;
-  }
-
-  public isTestCase(node: t.Node): boolean {
-    if (!t.isCallExpression(node)) return false;
-
-    const callee = node.callee;
-    const args = node.arguments;
-
-    let testName: string | null = null;
-
-    if (t.isIdentifier(callee)) {
-      testName = callee.name;
-    } else if (t.isMemberExpression(callee) && t.isIdentifier(callee.object)) {
-      testName = callee.object.name;
-    }
-
-    return (
-      testName !== null &&
-      jestTestAliases.includes(testName) &&
-      args.length > 1 &&
-      t.isStringLiteral(args[0]) &&
-      this.isFunction(args[1] as t.Node)
-    );
   }
 
   public isFunction(node: t.Node): boolean {
@@ -213,5 +218,5 @@ class AstService {
   }
 }
 
-const astService = new AstService();
+export const astService = new AstService();
 export default astService;
