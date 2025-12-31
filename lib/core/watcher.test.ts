@@ -10,7 +10,6 @@ import { DetectorRunner } from "./detector-runner";
 import { TEST_FILE_PATTERNS } from "@/shared/constants";
 import { logger } from "@/shared/logger";
 
-// Mock external dependencies
 jest.mock("chokidar", () => ({
   __esModule: true,
   default: {
@@ -51,7 +50,6 @@ describe("Watcher", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.clearAllMocks();
-    // Reset mock implementations for each test
     (glob as jest.MockedFunction<typeof glob>).mockResolvedValue([]);
     (DetectorRunner as jest.Mock).mockClear();
     (chokidar.watch as jest.Mock).mockClear();
@@ -187,7 +185,6 @@ describe("Watcher", () => {
     });
     await watcher.watch();
 
-    // Trigger a change event to make runDetections execute
     const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")![1] as Function;
     const changedFile = "changed-file.ts";
     changeCallback(changedFile);
@@ -214,7 +211,6 @@ describe("Watcher", () => {
     });
     await watcher.watch();
 
-    // Trigger a change event to make runDetections execute
     const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")![1] as Function;
     const changedFile = "changed-file.ts";
     changeCallback(changedFile);
