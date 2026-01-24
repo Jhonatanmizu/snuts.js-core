@@ -1,4 +1,4 @@
-import { AnonymousTestLogicDetector } from "./anonymousTest";
+import { AnonymousTestLogicDetector } from "./anonymousTesLogic";
 
 import astService from "@/ast/ast.service";
 
@@ -24,6 +24,18 @@ describe("AnonymousTestLogicDetector", () => {
   it("should detect a test with a whitespace description", async () => {
     const code = `
       it('   ', () => {
+        expect(1).toBe(1);
+      });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, "test.js");
+    expect(smells).toHaveLength(1);
+    expect(smells[0]?.message).toBe("Anonymous test case detected.");
+  });
+
+  it("should detect a test with a two-word description", async () => {
+    const code = `
+      test('two words', () => {
         expect(1).toBe(1);
       });
     `;
