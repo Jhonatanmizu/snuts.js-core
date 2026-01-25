@@ -1,9 +1,13 @@
+import { Detector } from "./core/detector.interface";
 import { Watcher } from "./core/watcher";
-import { ConditionalTestLogicDetector } from "./detectors/conditionalTestLogic";
+
+import * as detectors from "@/detectors";
+
+const detectorsInstance: Detector[] = Object.values(detectors).map((d) => new d());
 
 const watcher = new Watcher({
   paths: [process.cwd()],
-  detectors: [new ConditionalTestLogicDetector()],
+  detectors: [...detectorsInstance],
 });
 
 watcher.watch();
