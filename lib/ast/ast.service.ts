@@ -162,6 +162,18 @@ class AstService {
     return comments.length > maxComments;
   }
 
+  public countComments(node: t.Node): number {
+    let count = 0;
+    t.traverse(node, {
+      enter(node) {
+        count += (node.leadingComments ?? []).length;
+        count += (node.trailingComments ?? []).length;
+        count += (node.innerComments ?? []).length;
+      },
+    });
+    return count;
+  }
+
   public isFunction(node: t.Node): boolean {
     return (
       t.isFunctionDeclaration(node) ||

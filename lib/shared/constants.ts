@@ -14,4 +14,5 @@ const TEST_FILE_PATTERNS = [
   "**/*test-*.ts",
   "**/*Spec*.ts",
 ];
-export { TEST_FILE_PATTERNS };
+const MAX_COMMENTS_PER_TEST = 5;
+export { TEST_FILE_PATTERNS, MAX_COMMENTS_PER_TEST };
