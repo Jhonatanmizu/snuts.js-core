@@ -9,6 +9,7 @@ import { Smell, Detector } from "./detector.interface";
 
 import { TEST_FILE_PATTERNS } from "@/shared/constants";
 import { logger } from "@/shared/logger";
+import { LoggerUtils } from "@/shared/utils";
 
 interface WatcherOptions {
   paths: string[];
@@ -49,6 +50,7 @@ export class Watcher {
     });
 
     watcher.on("change", (file) => {
+      LoggerUtils.clearVisibleConsole();
       logger.debug({ file }, "File changed");
       debouncedRun(file);
     });
