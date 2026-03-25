@@ -17,7 +17,8 @@ describe("AnonymousTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, "test.js");
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Anonymous test case detected.");
   });
 
@@ -29,7 +30,8 @@ describe("AnonymousTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, "test.js");
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Anonymous test case detected.");
   });
 
@@ -41,7 +43,8 @@ describe("AnonymousTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, "test.js");
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Anonymous test case detected.");
   });
 
@@ -53,7 +56,8 @@ describe("AnonymousTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, "test.js");
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should handle multiple test cases", async () => {
@@ -74,6 +78,7 @@ describe("AnonymousTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, "test.js");
-    expect(smells).toHaveLength(2);
+    const expectedNumberOfSmells = 2;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 });
