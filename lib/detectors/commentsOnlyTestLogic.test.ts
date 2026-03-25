@@ -17,7 +17,8 @@ describe("CommentsOnlyLogicTestDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, "test.js");
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Test case with only comments or empty body detected.");
   });
 
@@ -29,7 +30,8 @@ describe("CommentsOnlyLogicTestDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, "test.js");
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Test case with only comments or empty body detected.");
   });
 
@@ -39,7 +41,8 @@ describe("CommentsOnlyLogicTestDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, "test.js");
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Test case with only comments or empty body detected.");
   });
 
@@ -52,7 +55,8 @@ describe("CommentsOnlyLogicTestDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, "test.js");
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should not detect a regular test case without comments", async () => {
@@ -63,6 +67,7 @@ describe("CommentsOnlyLogicTestDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, "test.js");
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 });

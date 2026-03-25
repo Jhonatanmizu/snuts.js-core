@@ -76,8 +76,8 @@ describe("ConditionalTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should not detect conditional logic if none exists", async () => {
@@ -90,8 +90,8 @@ describe("ConditionalTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should handle multiple conditional logic blocks inside a test case", async () => {
@@ -110,7 +110,8 @@ describe("ConditionalTestLogicDetector", () => {
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
 
-    expect(smells).toHaveLength(2);
+    const expectedNumberOfSmells = 2;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Conditional logic inside test case detected: IfStatement");
     expect(smells[1]?.message).toBe("Conditional logic inside test case detected: IfStatement");
   });
@@ -129,8 +130,8 @@ describe("ConditionalTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(2);
+    const expectedNumberOfSmells = 2;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Conditional logic inside test case detected: IfStatement");
     expect(smells[1]?.message).toBe("Conditional logic inside test case detected: IfStatement");
   });

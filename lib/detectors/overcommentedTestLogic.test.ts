@@ -23,7 +23,8 @@ describe("OvercommentedTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe(
       `Test has too many comments (6). The maximum allowed is ${MAX_COMMENTS_PER_TEST}.`,
     );
@@ -38,7 +39,8 @@ describe("OvercommentedTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should not detect a test with comments equal to the threshold", async () => {
@@ -54,7 +56,8 @@ describe("OvercommentedTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should detect only the overcommented tests in a file with multiple tests", async () => {
@@ -76,7 +79,8 @@ describe("OvercommentedTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toContain("Test has too many comments (6)");
   });
 
@@ -88,7 +92,8 @@ describe("OvercommentedTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should correctly handle leading comments", async () => {
@@ -105,6 +110,7 @@ describe("OvercommentedTestLogicDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 });

@@ -37,7 +37,8 @@ describe("IdenticalDescriptionTestLogic", () => {
 
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Identical Description test case detected.");
     expect(smells[0]?.file).toBe(filePath);
   });
@@ -55,7 +56,8 @@ describe("IdenticalDescriptionTestLogic", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should detect test cases with identical descriptions within nested describe blocks", async () => {
@@ -73,7 +75,8 @@ describe("IdenticalDescriptionTestLogic", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should detect multiple instances of identical test case descriptions", async () => {
@@ -95,6 +98,7 @@ describe("IdenticalDescriptionTestLogic", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-    expect(smells).toHaveLength(2);
+    const expectedNumberOfSmells = 2;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 });

@@ -38,13 +38,14 @@ describe("GeneralFixtureTestLogicDetector", () => {
 
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe(
       'General fixture detected: setup variable "fixtureValue" is never used in test cases.',
     );
     expect(smells[0]?.file).toBe(filePath);
-    expect(smells[0]?.start.line).toBe(4);
+    const expectedStartLine = 4;
+    expect(smells[0]?.start.line).toBe(expectedStartLine);
     expect(smells[0]?.codeBlock).toContain("fixtureValue");
   });
 
@@ -63,13 +64,14 @@ describe("GeneralFixtureTestLogicDetector", () => {
 
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe(
       'General fixture detected: setup variable "sharedFixture" is never used in test cases.',
     );
     expect(smells[0]?.file).toBe(filePath);
-    expect(smells[0]?.start.line).toBe(4);
+    const expectedStartLine = 4;
+    expect(smells[0]?.start.line).toBe(expectedStartLine);
     expect(smells[0]?.codeBlock).toContain("sharedFixture");
   });
 
@@ -92,8 +94,8 @@ describe("GeneralFixtureTestLogicDetector", () => {
 
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(2);
+    const expectedNumberOfSmells = 2;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toContain("General fixture detected");
     expect(smells[1]?.message).toContain("General fixture detected");
   });
@@ -113,8 +115,8 @@ describe("GeneralFixtureTestLogicDetector", () => {
 
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should not detect when no setup hooks exist", async () => {
@@ -129,8 +131,8 @@ describe("GeneralFixtureTestLogicDetector", () => {
 
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should not detect when setup variable is used in a nested block inside test callback", async () => {
@@ -150,8 +152,8 @@ describe("GeneralFixtureTestLogicDetector", () => {
 
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(0);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should report only the unused setup variable in mixed usage", async () => {
@@ -194,7 +196,8 @@ describe("GeneralFixtureTestLogicDetector", () => {
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
 
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe(
       'General fixture detected: setup variable "fixtureValue" is never used in test cases.',
     );
@@ -220,8 +223,8 @@ describe("GeneralFixtureTestLogicDetector", () => {
 
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe(
       'General fixture detected: setup variable "fixtureValue" is never used in test cases.',
     );

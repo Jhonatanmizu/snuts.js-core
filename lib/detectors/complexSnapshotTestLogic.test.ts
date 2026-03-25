@@ -143,8 +143,8 @@ exports[\`long test\`] = \`\n${longBody}\n\`;
 
       const ast = astService.parseToAst(code);
       const smells = await detector.detect(ast, code, filePath);
-
-      expect(smells).toHaveLength(1);
+      const expectedNumberOfSmells = 1;
+      expect(smells).toHaveLength(expectedNumberOfSmells);
       expect(smells[0]?.codeBlock).toContain("long test");
     });
 
@@ -159,8 +159,8 @@ it('test', () => {
 
       const ast = astService.parseToAst(code);
       const smells = await detector.detect(ast, code, filePath);
-
-      expect(smells).toHaveLength(2);
+      const expectedNumberOfSmells = 2;
+      expect(smells).toHaveLength(expectedNumberOfSmells);
     });
 
     it("should return empty array when no snapshot calls are present", async () => {
@@ -172,8 +172,8 @@ it('my test', () => {
 
       const ast = astService.parseToAst(code);
       const smells = await detector.detect(ast, code, filePath);
-
-      expect(smells).toHaveLength(0);
+      const expectedNumberOfSmells = 0;
+      expect(smells).toHaveLength(expectedNumberOfSmells);
     });
 
     it("should catch errors and log them without throwing", async () => {
