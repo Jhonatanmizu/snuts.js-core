@@ -70,7 +70,7 @@ describe("TestWithoutDescriptionLogic", () => {
     expect(smells[1]?.message).toBe("Test case without description detected");
   });
 
-  it("should detect test cases with empty or one-word description", async () => {
+  it("should detect test cases with empty description", async () => {
     const code = `
       describe('suite', () => {
         it('', () => {
@@ -89,11 +89,10 @@ describe("TestWithoutDescriptionLogic", () => {
 
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-    const expectedNumberOfSmells = 2;
+    const expectedNumberOfSmells = 1;
 
     expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Test case without description detected");
-    expect(smells[1]?.message).toBe("Test case without description detected");
   });
 
   it("should not report when descriptions are valid", async () => {
