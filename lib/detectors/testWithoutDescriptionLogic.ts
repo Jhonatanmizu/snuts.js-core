@@ -5,7 +5,6 @@ import { Detector, Smell } from "@/core/detector.interface";
 import { jestTestAliases } from "@/shared/aliases";
 import { logger } from "@/shared/logger";
 
-const MINIMUM_THRESHOLD_WORDS = 2;
 const TEST_CALL_SELECTOR = `CallExpression[callee.name=/${jestTestAliases.join("|")}/]`;
 
 const extractTestName = (callee: t.Expression | t.V8IntrinsicIdentifier): string | null => {
@@ -32,7 +31,7 @@ const hasValidDescription = (
   }
 
   const words = descriptionArg.value.trim().split(/\s+/).filter(Boolean);
-  return words.length >= MINIMUM_THRESHOLD_WORDS;
+  return words.length > 0;
 };
 
 export class DetectorTestWithoutDescriptionLogic implements Detector {
