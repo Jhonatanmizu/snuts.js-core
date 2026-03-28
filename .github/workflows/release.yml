@@ -7,14 +7,19 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   release:
+    if: "!contains(github.event.head_commit.message, 'ci: version packages')"
     runs-on: ubuntu-latest
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -26,12 +31,36 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Create release pull request or publish
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Check pending changesets
         id: changesets
-        uses: changesets/action@v1
-        with:
-          version: yarn version-packages
-          publish: yarn release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if yarn changeset status >/dev/null 2>&1; then
+            echo "has_changesets=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changesets=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Version packages
+        if: steps.changesets.outputs.has_changesets == 'true'
+        run: yarn version-packages
+
+      - name: Commit and push version bump
+        if: steps.changesets.outputs.has_changesets == 'true'
+        run: |
+          if git diff --quiet; then
+            echo "No version changes to commit"
+            exit 0
+          fi
+
+          git add -A
+          git commit -m "ci: version packages [skip ci]"
+          git push
+
+      - name: Publish to npm
+        if: steps.changesets.outputs.has_changesets == 'true'
+        run: yarn release

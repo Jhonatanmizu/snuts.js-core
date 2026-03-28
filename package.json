@@ -1,6 +1,6 @@
 {
   "name": "snuts.js-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AST-based test smell detection core for JavaScript and TypeScript projects.",
   "type": "module",
   "main": "./dist/index.js",
