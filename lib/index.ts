@@ -1,13 +1,6 @@
-import { Detector } from "./core/detector.interface";
-import { Watcher } from "./core/watcher";
+export { Watcher } from "./core/watcher";
+export { DetectorRunner } from "./core/detector-runner";
+export type { Detector, Smell } from "./core/detector.interface";
 
-import * as detectors from "@/detectors";
-
-const detectorsInstance: Detector[] = Object.values(detectors).map((d) => new d());
-
-const watcher = new Watcher({
-  paths: [process.cwd()],
-  detectors: [...detectorsInstance],
-});
-
-watcher.watch();
+export * from "./detectors";
+export * as detectors from "./detectors";

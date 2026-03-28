@@ -6,6 +6,34 @@
 
 `snuts.js-core` aims to be a robust and extensible static analysis tool designed to identify and report common "smells" or anti-patterns in JavaScript and TypeScript test files. By integrating with your development workflow, it helps maintain high-quality, readable, and effective test suites.
 
+## 📦 Installation
+
+```bash
+npm install snuts.js-core
+```
+
+## 🚀 Library Usage (Extension-Friendly)
+
+```ts
+import { DetectorRunner, detectors } from "snuts.js-core";
+
+const detectorInstances = Object.values(detectors).map((DetectorClass) => new DetectorClass());
+const runner = new DetectorRunner(detectorInstances);
+
+const smells = await runner.run("/absolute/path/to/example.test.ts");
+console.log(smells);
+```
+
+## 👀 Runtime Watcher Entry
+
+Use the runtime subpath when you want the side-effectful watcher behavior:
+
+```ts
+import "snuts.js-core/runtime/watch";
+```
+
+The root package import is side-effect free and safe for VS Code extension integration.
+
 ---
 
 ## 📁 Project Structure
@@ -22,7 +50,7 @@
 │   │   ├── watcher.test.ts
 │   │   └── watcher.ts
 │   ├── detectors/          # Collection of predefined test smell detectors
-│   │   ├── anonymousTesLogic.ts
+│   │   ├── anonymousTestLogic.ts
 │   │   ├── anonymousTestLogic.test.ts
 │   │   ├── commentsOnlyTestLogic.test.ts
 │   │   ├── commentsOnlyTestLogic.ts
@@ -33,6 +61,8 @@
 │   │   ├── index.ts
 │   │   ├── overcommentedTestLogic.test.ts
 │   │   └── overcommentedTestLogic.ts
+│   ├── runtime/
+│   │   └── watch.ts
 │   ├── shared/             # Shared utilities, constants, and plugins
 │   │   ├── aliases/        # Module aliases configuration
 │   │   │   └── index.ts
@@ -119,6 +149,38 @@ To run this project, you will need:
     ```
 
     `snuts.js-core` will automatically watch all files in the current directory and its subdirectories and report findings.
+
+### 📚 Build and Validate
+
+```bash
+yarn lint
+yarn test
+yarn typecheck
+yarn build
+npm pack --dry-run
+```
+
+### 🧾 Release Automation (Changesets)
+
+Create a changeset:
+
+```bash
+yarn changeset
+```
+
+Version packages and changelog:
+
+```bash
+yarn version-packages
+```
+
+Publish to npm:
+
+```bash
+yarn release
+```
+
+GitHub Actions workflows are configured to run CI on pull requests and publish through Changesets on merges to `main`.
 
 ---
 

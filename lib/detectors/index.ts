@@ -1,4 +1,4 @@
-export { AnonymousTestLogicDetector } from "./anonymousTesLogic";
+export { AnonymousTestLogicDetector } from "./anonymousTestLogic";
 export { CommentsOnlyLogicTestDetector } from "./commentsOnlyTestLogic";
 export { ComplexSnapshotTestLogicDetector } from "./complexSnapshotTestLogic";
 export { ConditionalTestLogicDetector } from "./conditionalTestLogic";
