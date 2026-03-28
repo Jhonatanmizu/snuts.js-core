@@ -6,6 +6,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "snuts": "./bin/snuts.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -22,6 +25,7 @@
     "./package.json": "./package.json"
   },
   "files": [
+    "bin",
     "dist",
     "README.md",
     "LICENSE"
@@ -44,7 +48,7 @@
     "access": "public"
   },
   "scripts": {
-    "start": "tsx lib/runtime/watch.ts",
+    "start": "tsx lib/bin/cli.ts watch .",
     "clean": "rimraf dist",
     "build": "tsup --config tsup.config.ts",
     "typecheck": "tsc --noEmit -p tsconfig.build.json",

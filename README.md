@@ -1,21 +1,21 @@
-# snuts.js-core
+# @snutsjs/core
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## 🎯 Goal
 
-`snuts.js-core` aims to be a robust and extensible static analysis tool designed to identify and report common "smells" or anti-patterns in JavaScript and TypeScript test files. By integrating with your development workflow, it helps maintain high-quality, readable, and effective test suites.
+`@snutsjs/core` aims to be a robust and extensible static analysis tool designed to identify and report common "smells" or anti-patterns in JavaScript and TypeScript test files. By integrating with your development workflow, it helps maintain high-quality, readable, and effective test suites.
 
 ## 📦 Installation
 
 ```bash
-npm install snuts.js-core
+npm install @snutsjs/core
 ```
 
 ## 🚀 Library Usage (Extension-Friendly)
 
 ```ts
-import { DetectorRunner, detectors } from "snuts.js-core";
+import { DetectorRunner, detectors } from "@snutsjs/core";
 
 const detectorInstances = Object.values(detectors).map((DetectorClass) => new DetectorClass());
 const runner = new DetectorRunner(detectorInstances);
@@ -29,10 +29,22 @@ console.log(smells);
 Use the runtime subpath when you want the side-effectful watcher behavior:
 
 ```ts
-import "snuts.js-core/runtime/watch";
+import "@snutsjs/core/runtime/watch";
 ```
 
 The root package import is side-effect free and safe for VS Code extension integration.
+
+## CLI Usage
+
+```bash
+npx @snutsjs/core watch .
+```
+
+You can also point to a specific directory:
+
+```bash
+npx @snutsjs/core watch src
+```
 
 ---
 
@@ -148,7 +160,7 @@ To run this project, you will need:
     yarn start
     ```
 
-    `snuts.js-core` will automatically watch all files in the current directory and its subdirectories and report findings.
+    `@snutsjs/core` will automatically watch all files in the selected directory and its subdirectories and report findings.
 
 ### 📚 Build and Validate
 

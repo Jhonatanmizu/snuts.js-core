@@ -41,16 +41,20 @@ export default tseslint.config(
       "eslint.config.js",
       "prettier.config.js",
       "vite.config.ts",
-      "dist",
-      "node_modules",
-      "coverage",
-      "bin/",
+      "dist/**",
+      "node_modules/**",
+      "coverage/**",
+      "bin/**",
+      "dumb/**",
     ],
   },
   {
     files: ["**/*.js"], // Apply this configuration to all .js files
     languageOptions: {
       parser: babelParser, // Use the imported babel parser
+      globals: {
+        process: "readonly",
+      },
       parserOptions: {
         requireConfigFile: false, // Allow parsing without a Babel config file
         babelOptions: {
