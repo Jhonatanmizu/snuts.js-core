@@ -1,4 +1,4 @@
-import { AnonymousTestLogicDetector } from "./anonymousTesLogic";
+import { AnonymousTestLogicDetector } from "./anonymousTestLogic";
 
 import astService from "@/ast/ast.service";
 
