@@ -1,5 +1,11 @@
 # @snutsjs/core
 
+## 1.2.1
+
+### Patch Changes
+
+- Fix pino pretty not logging in cli
+
 ## 1.2.0
 
 ### Minor Changes
