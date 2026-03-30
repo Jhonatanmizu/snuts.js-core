@@ -1,5 +1,11 @@
 # @snutsjs/core
 
+## 1.2.3
+
+### Patch Changes
+
+- add description and explanation in watcher logs
+
 ## 1.2.2
 
 ### Patch Changes
