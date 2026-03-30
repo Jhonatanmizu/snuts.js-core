@@ -1,5 +1,11 @@
 # @snutsjs/core
 
+## 1.2.2
+
+### Patch Changes
+
+- Improve pino pretty to handle vscode extension and cli.
+
 ## 1.2.1
 
 ### Patch Changes
