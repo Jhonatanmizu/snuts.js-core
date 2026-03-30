@@ -1847,13 +1847,6 @@
   dependencies:
     "@babel/types" "^7.28.2"
 
-"@types/chokidar@^2.1.7":
-  version "2.1.7"
-  resolved "https://registry.npmjs.org/@types/chokidar/-/chokidar-2.1.7.tgz"
-  integrity sha512-A7/MFHf6KF7peCzjEC1BBTF8jpmZTokb3vr/A0NxRGfwRLK3Ws+Hq6ugVn6cJIMfM6wkCak/aplWrxbTcu8oig==
-  dependencies:
-    chokidar "*"
-
 "@types/esquery@^1.5.4":
   version "1.5.4"
   resolved "https://registry.yarnpkg.com/@types/esquery/-/esquery-1.5.4.tgz#ebfd3a3bca6db50446688ba5592d18bb9b807e91"
@@ -2501,7 +2494,7 @@ chardet@^2.1.1:
   resolved "https://registry.yarnpkg.com/chardet/-/chardet-2.1.1.tgz#5c75593704a642f71ee53717df234031e65373c8"
   integrity sha512-PsezH1rqdV9VvyNhxxOW32/d75r01NY7TQCmOqomRo15ZSOKbpTFVsfjghxo6JloQUCGnH4k1LGu0R4yCLlWQQ==
 
-chokidar@*, chokidar@^4.0.3:
+chokidar@^4.0.3:
   version "4.0.3"
   resolved "https://registry.npmjs.org/chokidar/-/chokidar-4.0.3.tgz"
   integrity sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==
