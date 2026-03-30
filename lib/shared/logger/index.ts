@@ -4,7 +4,7 @@ import pino from "pino";
 
 function hasPinoPretty(): boolean {
   try {
-    const require = createRequire(import.meta.url);
+    const require = createRequire(process.cwd() + "/index.js");
     require.resolve("pino-pretty");
     return true;
   } catch {
