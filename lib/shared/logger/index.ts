@@ -1,16 +1,4 @@
-import { createRequire } from "module";
-
 import pino from "pino";
-
-function hasPinoPretty(): boolean {
-  try {
-    const require = createRequire(process.cwd() + "/index.js");
-    require.resolve("pino-pretty");
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Minimal logger interface used throughout the library.
@@ -54,23 +42,9 @@ export const silentLogger: ILogger = {
 };
 
 function createDefaultLogger(): ILogger {
-  const isDev = process.env["NODE_ENV"] !== "production";
-  const usePretty = isDev && hasPinoPretty();
-
   return pino({
-    name: "test-smell-watcher",
+    name: "snuts",
     level: process.env["LOG_LEVEL"] ?? "info",
-    transport: usePretty
-      ? {
-          target: "pino-pretty",
-          options: {
-            colorize: true,
-            translateTime: "SYS:HH:MM:ss",
-            ignore: "pid,hostname",
-            levelFirst: true,
-          },
-        }
-      : undefined,
   });
 }
 
