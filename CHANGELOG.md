@@ -1,5 +1,11 @@
 # @snutsjs/core
 
+## 1.3.0
+
+### Minor Changes
+
+- a588911: Improve build resolution and add smell description and explanation.
+
 ## 1.1.0
 
 ### Minor Changes
