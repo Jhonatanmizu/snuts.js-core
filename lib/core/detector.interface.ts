@@ -12,6 +12,8 @@ export interface Smell {
   };
   message: string;
   codeBlock: string;
+  description: string;
+  explanation: string;
 }
 
 export interface Detector {

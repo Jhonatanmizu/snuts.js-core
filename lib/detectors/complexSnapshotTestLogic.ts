@@ -3,6 +3,7 @@ import * as t from "@babel/types";
 import { Detector, Smell } from "@/core/detector.interface";
 import astService from "@/ast/ast.service";
 import { logger } from "@/shared/logger";
+import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 const MAX_LINES_IN_SNAPSHOT = 50;
 
@@ -31,6 +32,8 @@ function buildSmell(
     message: `Complex ${kind} snapshot detected: snapshot exceeds ${MAX_LINES_IN_SNAPSHOT} lines. Consider simplifying the tested output or breaking it into smaller assertions.`,
     codeBlock:
       sourceCode.slice(node.start ?? 0, node.end ?? 0) || "// Unable to extract code snippet",
+    description: SMELL_DESCRIPTIONS.ComplexSnapshotTest.description,
+    explanation: SMELL_DESCRIPTIONS.ComplexSnapshotTest.explanation,
   };
 }
 

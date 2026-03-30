@@ -3,6 +3,7 @@ import * as t from "@babel/types";
 import astService from "@/ast/ast.service";
 import { Detector, Smell } from "@/core/detector.interface";
 import { logger } from "@/shared/logger";
+import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 interface SetupVariableOccurrence {
   startLine: number;
@@ -64,6 +65,8 @@ export class GeneralFixtureTestLogicDetector implements Detector {
             end: { line: occurrence.endLine, column: occurrence.endColumn },
             message: `General fixture detected: setup variable "${variableName}" is never used in test cases.`,
             codeBlock,
+            description: SMELL_DESCRIPTIONS.GeneralFixture.description,
+            explanation: SMELL_DESCRIPTIONS.GeneralFixture.explanation,
           });
         }
       }

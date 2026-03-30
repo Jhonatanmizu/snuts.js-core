@@ -3,6 +3,7 @@ import * as t from "@babel/types";
 import { Detector, Smell } from "@/core/detector.interface";
 import astService from "@/ast/ast.service";
 import { MAX_COMMENTS_PER_TEST } from "@/shared/constants";
+import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 import { jestTestAliases } from "@/shared/aliases";
 
 export class OvercommentedTestLogicDetector implements Detector {
@@ -31,6 +32,8 @@ export class OvercommentedTestLogicDetector implements Detector {
           codeBlock:
             sourceCode.substring(testStatement.start!, testStatement.end!) ||
             "// Unable to extract code snippet",
+          description: SMELL_DESCRIPTIONS.OvercommentedTest.description,
+          explanation: SMELL_DESCRIPTIONS.OvercommentedTest.explanation,
         });
       }
     }

@@ -4,6 +4,7 @@ import { Detector, Smell } from "@/core/detector.interface";
 import astService from "@/ast/ast.service";
 import { logger } from "@/shared/logger";
 import { jestTestAliases } from "@/shared/aliases";
+import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 export class ConditionalTestLogicDetector implements Detector {
   /**
@@ -36,6 +37,8 @@ export class ConditionalTestLogicDetector implements Detector {
           end: { line: endLine, column: loc?.end.column ?? 0 },
           message: `Conditional logic inside test case detected: ${node.type}`,
           codeBlock,
+          description: SMELL_DESCRIPTIONS.ConditionalTestLogic.description,
+          explanation: SMELL_DESCRIPTIONS.ConditionalTestLogic.explanation,
         });
       }
     } catch (err) {

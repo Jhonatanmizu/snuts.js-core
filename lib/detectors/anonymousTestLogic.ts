@@ -4,6 +4,7 @@ import { Detector, Smell } from "@/core/detector.interface";
 import astService from "@/ast/ast.service";
 import { logger } from "@/shared/logger";
 import { jestTestAliases } from "@/shared/aliases";
+import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 const MINIMUM_WORDS_THRESHOLD = 2;
 
@@ -40,6 +41,8 @@ export class AnonymousTestLogicDetector implements Detector {
             end: { line: endLine, column: loc?.end.column ?? 0 },
             message: `Anonymous test case detected.`,
             codeBlock,
+            description: SMELL_DESCRIPTIONS.AnonymousTest.description,
+            explanation: SMELL_DESCRIPTIONS.AnonymousTest.explanation,
           });
         }
       }

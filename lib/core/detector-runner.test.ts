@@ -51,6 +51,8 @@ describe("DetectorRunner", () => {
       end: { line: 1, column: 5 },
       message: "Smell 1",
       codeBlock: "const",
+      description: "Mock Smell 1",
+      explanation: "Explanation for mock smell 1.",
     };
     const mockSmell2: Smell = {
       file: mockFilePath,
@@ -58,6 +60,8 @@ describe("DetectorRunner", () => {
       end: { line: 2, column: 5 },
       message: "Smell 2",
       codeBlock: "a = 1",
+      description: "Mock Smell 2",
+      explanation: "Explanation for mock smell 2.",
     };
 
     const mockDetector1: Detector = {

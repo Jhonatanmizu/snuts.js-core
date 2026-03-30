@@ -4,6 +4,7 @@ import astService from "@/ast/ast.service";
 import { Detector, Smell } from "@/core/detector.interface";
 import { jestTestAliases } from "@/shared/aliases";
 import { logger } from "@/shared/logger";
+import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 const TEST_CALL_SELECTOR = `CallExpression[callee.name=/${jestTestAliases.join("|")}/]`;
 
@@ -67,6 +68,8 @@ export class DetectorTestWithoutDescriptionLogic implements Detector {
           start: { line: loc?.start.line ?? 0, column: loc?.start.column ?? 0 },
           end: { line: loc?.end.line ?? 0, column: loc?.end.column ?? 0 },
           codeBlock,
+          description: SMELL_DESCRIPTIONS.TestWithoutDescription.description,
+          explanation: SMELL_DESCRIPTIONS.TestWithoutDescription.explanation,
         });
       }
     } catch (err) {

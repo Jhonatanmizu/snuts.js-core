@@ -4,6 +4,7 @@ import { Detector, Smell } from "@/core/detector.interface";
 import { logger } from "@/shared/logger";
 import { jestTestAliases } from "@/shared/aliases";
 import astService from "@/ast/ast.service";
+import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 export class IdenticalDescriptionTestLogicDetector implements Detector {
   async detect(ast: t.File, sourceCode: string, file: string): Promise<Smell[]> {
@@ -34,6 +35,8 @@ export class IdenticalDescriptionTestLogicDetector implements Detector {
               end: { line: endLine, column: loc?.end.column ?? 0 },
               message: `Identical Description test case detected.`,
               codeBlock,
+              description: SMELL_DESCRIPTIONS.IdenticalDescription.description,
+              explanation: SMELL_DESCRIPTIONS.IdenticalDescription.explanation,
             });
           }
           testDescriptionSet.add(testDescription);

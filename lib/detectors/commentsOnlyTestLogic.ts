@@ -4,6 +4,7 @@ import { Detector, Smell } from "@/core/detector.interface";
 import astService from "@/ast/ast.service";
 import { logger } from "@/shared/logger";
 import { jestTestAliases } from "@/shared/aliases";
+import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 export class CommentsOnlyLogicTestDetector implements Detector {
   /**
@@ -36,6 +37,8 @@ export class CommentsOnlyLogicTestDetector implements Detector {
               end: { line: endLine, column: loc?.end.column ?? 0 },
               message: `Test case with only comments or empty body detected.`,
               codeBlock,
+              description: SMELL_DESCRIPTIONS.CommentsOnlyTest.description,
+              explanation: SMELL_DESCRIPTIONS.CommentsOnlyTest.explanation,
             });
           }
         }
