@@ -163,15 +163,19 @@ class AstService {
   }
 
   public countComments(node: t.Node): number {
-    let count = 0;
+    const seen = new Set<number>();
     t.traverse(node, {
       enter(node) {
-        count += (node.leadingComments ?? []).length;
-        count += (node.trailingComments ?? []).length;
-        count += (node.innerComments ?? []).length;
+        for (const comment of [
+          ...(node.leadingComments ?? []),
+          ...(node.trailingComments ?? []),
+          ...(node.innerComments ?? []),
+        ]) {
+          seen.add(comment.start!);
+        }
       },
     });
-    return count;
+    return seen.size;
   }
 
   public isFunction(node: t.Node): boolean {
