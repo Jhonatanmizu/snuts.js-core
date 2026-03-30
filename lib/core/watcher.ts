@@ -107,6 +107,8 @@ export class Watcher {
         location: `${smell.start.line}:${smell.end.line}`,
         message: smell.message,
         code: smell.codeBlock?.trim().slice(0, 200),
+        description: smell.description,
+        explanation: smell.explanation,
       });
     }
   }
