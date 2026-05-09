@@ -4,11 +4,13 @@ import { Detector, Smell } from "@/core/detector.interface";
 import astService from "@/ast/ast.service";
 import { logger } from "@/shared/logger";
 import {
-  COMPLEX_SNAPSHOT_EXTERNAL_ESQUERY_SELECTOR,
-  COMPLEX_SNAPSHOT_INLINE_ESQUERY_SELECTOR,
   COMPLEX_SNAPSHOT_MAX_QUASI_LINE_SPAN,
   UNABLE_TO_EXTRACT_CODE_SNIPPET,
 } from "@/shared/constants";
+import {
+  COMPLEX_SNAPSHOT_EXTERNAL_ESQUERY_SELECTOR,
+  COMPLEX_SNAPSHOT_INLINE_ESQUERY_SELECTOR,
+} from "@/shared/selectors";
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 function isComplexQuasi(quasis: t.TemplateElement[] | undefined): boolean {

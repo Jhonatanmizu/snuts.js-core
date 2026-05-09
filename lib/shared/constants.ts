@@ -61,35 +61,6 @@ const JEST_TEST_ALIAS_NAME_SET = new Set<string>(JEST_TEST_ALIASES);
 const JEST_SUITE_ALIAS_NAME_SET = new Set<string>(JEST_SUITE_ALIASES);
 
 // -----------------------------------------------------------------------------
-// esquery selectors
-// -----------------------------------------------------------------------------
-
-/**
- * Matches `it('…', …)` / `test('…', …)` when the callee is a simple identifier.
- * Does not match `it.each`/`it.concurrent` callee shapes.
- */
-function buildJestTestCalleeEsquerySelector(
-  testRoots: readonly string[] = JEST_TEST_ALIASES,
-): string {
-  return `CallExpression[callee.name=/${testRoots.join("|")}/]`;
-}
-
-const ESQUERY_JEST_TEST_CALLEE_SELECTOR = buildJestTestCalleeEsquerySelector();
-
-function buildJestTestExpressionStatementHasEsquerySelector(): string {
-  return `ExpressionStatement:has(${buildJestTestCalleeEsquerySelector()})`;
-}
-
-const ESQUERY_JEST_TEST_IN_EXPRESSION_STMT_SELECTOR =
-  buildJestTestExpressionStatementHasEsquerySelector();
-
-const COMPLEX_SNAPSHOT_INLINE_ESQUERY_SELECTOR =
-  "ExpressionStatement:has(CallExpression[callee.property.name='toMatchInlineSnapshot'])";
-
-const COMPLEX_SNAPSHOT_EXTERNAL_ESQUERY_SELECTOR =
-  "ExpressionStatement:has(AssignmentExpression[left.type='MemberExpression'][left.property.type='TemplateLiteral'])";
-
-// -----------------------------------------------------------------------------
 // Detector thresholds / tunables (v1-aligned where noted)
 // -----------------------------------------------------------------------------
 
@@ -155,11 +126,6 @@ export {
   FOCUSED_TEST_API_ROOT_NAME_SET,
   JEST_TEST_ALIAS_NAME_SET,
   JEST_SUITE_ALIAS_NAME_SET,
-  buildJestTestCalleeEsquerySelector,
-  ESQUERY_JEST_TEST_CALLEE_SELECTOR,
-  ESQUERY_JEST_TEST_IN_EXPRESSION_STMT_SELECTOR,
-  COMPLEX_SNAPSHOT_INLINE_ESQUERY_SELECTOR,
-  COMPLEX_SNAPSHOT_EXTERNAL_ESQUERY_SELECTOR,
   ANONYMOUS_TEST_MAX_DESCRIPTION_WORD_COUNT,
   VERBOSE_BLOCK_BODY_STATEMENT_THRESHOLD,
   COMPLEX_SNAPSHOT_MAX_QUASI_LINE_SPAN,

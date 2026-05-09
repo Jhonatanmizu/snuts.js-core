@@ -2,11 +2,8 @@ import * as t from "@babel/types";
 
 import astService from "@/ast/ast.service";
 import { Detector, Smell } from "@/core/detector.interface";
-import {
-  ESQUERY_JEST_TEST_CALLEE_SELECTOR,
-  JEST_TEST_ALIAS_NAME_SET,
-  UNABLE_TO_EXTRACT_CODE_SNIPPET,
-} from "@/shared/constants";
+import { JEST_TEST_ALIAS_NAME_SET, UNABLE_TO_EXTRACT_CODE_SNIPPET } from "@/shared/constants";
+import { ESQUERY_JEST_TEST_CALLEE_SELECTOR } from "@/shared/selectors";
 import { logger } from "@/shared/logger";
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 

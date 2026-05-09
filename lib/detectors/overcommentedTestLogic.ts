@@ -2,11 +2,8 @@ import * as t from "@babel/types";
 
 import { Detector, Smell } from "@/core/detector.interface";
 import astService from "@/ast/ast.service";
-import {
-  ESQUERY_JEST_TEST_IN_EXPRESSION_STMT_SELECTOR,
-  MAX_COMMENTS_PER_TEST,
-  UNABLE_TO_EXTRACT_CODE_SNIPPET,
-} from "@/shared/constants";
+import { MAX_COMMENTS_PER_TEST, UNABLE_TO_EXTRACT_CODE_SNIPPET } from "@/shared/constants";
+import { ESQUERY_JEST_TEST_IN_EXPRESSION_STMT_SELECTOR } from "@/shared/selectors";
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 export class OvercommentedTestLogicDetector implements Detector {
