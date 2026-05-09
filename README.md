@@ -82,9 +82,35 @@ npx @snutsjs/core analyze lib/test/mock-test-file.test.ts --format json
 
 ---
 
+## 🧷 Built-in test smell detectors
+
+These ship with the library (see `lib/detectors`). Import them individually or instantiate everything from `import * as detectors from "@snutsjs/core"` (`Object.values(detectors)` gives each constructor). Report entries expose a human-readable **`description`** (`Smell.description`); JSON/CSV also duplicate the detector **`message`** in both **`message`** and **`smellType`**.
+
+| Report `description`     | Exported detector                       | What it catches                                                                                                                              |
+| ------------------------ | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Anonymous Test           | `AnonymousTestLogicDetector`            | Jest-style tests whose description is extremely short (configurable threshold: at most **two words** after trimming).                        |
+| Comments-Only Test       | `CommentsOnlyLogicTestDetector`         | `it` / `test` bodies that are empty or contain only comments, so nothing is asserted.                                                        |
+| Complex Snapshot         | `ComplexSnapshotTestLogicDetector`      | Snapshot matchers whose template spans too many lines (`toMatchInlineSnapshot`, `toMatchSnapshot`), making failures hard to review.          |
+| Conditional Test Logic   | `ConditionalTestLogicDetector`          | Branching (`if`, `switch`, …) inside a test body where separate cases are usually clearer.                                                   |
+| General Fixture          | `GeneralFixtureTestLogicDetector`       | Variables declared in `beforeAll` / `beforeEach` that never appear in test bodies (`after*` hooks intentionally ignored in v1-style parity). |
+| Identical Description    | `IdenticalDescriptionTestLogicDetector` | Duplicate test titles across the file so failures are ambiguous in output.                                                                   |
+| Overcommented Test       | `OvercommentedTestLogicDetector`        | More than **`MAX_COMMENTS_PER_TEST`** (default **5** in `shared/constants.ts`) distinct comment anchors on a single test.                    |
+| Test Without Description | `DetectorTestWithoutDescriptionLogic`   | `it()` / `test()` calls missing a leading string description.                                                                                |
+| Non-Functional Statement | `NonFunctionalStatementDetector`        | Effectively empty blocks with no explanatory comments.                                                                                       |
+| Focused / Isolated Test  | `OnlyTestDetector`                      | `*.only` on `it`, `test`, or `describe` (leftover focused tests).                                                                            |
+| Sensitive Equality       | `SensitiveEqualityDetector`             | Assertions that hinge on brittle string coercion (for example `.toString()` in expectations).                                                |
+| Suboptimal Assertion     | `SubOptimalAssertDetector`              | Assertion shapes that obscure intent vs. idiomatic matchers.                                                                                 |
+| Transcripting Test       | `TranscriptingTestDetector`             | `console.log` / `error` / `warn` / `info` usage inside tests.                                                                                |
+| Verbose Test             | `VerboseTestDetector`                   | Blocks whose body exceeds **13** statements (`VERBOSE_BLOCK_BODY_STATEMENT_THRESHOLD`), suggesting multiple scenarios in one test.           |
+| Assertion in Setup       | `VerifyInSetupDetector`                 | Expectations inside lifecycle hooks (`beforeAll`, `beforeEach`, `afterAll`, `afterEach`).                                                    |
+
+Thresholds such as anonymous word count, comment budget, verbose statement count, and snapshot line span live in **`lib/shared/constants.ts`**. Long-form explanations live in **`lib/shared/smell-descriptions.ts`** (mirrored into each `Smell.explanation` at runtime).
+
+---
+
 ## 📁 Project Structure
 
-````text
+```text
 ├── lib/
 │   ├── ast/                # AST (Abstract Syntax Tree) related services for parsing and querying
 │   │   ├── ast.service.test.ts
@@ -97,19 +123,24 @@ npx @snutsjs/core analyze lib/test/mock-test-file.test.ts --format json
 │   │   └── watcher.ts
 │   ├── detectors/          # Collection of predefined test smell detectors
 │   │   ├── anonymousTestLogic.ts
-│   │   ├── anonymousTestLogic.test.ts
-│   │   ├── commentsOnlyTestLogic.test.ts
 │   │   ├── commentsOnlyTestLogic.ts
-│   │   ├── conditionalTestLogic.test.ts
+│   │   ├── complexSnapshotTestLogic.ts
 │   │   ├── conditionalTestLogic.ts
-│   │   ├── identicalDescriptionTestLogic.test.ts
+│   │   ├── generalFixtureTestLogic.ts
 │   │   ├── identicalDescriptionTestLogic.ts
 │   │   ├── index.ts
-│   │   ├── overcommentedTestLogic.test.ts
-│   │   └── overcommentedTestLogic.ts
+│   │   ├── nonFunctionalStatementLogic.ts
+│   │   ├── onlyTestLogic.ts
+│   │   ├── overcommentedTestLogic.ts
+│   │   ├── sensitiveEqualityLogic.ts
+│   │   ├── subOptimalAssertLogic.ts
+│   │   ├── testWithoutDescriptionLogic.ts
+│   │   ├── transcriptingTestLogic.ts
+│   │   ├── verboseTestLogic.ts
+│   │   ├── verifyInSetupLogic.ts
+│   │   └── *.test.ts      # Detector unit specs (paired with each logic file)
 │   ├── reporter/           # Logic for project analysis and report generation
 │   │   ├── project-analyzer.ts
-│   │   ├── report-generator.ts
 │   │   ├── csv-report-generator.ts
 │   │   ├── json-report-generator.ts
 │   │   └── report.interface.ts
@@ -119,6 +150,8 @@ npx @snutsjs/core analyze lib/test/mock-test-file.test.ts --format json
 │   │   ├── aliases/        # Module aliases configuration
 │   │   │   └── index.ts
 │   │   ├── constants.ts
+│   │   ├── selectors/       # Shared esquery selectors / AST matchers
+│   │   │   └── index.ts
 │   │   ├── logger/         # Logging utility
 │   │   │   └── index.ts
 │   │   └── plugins/        # Plugin system for extensibility
@@ -138,6 +171,7 @@ npx @snutsjs/core analyze lib/test/mock-test-file.test.ts --format json
 ├── tsconfig.json
 ├── tsconfig.test.json
 └── yarn.lock
+```
 
 ---
 
@@ -167,25 +201,33 @@ For seamless integration, the VSCode extension can invoke the CLI command with t
 
 ```bash
 npx @snutsjs/core analyze <path> --format json
-````
+```
 
 The JSON output provides all necessary details (smell type, file path, line numbers, descriptions) to display results within the editor, link to specific code locations, and integrate with other extension features.
 
 ## 📄 Example Outputs
 
-Here are example outputs generated by running the `analyze` command on `lib/test/mock-test-file.test.ts`.
+Here are example outputs from `npx @snutsjs/core analyze lib/test/mock-test-file.test.ts --format json` (paths on your machine will differ). The **`description`** field matches the short labels in **Built-in test smell detectors**; **`smellType`** repeats **`message`** in JSON and CSV exports.
 
 ### JSON Output
 
 ```json
 [
   {
-    "smellType": "AnonymousTestLogic",
-    "filePath": "/home/jhonatanmizu/Developer/snuts.js-core/lib/test/mock-test-file.test.ts",
-    "startLine": 2,
-    "endLine": 5,
-    "message": "AnonymousTestLogic",
-    "description": "Test has anonymous logic. Consider giving this logic a meaningful name and extracting it into a helper function or a separate describe block."
+    "smellType": "Anonymous test case detected.",
+    "filePath": "/home/you/snuts.js-core/lib/test/mock-test-file.test.ts",
+    "startLine": 10,
+    "endLine": 12,
+    "message": "Anonymous test case detected.",
+    "description": "Anonymous Test"
+  },
+  {
+    "smellType": "Test case with only comments or empty body detected.",
+    "filePath": "/home/you/snuts.js-core/lib/test/mock-test-file.test.ts",
+    "startLine": 10,
+    "endLine": 12,
+    "message": "Test case with only comments or empty body detected.",
+    "description": "Comments-Only Test"
   }
 ]
 ```
@@ -194,7 +236,8 @@ Here are example outputs generated by running the `analyze` command on `lib/test
 
 ```csv
 Smell Type,File Path,Start Line,End Line,Message,Description
-"AnonymousTestLogic","/home/jhonatanmizu/Developer/snuts.js-core/lib/test/mock-test-file.test.ts",2,5,"AnonymousTestLogic","Test has anonymous logic. Consider giving this logic a meaningful name and extracting it into a helper function or a separate describe block."
+"Anonymous test case detected.","/home/you/snuts.js-core/lib/test/mock-test-file.test.ts",10,12,"Anonymous test case detected.","Anonymous Test"
+"Test case with only comments or empty body detected.","/home/you/snuts.js-core/lib/test/mock-test-file.test.ts",10,12,"Test case with only comments or empty body detected.","Comments-Only Test"
 ```
 
 ---
