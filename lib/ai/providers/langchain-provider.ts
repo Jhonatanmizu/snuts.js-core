@@ -1,4 +1,5 @@
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { StringOutputParser } from "@langchain/core/output_parsers";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { ChatOpenAI } from "@langchain/openai";
@@ -9,38 +10,17 @@ import {
   ProviderGenerateResponse,
 } from "@/ai/provider.interface";
 
-function contentToString(content: unknown): string {
-  if (typeof content === "string") {
-    return content;
-  }
-
-  if (Array.isArray(content)) {
-    return content
-      .map((item) => {
-        if (typeof item === "string") return item;
-        if (item && typeof item === "object" && "text" in item) {
-          const text = (item as { text?: unknown }).text;
-          return typeof text === "string" ? text : "";
-        }
-        return "";
-      })
-      .join("\n");
-  }
-
-  return "";
-}
-
 export class LangChainProvider implements AIProvider {
   async generate(request: ProviderGenerateRequest): Promise<ProviderGenerateResponse> {
     const model = this.createModel(request);
-    const response = await model.invoke([
+    const chain = model.pipe(new StringOutputParser());
+
+    const content = await chain.invoke([
       new SystemMessage(request.systemPrompt),
       new HumanMessage(request.userPrompt),
     ]);
 
-    return {
-      content: contentToString(response.content),
-    };
+    return { content };
   }
 
   private createModel(request: ProviderGenerateRequest) {
