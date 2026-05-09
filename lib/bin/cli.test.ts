@@ -34,35 +34,31 @@ const {
   readFile: mockFsReadFile,
 } = jest.requireMock("node:fs/promises");
 
-// Mock all detectors to simplify testing the CLI integration
-jest.mock("@/detectors", () => ({
-  AnonymousTestLogicDetector: jest.fn(() => ({
-    detect: jest.fn(async (ast, sourceCode, file) => {
-      if (file.includes("mock-test-file.test.ts")) {
-        return [
-          {
-            file,
-            start: { line: 1, column: 0 },
-            end: { line: 2, column: 0 },
-            message: "AnonymousTestLogic",
-            codeBlock: "",
-            description: "Test has anonymous logic",
-            explanation: "",
-          },
-        ];
-      }
-      return [];
-    }),
-  })),
-  // Mock other detectors if needed, or create a generic mock
-  CommentsOnlyLogicTestDetector: jest.fn(() => ({ detect: jest.fn(async () => []) })),
-  ComplexSnapshotTestLogicDetector: jest.fn(() => ({ detect: jest.fn(async () => []) })),
-  ConditionalTestLogicDetector: jest.fn(() => ({ detect: jest.fn(async () => []) })),
-  GeneralFixtureTestLogicDetector: jest.fn(() => ({ detect: jest.fn(async () => []) })),
-  IdenticalDescriptionTestLogicDetector: jest.fn(() => ({ detect: jest.fn(async () => []) })),
-  OvercommentedTestLogicDetector: jest.fn(() => ({ detect: jest.fn(async () => []) })),
-  DetectorTestWithoutDescriptionLogic: jest.fn(() => ({ detect: jest.fn(async () => []) })),
-}));
+// Override Anonymous detector only; other detectors use real implementations from the package.
+jest.mock("@/detectors", () => {
+  const actual = jest.requireActual("@/detectors") as Record<string, unknown>;
+  return {
+    ...actual,
+    AnonymousTestLogicDetector: jest.fn(() => ({
+      detect: jest.fn(async (ast: unknown, sourceCode: unknown, file: string) => {
+        if (file.includes("mock-test-file.test.ts")) {
+          return [
+            {
+              file,
+              start: { line: 1, column: 0 },
+              end: { line: 2, column: 0 },
+              message: "AnonymousTestLogic",
+              codeBlock: "",
+              description: "Test has anonymous logic",
+              explanation: "",
+            },
+          ];
+        }
+        return [];
+      }),
+    })),
+  };
+});
 
 const mockFilePath = path.resolve(__dirname, "..", "test", "mock-test-file.test.ts");
 

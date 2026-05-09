@@ -133,6 +133,62 @@ class AstService {
     );
   }
 
+  /**
+   * Whether this call is a setup/teardown hook with a function callback (Jest/Jasmine style).
+   */
+  public isSetupHookCall(node: t.CallExpression): boolean {
+    const hookNames = ["beforeEach", "beforeAll", "afterEach", "afterAll"];
+    if (!t.isIdentifier(node.callee) || !hookNames.includes(node.callee.name)) {
+      return false;
+    }
+    return node.arguments.length > 0 && this.isHookCallback(node.arguments[0] as t.Node);
+  }
+
+  /**
+   * Original SNUTS.js treated setup callbacks as classic function or arrow expressions only.
+   */
+  public isHookCallback(node: t.Node): boolean {
+    return t.isArrowFunctionExpression(node) || t.isFunctionExpression(node);
+  }
+
+  /**
+   * Detects assertion-style expressions inside setup/teardown hooks (expect/assert chains).
+   */
+  public isAssertionStatement(node: t.Statement): boolean {
+    if (!t.isExpressionStatement(node)) return false;
+    return this.expressionLooksLikeAssertion(node.expression);
+  }
+
+  private expressionLooksLikeAssertion(expr: t.Expression): boolean {
+    if (!t.isCallExpression(expr)) return false;
+    return this.callExpressionLooksLikeAssertion(expr);
+  }
+
+  private callExpressionLooksLikeAssertion(expr: t.CallExpression): boolean {
+    const { callee } = expr;
+    if (t.isIdentifier(callee)) {
+      return callee.name === "expect";
+    }
+    if (!t.isMemberExpression(callee)) return false;
+
+    if (t.isIdentifier(callee.object) && callee.object.name === "assert") {
+      return t.isIdentifier(callee.property);
+    }
+
+    if (t.isCallExpression(callee.object)) {
+      return this.callExpressionLooksLikeAssertion(callee.object);
+    }
+
+    if (t.isMemberExpression(callee.object)) {
+      const innerObject = callee.object.object;
+      if (t.isCallExpression(innerObject)) {
+        return this.callExpressionLooksLikeAssertion(innerObject);
+      }
+    }
+
+    return false;
+  }
+
   // -----------------------
   // Metadata Extraction
   // -----------------------

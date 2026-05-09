@@ -51,4 +51,46 @@ export const SMELL_DESCRIPTIONS = {
     explanation:
       "A test case with no description at all makes it completely impossible to understand its purpose from the test report. Every test must have a descriptive name that communicates what behavior is being tested, under what conditions, and what the expected result is.",
   },
+
+  NonFunctionalStatement: {
+    description: "Non-Functional Statement",
+    explanation:
+      "An empty block with no explanatory comments usually indicates dead code, an unfinished test, or a mistaken placeholder. Either remove the empty block or document why it intentionally does nothing.",
+  },
+
+  OnlyTest: {
+    description: "Focused / Isolated Test",
+    explanation:
+      "Using `it.only`, `test.only`, or `describe.only` restricts which tests run and is meant for temporary debugging. Shipping focused tests hides failures in the rest of the suite and should not remain in committed code.",
+  },
+
+  SensitiveEquality: {
+    description: "Sensitive Equality",
+    explanation:
+      "Comparing values via `.toString()` (for example `expect(x.toString())`) or comparing expression results that rely on default string conversion is brittle: formatting can change without logical bugs. Prefer stable matchers and explicit expectations.",
+  },
+
+  SubOptimalAssert: {
+    description: "Suboptimal Assertion",
+    explanation:
+      "Some assertion shapes are harder to read or easier to misuse than dedicated matchers—for example checking undefined/null via `toBe` instead of `toBeUndefined`/`toBeNull`, using raw binary expressions inside `expect`, or relying on awkward patterns that obscure intent.",
+  },
+
+  TranscriptingTest: {
+    description: "Transcripting Test",
+    explanation:
+      "Logging to the console from a test (`console.log`, `console.warn`, etc.) clutters CI output and often signals leftover debugging code. Tests should assert behavior instead of printing transcripts.",
+  },
+
+  VerboseTest: {
+    description: "Verbose Test",
+    explanation:
+      "A test body with a very large number of statements is difficult to follow and usually verifies too much at once. Splitting it into smaller, focused tests improves readability and failure diagnostics.",
+  },
+
+  VerifyInSetup: {
+    description: "Assertion in Setup",
+    explanation:
+      "Assertions placed inside lifecycle hooks (such as `beforeEach`) combine setup with verification, making failures harder to trace to a specific test case. Prefer arranging state in hooks and asserting inside individual tests.",
+  },
 } as const satisfies Record<string, SmellDescription>;

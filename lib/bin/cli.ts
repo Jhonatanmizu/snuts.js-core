@@ -7,20 +7,10 @@ import pretty from "pino-pretty";
 import { parseCliArgs, usageText } from "./cli-args";
 
 import { setLogger } from "@/shared/logger";
-import { startWatch } from "@/runtime/watch-runner";
+import { createDetectorInstances, startWatch } from "@/runtime/watch-runner";
 import { ProjectAnalyzer } from "@/reporter/project-analyzer";
 import { CsvReportGenerator } from "@/reporter/csv-report-generator";
 import { JsonReportGenerator } from "@/reporter/json-report-generator";
-import {
-  AnonymousTestLogicDetector,
-  CommentsOnlyLogicTestDetector,
-  ComplexSnapshotTestLogicDetector,
-  ConditionalTestLogicDetector,
-  GeneralFixtureTestLogicDetector,
-  IdenticalDescriptionTestLogicDetector,
-  OvercommentedTestLogicDetector,
-  DetectorTestWithoutDescriptionLogic,
-} from "@/detectors";
 
 function createCliLogger() {
   const stream = pretty({
@@ -77,17 +67,7 @@ export async function runCli(argv: string[]): Promise<number> {
   }
 
   if (parsedCommand.type === "analyze") {
-    const allDetectors = [
-      new AnonymousTestLogicDetector(),
-      new CommentsOnlyLogicTestDetector(),
-      new ComplexSnapshotTestLogicDetector(),
-      new ConditionalTestLogicDetector(),
-      new GeneralFixtureTestLogicDetector(),
-      new IdenticalDescriptionTestLogicDetector(),
-      new OvercommentedTestLogicDetector(),
-      new DetectorTestWithoutDescriptionLogic(),
-    ];
-    const projectAnalyzer = new ProjectAnalyzer(allDetectors);
+    const projectAnalyzer = new ProjectAnalyzer(createDetectorInstances());
     const smells = await projectAnalyzer.analyze(resolvedPaths);
 
     let reportContent: string;

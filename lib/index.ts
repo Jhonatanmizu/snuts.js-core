@@ -1,5 +1,6 @@
 export { Watcher } from "./core/watcher";
 export { DetectorRunner } from "./core/detector-runner";
+export { createDetectorInstances } from "./runtime/watch-runner";
 export type { Detector, Smell } from "./core/detector.interface";
 
 export { setLogger, silentLogger } from "./shared/logger";

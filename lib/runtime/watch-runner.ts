@@ -7,7 +7,9 @@ interface DetectorConstructor {
 }
 
 export function createDetectorInstances(): Detector[] {
-  const detectorEntries = Object.values(detectorModule) as DetectorConstructor[];
+  const detectorEntries = Object.values(detectorModule).filter(
+    (exp): exp is DetectorConstructor => typeof exp === "function",
+  );
   return detectorEntries.map((DetectorClass) => new DetectorClass());
 }
 
