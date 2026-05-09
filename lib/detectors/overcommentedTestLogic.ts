@@ -2,15 +2,20 @@ import * as t from "@babel/types";
 
 import { Detector, Smell } from "@/core/detector.interface";
 import astService from "@/ast/ast.service";
-import { MAX_COMMENTS_PER_TEST } from "@/shared/constants";
+import {
+  ESQUERY_JEST_TEST_IN_EXPRESSION_STMT_SELECTOR,
+  MAX_COMMENTS_PER_TEST,
+  UNABLE_TO_EXTRACT_CODE_SNIPPET,
+} from "@/shared/constants";
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
-import { jestTestAliases } from "@/shared/aliases";
 
 export class OvercommentedTestLogicDetector implements Detector {
   async detect(ast: t.File, sourceCode: string, file: string): Promise<Smell[]> {
     const smells: Smell[] = [];
-    const testCaseSelector = `ExpressionStatement:has(CallExpression[callee.name=/${jestTestAliases.join("|")}/])`;
-    const testStatements = astService.query(ast, testCaseSelector) as t.ExpressionStatement[];
+    const testStatements = astService.query(
+      ast,
+      ESQUERY_JEST_TEST_IN_EXPRESSION_STMT_SELECTOR,
+    ) as t.ExpressionStatement[];
 
     if (!testStatements.length) return [];
 
@@ -31,7 +36,7 @@ export class OvercommentedTestLogicDetector implements Detector {
           message: `Test has too many comments (${commentCount}). The maximum allowed is ${MAX_COMMENTS_PER_TEST}.`,
           codeBlock:
             sourceCode.substring(testStatement.start!, testStatement.end!) ||
-            "// Unable to extract code snippet",
+            UNABLE_TO_EXTRACT_CODE_SNIPPET,
           description: SMELL_DESCRIPTIONS.OvercommentedTest.description,
           explanation: SMELL_DESCRIPTIONS.OvercommentedTest.explanation,
         });

@@ -3,9 +3,8 @@ import * as t from "@babel/types";
 import astService from "@/ast/ast.service";
 import { Detector, Smell } from "@/core/detector.interface";
 import { logger } from "@/shared/logger";
+import { UNABLE_TO_EXTRACT_CODE_SNIPPET } from "@/shared/constants";
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
-
-const UNABLE = "// Unable to extract code snippet";
 
 function isExpectNotBeAssertion(node: t.CallExpression): boolean {
   const { callee } = node;
@@ -97,7 +96,7 @@ export class SubOptimalAssertDetector implements Detector {
       start: { line: loc?.start.line ?? 0, column: loc?.start.column ?? 0 },
       end: { line: loc?.end.line ?? 0, column: loc?.end.column ?? 0 },
       message: "Suboptimal assertion pattern detected.",
-      codeBlock: sourceCode.slice(start, end) || UNABLE,
+      codeBlock: sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET,
       description: SMELL_DESCRIPTIONS.SubOptimalAssert.description,
       explanation: SMELL_DESCRIPTIONS.SubOptimalAssert.explanation,
     };

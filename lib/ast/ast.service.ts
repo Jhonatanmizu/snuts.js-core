@@ -6,7 +6,13 @@ import { parse } from "@babel/parser";
 import esquery from "esquery";
 
 import { logger } from "@/shared/logger";
-import { jestTestAliases, jestSuiteAliases } from "@/shared/aliases";
+import {
+  ASSERT_OBJECT_IDENTIFIER_NAME,
+  EXPECT_CALLEE_IDENTIFIER_NAME,
+  JEST_LIFECYCLE_HOOK_NAME_SET,
+  JEST_SUITE_ALIAS_NAME_SET,
+  JEST_TEST_ALIAS_NAME_SET,
+} from "@/shared/constants";
 import * as astPlugins from "@/shared/plugins";
 
 const { configsFlow, configsTypescript } = astPlugins;
@@ -95,7 +101,7 @@ class AstService {
 
     return (
       !!testName &&
-      jestTestAliases.includes(testName) &&
+      JEST_TEST_ALIAS_NAME_SET.has(testName) &&
       args.length > 1 &&
       t.isStringLiteral(args[0]) &&
       this.isFunction(args[1] as t.Node)
@@ -116,7 +122,7 @@ class AstService {
 
     return (
       !!suiteName &&
-      jestSuiteAliases.includes(suiteName) &&
+      JEST_SUITE_ALIAS_NAME_SET.has(suiteName) &&
       args.length > 1 &&
       t.isStringLiteral(args[0]) &&
       this.isFunction(args[1] as t.Node)
@@ -124,12 +130,11 @@ class AstService {
   }
 
   public isHook(node: t.Node): boolean {
-    const hookNames = ["beforeAll", "beforeEach", "afterAll", "afterEach"];
     return (
       t.isExpressionStatement(node) &&
       t.isCallExpression(node.expression) &&
       t.isIdentifier(node.expression.callee) &&
-      hookNames.includes(node.expression.callee.name)
+      JEST_LIFECYCLE_HOOK_NAME_SET.has(node.expression.callee.name)
     );
   }
 
@@ -137,8 +142,7 @@ class AstService {
    * Whether this call is a setup/teardown hook with a function callback (Jest/Jasmine style).
    */
   public isSetupHookCall(node: t.CallExpression): boolean {
-    const hookNames = ["beforeEach", "beforeAll", "afterEach", "afterAll"];
-    if (!t.isIdentifier(node.callee) || !hookNames.includes(node.callee.name)) {
+    if (!t.isIdentifier(node.callee) || !JEST_LIFECYCLE_HOOK_NAME_SET.has(node.callee.name)) {
       return false;
     }
     return node.arguments.length > 0 && this.isHookCallback(node.arguments[0] as t.Node);
@@ -167,11 +171,11 @@ class AstService {
   private callExpressionLooksLikeAssertion(expr: t.CallExpression): boolean {
     const { callee } = expr;
     if (t.isIdentifier(callee)) {
-      return callee.name === "expect";
+      return callee.name === EXPECT_CALLEE_IDENTIFIER_NAME;
     }
     if (!t.isMemberExpression(callee)) return false;
 
-    if (t.isIdentifier(callee.object) && callee.object.name === "assert") {
+    if (t.isIdentifier(callee.object) && callee.object.name === ASSERT_OBJECT_IDENTIFIER_NAME) {
       return t.isIdentifier(callee.property);
     }
 

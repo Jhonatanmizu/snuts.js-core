@@ -2,11 +2,13 @@ import * as t from "@babel/types";
 
 import astService from "@/ast/ast.service";
 import { Detector, Smell } from "@/core/detector.interface";
-import { jestTestAliases } from "@/shared/aliases";
+import {
+  ESQUERY_JEST_TEST_CALLEE_SELECTOR,
+  JEST_TEST_ALIAS_NAME_SET,
+  UNABLE_TO_EXTRACT_CODE_SNIPPET,
+} from "@/shared/constants";
 import { logger } from "@/shared/logger";
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
-
-const TEST_CALL_SELECTOR = `CallExpression[callee.name=/${jestTestAliases.join("|")}/]`;
 
 const extractTestName = (callee: t.Expression | t.V8IntrinsicIdentifier): string | null => {
   if (t.isIdentifier(callee)) {
@@ -39,11 +41,14 @@ export class DetectorTestWithoutDescriptionLogic implements Detector {
   async detect(ast: t.File, sourceCode: string, file: string): Promise<Smell[]> {
     const smells: Smell[] = [];
     try {
-      const callExpressionNodes = astService.query(ast, TEST_CALL_SELECTOR) as t.CallExpression[];
+      const callExpressionNodes = astService.query(
+        ast,
+        ESQUERY_JEST_TEST_CALLEE_SELECTOR,
+      ) as t.CallExpression[];
 
       for (const callExpressionNode of callExpressionNodes) {
         const testName = extractTestName(callExpressionNode.callee);
-        if (!testName || !jestTestAliases.includes(testName)) {
+        if (!testName || !JEST_TEST_ALIAS_NAME_SET.has(testName)) {
           continue;
         }
 
@@ -60,7 +65,7 @@ export class DetectorTestWithoutDescriptionLogic implements Detector {
         const end = callExpressionNode.end ?? start;
         const loc = callExpressionNode.loc;
 
-        const codeBlock = sourceCode.slice(start, end) || "// Unable to extract code snippet";
+        const codeBlock = sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET;
 
         smells.push({
           file,

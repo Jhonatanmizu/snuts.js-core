@@ -3,7 +3,10 @@ import * as t from "@babel/types";
 import { Detector, Smell } from "@/core/detector.interface";
 import astService from "@/ast/ast.service";
 import { logger } from "@/shared/logger";
-import { jestTestAliases } from "@/shared/aliases";
+import {
+  ESQUERY_JEST_TEST_CALLEE_SELECTOR,
+  UNABLE_TO_EXTRACT_CODE_SNIPPET,
+} from "@/shared/constants";
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 export class ConditionalTestLogicDetector implements Detector {
@@ -14,9 +17,8 @@ export class ConditionalTestLogicDetector implements Detector {
     const smells: Smell[] = [];
 
     try {
-      const testCaseSelector = `CallExpression[callee.name=/${jestTestAliases.join("|")}/]`;
-      const ifSelector = `${testCaseSelector} IfStatement`;
-      const switchSelector = `${testCaseSelector} SwitchStatement`;
+      const ifSelector = `${ESQUERY_JEST_TEST_CALLEE_SELECTOR} IfStatement`;
+      const switchSelector = `${ESQUERY_JEST_TEST_CALLEE_SELECTOR} SwitchStatement`;
 
       const ifNodes = astService.query(ast, ifSelector) as t.IfStatement[];
       const switchNodes = astService.query(ast, switchSelector) as t.SwitchStatement[];
@@ -29,7 +31,7 @@ export class ConditionalTestLogicDetector implements Detector {
         const startLine = loc?.start.line ?? 0;
         const endLine = loc?.end.line ?? 0;
 
-        const codeBlock = sourceCode.slice(start, end) || "// Unable to extract code snippet";
+        const codeBlock = sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET;
 
         smells.push({
           file,

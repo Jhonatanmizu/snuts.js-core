@@ -3,6 +3,10 @@ import * as t from "@babel/types";
 import astService from "@/ast/ast.service";
 import { Detector, Smell } from "@/core/detector.interface";
 import { logger } from "@/shared/logger";
+import {
+  GENERAL_FIXTURE_SETUP_HOOK_NAME_SET,
+  UNABLE_TO_EXTRACT_CODE_SNIPPET,
+} from "@/shared/constants";
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 interface SetupVariableOccurrence {
@@ -13,9 +17,6 @@ interface SetupVariableOccurrence {
   sourceStart: number;
   sourceEnd: number;
 }
-
-const SETUP_HOOKS = new Set(["beforeAll", "beforeEach"]);
-const UNABLE_TO_EXTRACT_SNIPPET = "// Unable to extract code snippet";
 
 export class GeneralFixtureTestLogicDetector implements Detector {
   async detect(ast: t.File, sourceCode: string, file: string): Promise<Smell[]> {
@@ -57,7 +58,7 @@ export class GeneralFixtureTestLogicDetector implements Detector {
         for (const occurrence of occurrences) {
           const codeBlock =
             sourceCode.slice(occurrence.sourceStart, occurrence.sourceEnd) ||
-            UNABLE_TO_EXTRACT_SNIPPET;
+            UNABLE_TO_EXTRACT_CODE_SNIPPET;
 
           smells.push({
             file,
@@ -80,7 +81,8 @@ export class GeneralFixtureTestLogicDetector implements Detector {
 
 function isSetupHookCall(callExpressionNode: t.CallExpression): boolean {
   return (
-    t.isIdentifier(callExpressionNode.callee) && SETUP_HOOKS.has(callExpressionNode.callee.name)
+    t.isIdentifier(callExpressionNode.callee) &&
+    GENERAL_FIXTURE_SETUP_HOOK_NAME_SET.has(callExpressionNode.callee.name)
   );
 }
 

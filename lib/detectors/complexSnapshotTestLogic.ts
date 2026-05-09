@@ -3,20 +3,18 @@ import * as t from "@babel/types";
 import { Detector, Smell } from "@/core/detector.interface";
 import astService from "@/ast/ast.service";
 import { logger } from "@/shared/logger";
+import {
+  COMPLEX_SNAPSHOT_EXTERNAL_ESQUERY_SELECTOR,
+  COMPLEX_SNAPSHOT_INLINE_ESQUERY_SELECTOR,
+  COMPLEX_SNAPSHOT_MAX_QUASI_LINE_SPAN,
+  UNABLE_TO_EXTRACT_CODE_SNIPPET,
+} from "@/shared/constants";
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
-
-const MAX_LINES_IN_SNAPSHOT = 50;
-
-const INLINE_SNAPSHOT_SELECTOR =
-  "ExpressionStatement:has(CallExpression[callee.property.name='toMatchInlineSnapshot'])";
-
-const EXTERNAL_SNAPSHOT_SELECTOR =
-  "ExpressionStatement:has(AssignmentExpression[left.type='MemberExpression'][left.property.type='TemplateLiteral'])";
 
 function isComplexQuasi(quasis: t.TemplateElement[] | undefined): boolean {
   const quasi = quasis?.[0];
   if (!quasi?.loc) return false;
-  return quasi.loc.end.line - quasi.loc.start.line > MAX_LINES_IN_SNAPSHOT;
+  return quasi.loc.end.line - quasi.loc.start.line > COMPLEX_SNAPSHOT_MAX_QUASI_LINE_SPAN;
 }
 
 function buildSmell(
@@ -29,9 +27,8 @@ function buildSmell(
     file,
     start: { line: node.loc?.start.line ?? 0, column: node.loc?.start.column ?? 0 },
     end: { line: node.loc?.end.line ?? 0, column: node.loc?.end.column ?? 0 },
-    message: `Complex ${kind} snapshot detected: snapshot exceeds ${MAX_LINES_IN_SNAPSHOT} lines. Consider simplifying the tested output or breaking it into smaller assertions.`,
-    codeBlock:
-      sourceCode.slice(node.start ?? 0, node.end ?? 0) || "// Unable to extract code snippet",
+    message: `Complex ${kind} snapshot detected: snapshot exceeds ${COMPLEX_SNAPSHOT_MAX_QUASI_LINE_SPAN} lines. Consider simplifying the tested output or breaking it into smaller assertions.`,
+    codeBlock: sourceCode.slice(node.start ?? 0, node.end ?? 0) || UNABLE_TO_EXTRACT_CODE_SNIPPET,
     description: SMELL_DESCRIPTIONS.ComplexSnapshotTest.description,
     explanation: SMELL_DESCRIPTIONS.ComplexSnapshotTest.explanation,
   };
@@ -44,11 +41,11 @@ export class ComplexSnapshotTestLogicDetector implements Detector {
     try {
       const inlineNodes = astService.query(
         ast,
-        INLINE_SNAPSHOT_SELECTOR,
+        COMPLEX_SNAPSHOT_INLINE_ESQUERY_SELECTOR,
       ) as t.ExpressionStatement[];
       const externalNodes = astService.query(
         ast,
-        EXTERNAL_SNAPSHOT_SELECTOR,
+        COMPLEX_SNAPSHOT_EXTERNAL_ESQUERY_SELECTOR,
       ) as t.ExpressionStatement[];
 
       for (const node of inlineNodes) {

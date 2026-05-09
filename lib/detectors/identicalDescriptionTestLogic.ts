@@ -2,7 +2,10 @@ import * as t from "@babel/types";
 
 import { Detector, Smell } from "@/core/detector.interface";
 import { logger } from "@/shared/logger";
-import { jestTestAliases } from "@/shared/aliases";
+import {
+  ESQUERY_JEST_TEST_CALLEE_SELECTOR,
+  UNABLE_TO_EXTRACT_CODE_SNIPPET,
+} from "@/shared/constants";
 import astService from "@/ast/ast.service";
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
@@ -11,8 +14,10 @@ export class IdenticalDescriptionTestLogicDetector implements Detector {
     const smells: Smell[] = [];
 
     try {
-      const testCaseSelector = `CallExpression[callee.name=/${jestTestAliases.join("|")}/]`;
-      const testCaseNodes = astService.query(ast, testCaseSelector) as t.CallExpression[];
+      const testCaseNodes = astService.query(
+        ast,
+        ESQUERY_JEST_TEST_CALLEE_SELECTOR,
+      ) as t.CallExpression[];
       const testDescriptionSet = new Set<string>();
       for (const node of testCaseNodes) {
         if (node.arguments.length > 0 && t.isStringLiteral(node.arguments[0])) {
@@ -27,7 +32,7 @@ export class IdenticalDescriptionTestLogicDetector implements Detector {
             const startLine = loc?.start.line ?? 0;
             const endLine = loc?.end.line ?? 0;
 
-            const codeBlock = sourceCode.slice(start, end) || "// Unable to extract code snippet";
+            const codeBlock = sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET;
 
             smells.push({
               file,

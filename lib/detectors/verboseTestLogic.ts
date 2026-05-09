@@ -3,12 +3,11 @@ import * as t from "@babel/types";
 import astService from "@/ast/ast.service";
 import { Detector, Smell } from "@/core/detector.interface";
 import { logger } from "@/shared/logger";
+import {
+  UNABLE_TO_EXTRACT_CODE_SNIPPET,
+  VERBOSE_BLOCK_BODY_STATEMENT_THRESHOLD,
+} from "@/shared/constants";
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
-
-const UNABLE = "// Unable to extract code snippet";
-
-/** Same threshold as SNUTS.js v1 `verboseTest.js`. */
-const VERBOSE_STATEMENT_THRESHOLD = 13;
 
 export class VerboseTestDetector implements Detector {
   async detect(ast: t.File, sourceCode: string, file: string): Promise<Smell[]> {
@@ -18,7 +17,7 @@ export class VerboseTestDetector implements Detector {
       const blocks = astService.query(ast, "BlockStatement") as t.BlockStatement[];
 
       for (const block of blocks) {
-        if (block.body.length <= VERBOSE_STATEMENT_THRESHOLD) continue;
+        if (block.body.length <= VERBOSE_BLOCK_BODY_STATEMENT_THRESHOLD) continue;
 
         const loc = block.loc;
         const start = block.start ?? 0;
@@ -28,8 +27,8 @@ export class VerboseTestDetector implements Detector {
           file,
           start: { line: loc?.start.line ?? 0, column: loc?.start.column ?? 0 },
           end: { line: loc?.end.line ?? 0, column: loc?.end.column ?? 0 },
-          message: `Verbose block detected (${block.body.length} statements; threshold ${VERBOSE_STATEMENT_THRESHOLD}).`,
-          codeBlock: sourceCode.slice(start, end) || UNABLE,
+          message: `Verbose block detected (${block.body.length} statements; threshold ${VERBOSE_BLOCK_BODY_STATEMENT_THRESHOLD}).`,
+          codeBlock: sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET,
           description: SMELL_DESCRIPTIONS.VerboseTest.description,
           explanation: SMELL_DESCRIPTIONS.VerboseTest.explanation,
         });
