@@ -17,6 +17,10 @@ const TEST_FILE_PATTERNS = [
   "**/*test_*.ts",
   "**/*test-*.ts",
   "**/*Spec*.ts",
+  "**/*.test.jsx",
+  "**/*.spec.jsx",
+  "**/*.test.tsx",
+  "**/*.spec.tsx",
 ];
 
 /** Over-commented detector: counts distinct comment positions tied to the test AST node */
