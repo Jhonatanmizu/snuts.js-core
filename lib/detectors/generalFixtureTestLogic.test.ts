@@ -173,7 +173,8 @@ describe("GeneralFixtureTestLogicDetector", () => {
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
 
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe(
       'General fixture detected: setup variable "unusedFixture" is never used in test cases.',
     );
@@ -202,6 +203,29 @@ describe("GeneralFixtureTestLogicDetector", () => {
       'General fixture detected: setup variable "fixtureValue" is never used in test cases.',
     );
     expect(smells[0]?.codeBlock).toContain("fixtureValue");
+  });
+
+  it("should not flag afterEach assignment used in test body", async () => {
+    // afterEach is NOT in GENERAL_FIXTURE_SETUP_HOOK_NAMES (["beforeAll", "beforeEach"]),
+    // so assignments inside afterEach are never collected as setup variables.
+    // The detector therefore produces zero smells even though the variable is "unused"
+    // from a setup perspective — it simply isn't tracked at all.
+    const code = `
+      describe('suite', () => {
+        afterEach(() => {
+          teardownValue = buildFixture();
+        });
+
+        it('references teardown variable', () => {
+          expect(teardownValue).toBeDefined();
+        });
+      });
+    `;
+
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 
   it("should not count non-test callback references as usage", async () => {

@@ -32,8 +32,36 @@ describe("VerifyInSetupDetector", () => {
     `;
     const ast = astService.parseToAst(code, filePath);
     const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+    expect(smells[0]?.message).toContain("setup/teardown");
+  });
 
-    expect(smells).toHaveLength(1);
+  it("detects expect() inside beforeAll", async () => {
+    const code = `
+      beforeAll(() => {
+        expect(db.isConnected()).toBe(true);
+      });
+      it('x', () => { expect(1).toBe(1); });
+    `;
+    const ast = astService.parseToAst(code, filePath);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+    expect(smells[0]?.message).toContain("setup/teardown");
+  });
+
+  it("detects expect() inside afterEach", async () => {
+    const code = `
+      afterEach(() => {
+        expect(cleanup()).toBe(true);
+      });
+      it('x', () => { expect(1).toBe(1); });
+    `;
+    const ast = astService.parseToAst(code, filePath);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toContain("setup/teardown");
   });
 
@@ -47,7 +75,24 @@ describe("VerifyInSetupDetector", () => {
     `;
     const ast = astService.parseToAst(code, filePath);
     const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+  });
 
-    expect(smells).toHaveLength(0);
+  it("mixed hooks only one smell", async () => {
+    const code = `
+      let result;
+      beforeEach(() => {
+        expect(setup()).toBe(true);
+      });
+      afterAll(() => {
+        result = null;
+      });
+      it('x', () => { expect(1).toBe(1); });
+    `;
+    const ast = astService.parseToAst(code, filePath);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 });

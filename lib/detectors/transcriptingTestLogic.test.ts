@@ -23,29 +23,91 @@ describe("TranscriptingTestDetector", () => {
     (logger.error as jest.Mock).mockClear();
   });
 
-  it("detects console.log inside a test body", async () => {
+  it("detects console.log inside test body", async () => {
     const code = `
-      it('logs', () => {
+      it('logs something', () => {
         console.log('debug');
         expect(1).toBe(1);
       });
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toContain("Console output");
   });
 
-  it("allows tests without console usage", async () => {
+  it("detects console.error inside test body", async () => {
     const code = `
-      it('clean', () => {
+      it('errors something', () => {
+        console.error('something went wrong');
         expect(1).toBe(1);
       });
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+    expect(smells[0]?.message).toContain("Console output");
+  });
 
-    expect(smells).toHaveLength(0);
+  it("detects console.warn inside test body", async () => {
+    const code = `
+      it('warns about something', () => {
+        console.warn('watch out');
+        expect(1).toBe(1);
+      });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+    expect(smells[0]?.message).toContain("Console output");
+  });
+
+  it("flags test case once with multiple console calls", async () => {
+    // The detector uses Array.some — it flags the test case once regardless of how many console calls exist
+    const code = `
+      it('multiple console calls', () => {
+        console.log('first');
+        console.error('second');
+        expect(1).toBe(1);
+      });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+    expect(smells[0]?.message).toContain("Console output");
+  });
+
+  it("allows tests without console usage", async () => {
+    const code = `
+      it('clean test case', () => {
+        expect(1).toBe(1);
+      });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+  });
+
+  it("detects only console test in mixed snippet", async () => {
+    const code = `
+      it('uses console log', () => {
+        console.log('debug info');
+        expect(1).toBe(1);
+      });
+
+      it('clean test case', () => {
+        expect(2).toBe(2);
+      });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+    expect(smells[0]?.message).toContain("Console output");
   });
 });

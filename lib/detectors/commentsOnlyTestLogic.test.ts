@@ -70,4 +70,19 @@ describe("CommentsOnlyLogicTestDetector", () => {
     const expectedNumberOfSmells = 0;
     expect(smells).toHaveLength(expectedNumberOfSmells);
   });
+
+  it("should detect only comments-only test in mixed snippet", async () => {
+    const code = `
+      test('clean test with assertion', () => {
+        expect(1).toBe(1);
+      });
+      test('smelly test with only comment', () => {
+        // This is just a comment
+      });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, "test.js");
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+  });
 });

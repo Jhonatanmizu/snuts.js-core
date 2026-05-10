@@ -23,18 +23,18 @@ describe("NonFunctionalStatementDetector", () => {
     (logger.error as jest.Mock).mockClear();
   });
 
-  it("reports an empty block without comments", async () => {
+  it("reports empty block without comments", async () => {
     const code = `
       function unused() {}
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells.length).toBeGreaterThanOrEqual(1);
-    expect(smells[0]?.message).toContain("Empty block");
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+    expect(smells[0]?.message).toBe("Empty block without explanatory comments detected.");
   });
 
-  it("does not report an empty block that has a leading comment", async () => {
+  it("does not report empty block with inner comment", async () => {
     const code = `
       function unused() {
         /* intentional */
@@ -42,8 +42,20 @@ describe("NonFunctionalStatementDetector", () => {
     `;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+  });
 
-    const emptyWithoutComment = smells.filter((s) => s.codeBlock === "{}");
-    expect(emptyWithoutComment).toHaveLength(0);
+  it("mixed blocks one commented one not", async () => {
+    const code = `
+      function withComment() {
+        /* intentional */
+      }
+      function withoutComment() {}
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 });
