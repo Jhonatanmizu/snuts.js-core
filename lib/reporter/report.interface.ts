@@ -1,4 +1,4 @@
-import { Smell } from "@/core/detector.interface";
+import { Smell, SmellSeverity } from "@/core/detector.interface";
 
 export interface ReportEntry {
   smellType: string;
@@ -7,6 +7,7 @@ export interface ReportEntry {
   endLine: number;
   message: string;
   description: string;
+  severity: SmellSeverity;
 }
 
 export interface ReportGenerator {

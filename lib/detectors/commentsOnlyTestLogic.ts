@@ -42,6 +42,7 @@ export class CommentsOnlyLogicTestDetector implements Detector {
               codeBlock,
               description: SMELL_DESCRIPTIONS.CommentsOnlyTest.description,
               explanation: SMELL_DESCRIPTIONS.CommentsOnlyTest.explanation,
+              severity: SMELL_DESCRIPTIONS.CommentsOnlyTest.severity,
             });
           }
         }

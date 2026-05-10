@@ -6,9 +6,13 @@ import { Detector, Smell } from "@/core/detector.interface";
 import { DetectorRunner } from "@/core/detector-runner";
 import { logger } from "@/shared/logger";
 import { TEST_FILE_PATTERNS } from "@/shared/constants";
+import { SnutsConfig } from "@/config/snuts-config";
 
 export class ProjectAnalyzer {
-  constructor(private detectors: Detector[]) {}
+  constructor(
+    private detectors: Detector[],
+    private config?: SnutsConfig,
+  ) {}
 
   async analyze(paths: string[]): Promise<Smell[]> {
     const allSmells: Smell[] = [];
@@ -29,9 +33,9 @@ export class ProjectAnalyzer {
 
     logger.info(`Found ${filesToAnalyze.length} files to analyze.`);
 
+    const detectorRunner = new DetectorRunner(this.detectors);
     for (const file of filesToAnalyze) {
       logger.debug(`Analyzing file: ${file}`);
-      const detectorRunner = new DetectorRunner(this.detectors);
       const smells = await detectorRunner.run(file);
       allSmells.push(...smells);
     }

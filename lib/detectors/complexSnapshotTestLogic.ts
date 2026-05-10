@@ -33,6 +33,7 @@ function buildSmell(
     codeBlock: sourceCode.slice(node.start ?? 0, node.end ?? 0) || UNABLE_TO_EXTRACT_CODE_SNIPPET,
     description: SMELL_DESCRIPTIONS.ComplexSnapshotTest.description,
     explanation: SMELL_DESCRIPTIONS.ComplexSnapshotTest.explanation,
+    severity: SMELL_DESCRIPTIONS.ComplexSnapshotTest.severity,
   };
 }
 

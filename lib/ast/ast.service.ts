@@ -22,12 +22,25 @@ export interface ParsedFile {
   code: string;
 }
 
-class AstService {
+export class AstService {
+  private readonly cache = new Map<string, ParsedFile>();
+
   /**
    * Parse a given file path into an AST + source code.
    * Detects parser config based on file extension.
+   * Uses an mtime-keyed in-memory cache to avoid re-reading unchanged files.
    */
   public async parseFileToAst(filePath: string): Promise<ParsedFile | null> {
+    let cacheKey: string | null = null;
+    try {
+      const stats = await fs.stat(filePath);
+      cacheKey = `${filePath}::${stats.mtimeMs}`;
+      const cached = this.cache.get(cacheKey);
+      if (cached) return cached;
+    } catch {
+      // stat failed — skip caching, parse normally
+    }
+
     try {
       const code = await fs.readFile(filePath, "utf-8");
       if (!code.trim()) {
@@ -36,7 +49,9 @@ class AstService {
       }
 
       const ast = this.parseToAst(code, filePath);
-      return { ast, code };
+      const result: ParsedFile = { ast, code };
+      if (cacheKey) this.cache.set(cacheKey, result);
+      return result;
     } catch (err) {
       logger.error({ err, file: filePath }, "Failed to parse file into AST");
       return null;

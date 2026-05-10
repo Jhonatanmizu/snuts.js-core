@@ -53,6 +53,7 @@ describe("DetectorRunner", () => {
       codeBlock: "const",
       description: "Mock Smell 1",
       explanation: "Explanation for mock smell 1.",
+      severity: "low",
     };
     const mockSmell2: Smell = {
       file: mockFilePath,
@@ -62,6 +63,7 @@ describe("DetectorRunner", () => {
       codeBlock: "a = 1",
       description: "Mock Smell 2",
       explanation: "Explanation for mock smell 2.",
+      severity: "low",
     };
 
     const mockDetector1: Detector = {

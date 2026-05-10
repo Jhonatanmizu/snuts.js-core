@@ -68,6 +68,7 @@ export class GeneralFixtureTestLogicDetector implements Detector {
             codeBlock,
             description: SMELL_DESCRIPTIONS.GeneralFixture.description,
             explanation: SMELL_DESCRIPTIONS.GeneralFixture.explanation,
+            severity: SMELL_DESCRIPTIONS.GeneralFixture.severity,
           });
         }
       }

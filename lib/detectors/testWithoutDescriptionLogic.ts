@@ -72,6 +72,7 @@ export class DetectorTestWithoutDescriptionLogic implements Detector {
           codeBlock,
           description: SMELL_DESCRIPTIONS.TestWithoutDescription.description,
           explanation: SMELL_DESCRIPTIONS.TestWithoutDescription.explanation,
+          severity: SMELL_DESCRIPTIONS.TestWithoutDescription.severity,
         });
       }
     } catch (err) {

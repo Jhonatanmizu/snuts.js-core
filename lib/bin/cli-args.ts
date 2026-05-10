@@ -15,6 +15,9 @@ export type ParsedCommand =
       paths: string[];
       format: ReportFormat;
       output?: string;
+      config?: string; // --config <path>
+      watch?: boolean; // --watch
+      smells?: string[]; // --smell <type> (repeatable)
     }
   | {
       type: "refactor";
@@ -68,6 +71,9 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
     const paths: string[] = [];
     let format: ReportFormat | undefined;
     let output: string | undefined;
+    let config: string | undefined;
+    let watch: boolean | undefined;
+    const smells: string[] = [];
 
     for (let i = 0; i < rest.length; i++) {
       const arg = rest[i] ?? "";
@@ -82,6 +88,20 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
           return { type: "error", message: "Missing value for --output." };
         }
         output = rest[i + 1];
+        i++;
+      } else if (arg === "--config") {
+        if (i + 1 >= rest.length) {
+          return { type: "error", message: "Missing value for --config." };
+        }
+        config = rest[i + 1];
+        i++;
+      } else if (arg === "--watch") {
+        watch = true;
+      } else if (arg === "--smell") {
+        if (i + 1 >= rest.length) {
+          return { type: "error", message: "Missing value for --smell." };
+        }
+        smells.push(rest[i + 1]!);
         i++;
       } else {
         paths.push(arg!);
@@ -107,6 +127,9 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
       paths: paths.length > 0 ? paths : ["."],
       format,
       output,
+      config,
+      watch,
+      smells: smells.length > 0 ? smells : undefined,
     };
   }
 

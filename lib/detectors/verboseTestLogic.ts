@@ -31,6 +31,7 @@ export class VerboseTestDetector implements Detector {
           codeBlock: sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET,
           description: SMELL_DESCRIPTIONS.VerboseTest.description,
           explanation: SMELL_DESCRIPTIONS.VerboseTest.explanation,
+          severity: SMELL_DESCRIPTIONS.VerboseTest.severity,
         });
       }
     } catch (err) {

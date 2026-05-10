@@ -39,14 +39,17 @@ describe("CsvReportGenerator", () => {
         codeBlock: "",
         description: "Test has anonymous logic",
         explanation: "",
+        severity: "low" as const,
       },
     ];
     const generator = new CsvReportGenerator();
     const report = generator.generate(smells);
 
-    expect(report).toContain("Smell Type,File Path,Start Line,End Line,Message,Description");
     expect(report).toContain(
-      `"AnonymousTestLogic","${mockFilePath}",1,2,"AnonymousTestLogic","Test has anonymous logic"`,
+      "Smell Type,File Path,Start Line,End Line,Message,Description,Severity",
+    );
+    expect(report).toContain(
+      `"AnonymousTestLogic","${mockFilePath}",1,2,"AnonymousTestLogic","Test has anonymous logic","low"`,
     );
   });
 });
@@ -62,6 +65,7 @@ describe("JsonReportGenerator", () => {
         codeBlock: "",
         description: "Test has anonymous logic",
         explanation: "",
+        severity: "low" as const,
       },
     ];
     const generator = new JsonReportGenerator();
@@ -72,5 +76,6 @@ describe("JsonReportGenerator", () => {
     expect(parsedReport.length).toBe(1);
     expect(parsedReport[0]).toHaveProperty("filePath", mockFilePath);
     expect(parsedReport[0]).toHaveProperty("smellType", "AnonymousTestLogic");
+    expect(parsedReport[0]).toHaveProperty("severity", "low");
   });
 });

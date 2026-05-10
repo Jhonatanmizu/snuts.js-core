@@ -127,6 +127,9 @@ describe("parseCliArgs", () => {
       paths: ["."],
       format: "json",
       output: undefined,
+      config: undefined,
+      watch: undefined,
+      smells: undefined,
     });
   });
 
@@ -136,6 +139,9 @@ describe("parseCliArgs", () => {
       paths: ["src"],
       format: "csv",
       output: "report.csv",
+      config: undefined,
+      watch: undefined,
+      smells: undefined,
     });
   });
 
@@ -150,6 +156,81 @@ describe("parseCliArgs", () => {
     expect(parseCliArgs(["analyze", ".", "--format", "xml"])).toEqual({
       type: "error",
       message: "Invalid report format: xml. Supported formats are csv and json.",
+    });
+  });
+
+  it("parses analyze command with --config flag", () => {
+    expect(
+      parseCliArgs(["analyze", ".", "--format", "json", "--config", "snuts.config.json"]),
+    ).toEqual({
+      type: "analyze",
+      paths: ["."],
+      format: "json",
+      output: undefined,
+      config: "snuts.config.json",
+      watch: undefined,
+      smells: undefined,
+    });
+  });
+
+  it("returns an error if --config is missing its value", () => {
+    expect(parseCliArgs(["analyze", ".", "--format", "json", "--config"])).toEqual({
+      type: "error",
+      message: "Missing value for --config.",
+    });
+  });
+
+  it("parses --watch flag on analyze command", () => {
+    expect(parseCliArgs(["analyze", ".", "--format", "json", "--watch"])).toEqual({
+      type: "analyze",
+      paths: ["."],
+      format: "json",
+      output: undefined,
+      config: undefined,
+      watch: true,
+      smells: undefined,
+    });
+  });
+
+  it("parses single --smell flag on analyze command", () => {
+    expect(parseCliArgs(["analyze", ".", "--format", "json", "--smell", "OnlyTest"])).toEqual({
+      type: "analyze",
+      paths: ["."],
+      format: "json",
+      output: undefined,
+      config: undefined,
+      watch: undefined,
+      smells: ["OnlyTest"],
+    });
+  });
+
+  it("parses multiple --smell flags on analyze command", () => {
+    expect(
+      parseCliArgs([
+        "analyze",
+        ".",
+        "--format",
+        "json",
+        "--smell",
+        "OnlyTest",
+        "--smell",
+        "VerboseTest",
+      ]),
+    ).toEqual({
+      type: "analyze",
+      paths: ["."],
+      format: "json",
+      output: undefined,
+      config: undefined,
+      watch: undefined,
+      smells: ["OnlyTest", "VerboseTest"],
+    });
+  });
+
+  it("returns an error if --smell is missing its value", () => {
+    expect(parseCliArgs(["analyze", ".", "--format", "json", "--smell"])).toEqual({
+      type: "error",
+      message: "Missing value for --smell.",
     });
   });
 
@@ -263,6 +344,9 @@ describe("runCli", () => {
     expect(exitCode).toBe(0);
     expect(mockRefactorFile).toHaveBeenCalledTimes(1);
     expect(spyStdout).toHaveBeenCalled();
-    expect(spyStdout.mock.calls.at(-1)?.[0]).toContain("Summary: Refactor summary");
+    // In preview+text mode, output is a unified diff (--- a/ +++ b/ headers)
+    const output = spyStdout.mock.calls.at(-1)?.[0] as string;
+    expect(output).toContain("--- a/");
+    expect(output).toContain("+++ b/");
   });
 });
