@@ -32,14 +32,10 @@ export class AstService {
    */
   public async parseFileToAst(filePath: string): Promise<ParsedFile | null> {
     let cacheKey: string | null = null;
-    try {
-      const stats = await fs.stat(filePath);
-      cacheKey = `${filePath}::${stats.mtimeMs}`;
-      const cached = this.cache.get(cacheKey);
-      if (cached) return cached;
-    } catch {
-      // stat failed — skip caching, parse normally
-    }
+    const stats = await fs.stat(filePath);
+    cacheKey = `${filePath}::${stats.mtimeMs}`;
+    const cached = this.cache.get(cacheKey);
+    if (cached) return cached;
 
     try {
       const code = await fs.readFile(filePath, "utf-8");
