@@ -170,6 +170,7 @@ describe("Watcher", () => {
       codeBlock: "if (true) {}",
       description: "Mock Smell",
       explanation: "Explanation for mock smell.",
+      severity: "low",
     };
     const mockRun = jest.fn<() => Promise<Smell[]>>().mockResolvedValue([mockSmell]);
     (DetectorRunner as jest.Mock).mockImplementation(() => ({

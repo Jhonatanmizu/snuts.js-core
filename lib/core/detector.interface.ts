@@ -1,5 +1,7 @@
 import * as t from "@babel/types";
 
+export type SmellSeverity = "low" | "medium" | "high";
+
 export interface Smell {
   file: string;
   start: {
@@ -14,6 +16,7 @@ export interface Smell {
   codeBlock: string;
   description: string;
   explanation: string;
+  severity: SmellSeverity;
 }
 
 export interface Detector {

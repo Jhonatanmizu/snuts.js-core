@@ -1,12 +1,20 @@
 import { AnonymousTestLogicDetector } from "./anonymousTestLogic";
 
 import astService from "@/ast/ast.service";
+import { logger } from "@/shared/logger";
+import { ANONYMOUS_TEST_MAX_DESCRIPTION_WORD_COUNT } from "@/shared/constants";
+
+jest.mock("@/shared/logger", () => ({
+  __esModule: true,
+  logger: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
+}));
 
 describe("AnonymousTestLogicDetector", () => {
-  let detector: AnonymousTestLogicDetector;
+  const detector = new AnonymousTestLogicDetector();
+  const filePath = "test.js";
 
   beforeEach(() => {
-    detector = new AnonymousTestLogicDetector();
+    (logger.error as jest.Mock).mockClear();
   });
 
   it("should detect a test with an empty description", async () => {
@@ -16,7 +24,7 @@ describe("AnonymousTestLogicDetector", () => {
       });
     `;
     const ast = astService.parseToAst(code);
-    const smells = await detector.detect(ast, code, "test.js");
+    const smells = await detector.detect(ast, code, filePath);
     const expectedNumberOfSmells = 1;
     expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Anonymous test case detected.");
@@ -29,7 +37,7 @@ describe("AnonymousTestLogicDetector", () => {
       });
     `;
     const ast = astService.parseToAst(code);
-    const smells = await detector.detect(ast, code, "test.js");
+    const smells = await detector.detect(ast, code, filePath);
     const expectedNumberOfSmells = 1;
     expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Anonymous test case detected.");
@@ -42,7 +50,7 @@ describe("AnonymousTestLogicDetector", () => {
       });
     `;
     const ast = astService.parseToAst(code);
-    const smells = await detector.detect(ast, code, "test.js");
+    const smells = await detector.detect(ast, code, filePath);
     const expectedNumberOfSmells = 1;
     expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toBe("Anonymous test case detected.");
@@ -55,7 +63,7 @@ describe("AnonymousTestLogicDetector", () => {
       });
     `;
     const ast = astService.parseToAst(code);
-    const smells = await detector.detect(ast, code, "test.js");
+    const smells = await detector.detect(ast, code, filePath);
     const expectedNumberOfSmells = 0;
     expect(smells).toHaveLength(expectedNumberOfSmells);
   });
@@ -77,8 +85,44 @@ describe("AnonymousTestLogicDetector", () => {
       });
     `;
     const ast = astService.parseToAst(code);
-    const smells = await detector.detect(ast, code, "test.js");
+    const smells = await detector.detect(ast, code, filePath);
     const expectedNumberOfSmells = 2;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+  });
+
+  it("flags description at exact word count boundary", async () => {
+    // Build a description with exactly ANONYMOUS_TEST_MAX_DESCRIPTION_WORD_COUNT words
+    const words = Array.from(
+      { length: ANONYMOUS_TEST_MAX_DESCRIPTION_WORD_COUNT },
+      (_, i) => `word${i}`,
+    );
+    const description = words.join(" ");
+    const code = `
+      it('${description}', () => {
+        expect(1).toBe(1);
+      });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+  });
+
+  it("does not flag description one word above boundary", async () => {
+    // Build a description with exactly ANONYMOUS_TEST_MAX_DESCRIPTION_WORD_COUNT + 1 words
+    const words = Array.from(
+      { length: ANONYMOUS_TEST_MAX_DESCRIPTION_WORD_COUNT + 1 },
+      (_, i) => `word${i}`,
+    );
+    const description = words.join(" ");
+    const code = `
+      it('${description}', () => {
+        expect(1).toBe(1);
+      });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 0;
     expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 });

@@ -80,6 +80,47 @@ Analyze a specific file and output a JSON report to `stdout`:
 npx @snutsjs/core analyze lib/test/mock-test-file.test.ts --format json
 ```
 
+### `refactor` command (AI-assisted)
+
+Run AI-powered refactoring for a single test file using LangChain-backed providers.
+
+```bash
+npx @snutsjs/core refactor <file> --provider <provider> [--model <model>] [--apply] [--format <text|json>] [--output <file>]
+```
+
+- `<file>`: Target file to refactor.
+- `--provider`: Required. One of `openai`, `google`, `anthropic`, `deepseek`, `kimi`.
+- `--model`: Optional model override. If omitted, SNUTS uses a provider-specific default.
+- `--apply`: Optional. When omitted, command runs in preview mode and does not write to the source file.
+- `--format`: Optional output format (`text` or `json`, default: `text`).
+- `--output <file>`: Optional file path to save the command result.
+- `--smell <description>`: Optional smell description filter to focus refactoring context.
+- `--temperature <number>` and `--max-tokens <number>`: Optional LLM tuning options.
+
+Examples:
+
+```bash
+npx @snutsjs/core refactor lib/test/mock-test-file.test.ts --provider openai
+npx @snutsjs/core refactor lib/test/mock-test-file.test.ts --provider anthropic --apply --format json
+```
+
+### AI provider configuration
+
+You can pass an API key via `--api-key`, or configure environment variables:
+
+- OpenAI: `OPENAI_API_KEY`
+- Google: `GOOGLE_API_KEY` (or `GOOGLE_GENERATIVE_AI_API_KEY`)
+- Anthropic: `ANTHROPIC_API_KEY`
+- DeepSeek: `DEEPSEEK_API_KEY` (`DEEPSEEK_BASE_URL` optional)
+- Kimi: `KIMI_API_KEY` (or `MOONSHOT_API_KEY`, `KIMI_BASE_URL` optional)
+
+Optional shared defaults:
+
+- `SNUTS_AI_PROVIDER`
+- `SNUTS_AI_MODEL`
+- `SNUTS_AI_TEMPERATURE`
+- `SNUTS_AI_MAX_TOKENS`
+
 ---
 
 ## 🧷 Built-in test smell detectors

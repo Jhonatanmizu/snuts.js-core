@@ -40,6 +40,7 @@ export class IdenticalDescriptionTestLogicDetector implements Detector {
               codeBlock,
               description: SMELL_DESCRIPTIONS.IdenticalDescription.description,
               explanation: SMELL_DESCRIPTIONS.IdenticalDescription.explanation,
+              severity: SMELL_DESCRIPTIONS.IdenticalDescription.severity,
             });
           }
           testDescriptionSet.add(testDescription);

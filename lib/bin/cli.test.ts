@@ -62,6 +62,35 @@ jest.mock("@/detectors", () => {
 
 const mockFilePath = path.resolve(__dirname, "..", "test", "mock-test-file.test.ts");
 
+const mockRefactorFile = jest.fn(async () => ({
+  file: mockFilePath,
+  apply: false,
+  summary: "Refactor summary",
+  smells: [],
+  patch: { summary: "Refactor summary", edits: [] },
+  diagnostics: {
+    smellsDetected: 0,
+    smellsUsedInPrompt: 0,
+    provider: "openai",
+    model: "gpt-4.1-mini",
+  },
+  updatedContent: "const x = 1;",
+}));
+
+jest.mock("@/ai", () => ({
+  resolveAIConfig: jest.fn((input: { provider: string; model?: string; apiKey?: string }) => ({
+    provider: input.provider,
+    model: input.model ?? "gpt-4.1-mini",
+    apiKey: input.apiKey ?? "test-key",
+    temperature: 0.1,
+    maxTokens: 1400,
+  })),
+  LangChainProviderRegistry: jest.fn(),
+  RefactorService: jest.fn(() => ({
+    refactorFile: mockRefactorFile,
+  })),
+}));
+
 describe("parseCliArgs", () => {
   it("returns help when no arguments are provided", () => {
     expect(parseCliArgs([])).toEqual({ type: "help" });
@@ -98,6 +127,9 @@ describe("parseCliArgs", () => {
       paths: ["."],
       format: "json",
       output: undefined,
+      config: undefined,
+      watch: undefined,
+      smells: undefined,
     });
   });
 
@@ -107,6 +139,9 @@ describe("parseCliArgs", () => {
       paths: ["src"],
       format: "csv",
       output: "report.csv",
+      config: undefined,
+      watch: undefined,
+      smells: undefined,
     });
   });
 
@@ -123,6 +158,125 @@ describe("parseCliArgs", () => {
       message: "Invalid report format: xml. Supported formats are csv and json.",
     });
   });
+
+  it("parses analyze command with --config flag", () => {
+    expect(
+      parseCliArgs(["analyze", ".", "--format", "json", "--config", "snuts.config.json"]),
+    ).toEqual({
+      type: "analyze",
+      paths: ["."],
+      format: "json",
+      output: undefined,
+      config: "snuts.config.json",
+      watch: undefined,
+      smells: undefined,
+    });
+  });
+
+  it("returns an error if --config is missing its value", () => {
+    expect(parseCliArgs(["analyze", ".", "--format", "json", "--config"])).toEqual({
+      type: "error",
+      message: "Missing value for --config.",
+    });
+  });
+
+  it("parses --watch flag on analyze command", () => {
+    expect(parseCliArgs(["analyze", ".", "--format", "json", "--watch"])).toEqual({
+      type: "analyze",
+      paths: ["."],
+      format: "json",
+      output: undefined,
+      config: undefined,
+      watch: true,
+      smells: undefined,
+    });
+  });
+
+  it("parses single --smell flag on analyze command", () => {
+    expect(parseCliArgs(["analyze", ".", "--format", "json", "--smell", "OnlyTest"])).toEqual({
+      type: "analyze",
+      paths: ["."],
+      format: "json",
+      output: undefined,
+      config: undefined,
+      watch: undefined,
+      smells: ["OnlyTest"],
+    });
+  });
+
+  it("parses multiple --smell flags on analyze command", () => {
+    expect(
+      parseCliArgs([
+        "analyze",
+        ".",
+        "--format",
+        "json",
+        "--smell",
+        "OnlyTest",
+        "--smell",
+        "VerboseTest",
+      ]),
+    ).toEqual({
+      type: "analyze",
+      paths: ["."],
+      format: "json",
+      output: undefined,
+      config: undefined,
+      watch: undefined,
+      smells: ["OnlyTest", "VerboseTest"],
+    });
+  });
+
+  it("returns an error if --smell is missing its value", () => {
+    expect(parseCliArgs(["analyze", ".", "--format", "json", "--smell"])).toEqual({
+      type: "error",
+      message: "Missing value for --smell.",
+    });
+  });
+
+  it("parses refactor command in preview mode", () => {
+    expect(parseCliArgs(["refactor", "src/sample.test.ts", "--provider", "openai"])).toEqual({
+      type: "refactor",
+      file: "src/sample.test.ts",
+      provider: "openai",
+      model: undefined,
+      apiKey: undefined,
+      apply: false,
+      output: undefined,
+      format: "text",
+      smellDescriptionFilter: undefined,
+      temperature: undefined,
+      maxTokens: undefined,
+    });
+  });
+
+  it("parses refactor command in apply mode with json output", () => {
+    expect(
+      parseCliArgs([
+        "refactor",
+        "src/sample.test.ts",
+        "--provider",
+        "google",
+        "--model",
+        "gemini-2.0-flash",
+        "--format",
+        "json",
+        "--apply",
+      ]),
+    ).toEqual({
+      type: "refactor",
+      file: "src/sample.test.ts",
+      provider: "google",
+      model: "gemini-2.0-flash",
+      apiKey: undefined,
+      apply: true,
+      output: undefined,
+      format: "json",
+      smellDescriptionFilter: undefined,
+      temperature: undefined,
+      maxTokens: undefined,
+    });
+  });
 });
 
 describe("runCli", () => {
@@ -135,6 +289,7 @@ describe("runCli", () => {
     mockFsWriteFile.mockClear();
     mockFsStat.mockClear();
     mockFsReadFile.mockClear();
+    mockRefactorFile.mockClear();
   });
 
   afterAll(() => {
@@ -181,5 +336,17 @@ describe("runCli", () => {
     expect(writtenContent as string).toContain(
       `"AnonymousTestLogic","${mockFilePath}",1,2,"AnonymousTestLogic","Test has anonymous logic"`,
     );
+  });
+
+  it("should run refactor command and output result to stdout", async () => {
+    const exitCode = await runCli(["refactor", mockFilePath, "--provider", "openai"]);
+
+    expect(exitCode).toBe(0);
+    expect(mockRefactorFile).toHaveBeenCalledTimes(1);
+    expect(spyStdout).toHaveBeenCalled();
+    // In preview+text mode, output is a unified diff (--- a/ +++ b/ headers)
+    const output = spyStdout.mock.calls.at(-1)?.[0] as string;
+    expect(output).toContain("--- a/");
+    expect(output).toContain("+++ b/");
   });
 });

@@ -13,3 +13,5 @@ export { JsonReportGenerator } from "./reporter/json-report-generator";
 
 export * from "./detectors";
 export * as detectors from "./detectors";
+
+export * from "./ai";

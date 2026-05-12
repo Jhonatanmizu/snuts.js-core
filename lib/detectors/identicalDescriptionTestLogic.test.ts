@@ -101,4 +101,42 @@ describe("IdenticalDescriptionTestLogic", () => {
     const expectedNumberOfSmells = 2;
     expect(smells).toHaveLength(expectedNumberOfSmells);
   });
+
+  it("should detect duplicate description across sibling describe blocks", async () => {
+    const code = `
+        describe("firstBlock", () => {
+            test("sharedDescription", () => {
+                expect(true).toBeTruthy();
+            });
+        });
+        describe("secondBlock", () => {
+            test("sharedDescription", () => {
+                expect(true).toBeTruthy();
+            });
+        });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+  });
+
+  it("should not flag unique descriptions across nested describe blocks", async () => {
+    const code = `
+        describe("outerBlock", () => {
+            test("outerTestCase", () => {
+                expect(true).toBeTruthy();
+            });
+            describe("innerBlock", () => {
+                test("innerTestCase", () => {
+                    expect(true).toBeTruthy();
+                });
+            });
+        });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+  });
 });

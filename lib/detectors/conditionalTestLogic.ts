@@ -39,6 +39,7 @@ export class ConditionalTestLogicDetector implements Detector {
           codeBlock,
           description: SMELL_DESCRIPTIONS.ConditionalTestLogic.description,
           explanation: SMELL_DESCRIPTIONS.ConditionalTestLogic.explanation,
+          severity: SMELL_DESCRIPTIONS.ConditionalTestLogic.severity,
         });
       }
     } catch (err) {

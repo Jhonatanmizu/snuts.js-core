@@ -27,31 +27,25 @@ export class DetectorRunner {
       return [];
     }
 
-    const allResults: Smell[][] = [];
-
-    for (const detector of this.detectors) {
-      const detectorName = detector.constructor?.name ?? "AnonymousDetector";
-      const startTime = performance.now();
-
-      try {
-        const result = await detector.detect(ast, sourceCode, file);
-
-        if (Array.isArray(result)) {
-          allResults.push(result);
-        } else if (result) {
-          logger.warn(
-            { file, detector: detectorName },
-            "Detector returned non-array result; skipping",
+    const results = await Promise.all(
+      this.detectors.map(async (detector) => {
+        const name = detector.constructor?.name ?? "AnonymousDetector";
+        const t0 = performance.now();
+        try {
+          const result = await detector.detect(ast, sourceCode, file);
+          return Array.isArray(result) ? result : [];
+        } catch (err) {
+          logger.error({ err, file, detector: name }, "Error running detector");
+          return [];
+        } finally {
+          logger.debug(
+            { file, detector: name, elapsedMs: (performance.now() - t0).toFixed(1) },
+            "Detector completed",
           );
         }
-      } catch (err) {
-        logger.error({ err, file, detector: detectorName }, "Error running detector");
-      } finally {
-        const elapsed = (performance.now() - startTime).toFixed(1);
-        logger.debug({ file, detector: detectorName, elapsedMs: elapsed }, "Detector completed");
-      }
-    }
+      }),
+    );
 
-    return allResults.flat();
+    return results.flat();
   }
 }

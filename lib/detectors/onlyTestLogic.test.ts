@@ -23,20 +23,50 @@ describe("OnlyTestDetector", () => {
     (logger.error as jest.Mock).mockClear();
   });
 
-  it("detects it.only", async () => {
+  it("detects it.only focused test", async () => {
     const code = `it.only('focused', () => { expect(1).toBe(1); });`;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
-
-    expect(smells).toHaveLength(1);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
     expect(smells[0]?.message).toContain("it.only");
   });
 
-  it("does not flag a normal it()", async () => {
-    const code = `it('normal', () => { expect(1).toBe(1); });`;
+  it("detects test.only focused test", async () => {
+    const code = `test.only('focused test', () => { expect(2).toBe(2); });`;
     const ast = astService.parseToAst(code);
     const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+    expect(smells[0]?.message).toContain("test.only");
+  });
 
-    expect(smells).toHaveLength(0);
+  it("detects describe.only focused block", async () => {
+    const code = `describe.only('focused suite', () => { it('inner', () => { expect(1).toBe(1); }); });`;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 1;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+    expect(smells[0]?.message).toContain("describe.only");
+  });
+
+  it("does not flag normal it()", async () => {
+    const code = `it('normal test', () => { expect(1).toBe(1); });`;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 0;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
+  });
+
+  it("counts only focused tests in mixed snippet", async () => {
+    const code = `
+      it.only('focused it', () => { expect(1).toBe(1); });
+      test.only('focused test', () => { expect(2).toBe(2); });
+      it('clean test', () => { expect(3).toBe(3); });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedNumberOfSmells = 2;
+    expect(smells).toHaveLength(expectedNumberOfSmells);
   });
 });

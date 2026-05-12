@@ -36,6 +36,7 @@ export class OvercommentedTestLogicDetector implements Detector {
             UNABLE_TO_EXTRACT_CODE_SNIPPET,
           description: SMELL_DESCRIPTIONS.OvercommentedTest.description,
           explanation: SMELL_DESCRIPTIONS.OvercommentedTest.explanation,
+          severity: SMELL_DESCRIPTIONS.OvercommentedTest.severity,
         });
       }
     }
