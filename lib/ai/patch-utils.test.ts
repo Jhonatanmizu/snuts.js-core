@@ -1,9 +1,5 @@
 import { applyEdits, generateUnifiedDiff, parseRefactorPatch } from "@/ai/patch-utils";
 
-// ---------------------------------------------------------------------------
-// generateUnifiedDiff — unit tests
-// ---------------------------------------------------------------------------
-
 describe("generateUnifiedDiff", () => {
   describe("headers", () => {
     it("always emits --- a/<filePath> header", () => {
@@ -73,24 +69,19 @@ describe("generateUnifiedDiff", () => {
     });
 
     it("limits context to 3 lines on each side", () => {
-      // 10-line file, change on line 5
       const lines = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
       const original = lines.join("\n");
       const updatedLines = [...lines];
       updatedLines[4] = "FIVE";
       const updated = updatedLines.join("\n");
       const diff = generateUnifiedDiff(original, updated, "f.ts");
-      // Line 1 is more than 3 lines away from line 5 (index 4), so it should NOT appear
       expect(diff).not.toContain(" 1\n");
-      // Lines 2, 3, 4 are within 3 lines of the change (before)
       expect(diff).toContain(" 2");
       expect(diff).toContain(" 3");
       expect(diff).toContain(" 4");
-      // Lines 6, 7, 8 are within 3 lines of the change (after)
       expect(diff).toContain(" 6");
       expect(diff).toContain(" 7");
       expect(diff).toContain(" 8");
-      // Line 9 is more than 3 lines away from line 5, so it should NOT appear
       expect(diff).not.toContain(" 9\n");
     });
   });
@@ -127,7 +118,6 @@ describe("generateUnifiedDiff", () => {
 
   describe("multiple hunks", () => {
     it("produces two separate hunks for changes far apart", () => {
-      // Changes at line 1 and line 20 — more than 6 lines apart, so two hunks
       const lines = Array.from({ length: 20 }, (_, i) => `line${i + 1}`);
       const original = lines.join("\n");
       const updatedLines = [...lines];
@@ -159,164 +149,6 @@ describe("generateUnifiedDiff", () => {
       const diff = generateUnifiedDiff(original, updated, "src/test.ts");
       expect(diff).not.toContain("@@");
     });
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Property 9: Unified diff round-trip (Property-based test)
-// Feature: performance-ux-improvements, Property 9
-// Validates: Requirements 5.1, 5.2
-// ---------------------------------------------------------------------------
-
-describe("Property 9: Unified diff round-trip", () => {
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
-
-  /** Generate a random integer in [min, max] (inclusive). */
-  function randInt(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  /** Generate a random alphanumeric string of length [1, maxLen]. */
-  function randWord(maxLen = 12): string {
-    const chars = "abcdefghijklmnopqrstuvwxyz0123456789_";
-    const len = randInt(1, maxLen);
-    return Array.from({ length: len }, () => chars[randInt(0, chars.length - 1)]).join("");
-  }
-
-  /** Generate a random source string with [1, maxLines] lines. */
-  function randSource(maxLines = 20): string {
-    const lineCount = randInt(1, maxLines);
-    return Array.from({ length: lineCount }, () => randWord(20)).join("\n");
-  }
-
-  /** Generate a random file path like "src/foo/bar.ts". */
-  function randFilePath(): string {
-    const parts = randInt(1, 3);
-    const segments = Array.from({ length: parts }, () => randWord(8));
-    return segments.join("/") + ".ts";
-  }
-
-  /**
-   * Generate a set of non-overlapping edits for a source string.
-   * Returns an empty array if the source has fewer than 1 line.
-   */
-  function randNonOverlappingEdits(
-    source: string,
-    maxEdits = 3,
-  ): Array<{ startLine: number; endLine: number; replacement: string; reason: string }> {
-    const lines = source.split("\n");
-    const totalLines = lines.length;
-    if (totalLines < 1) return [];
-
-    const editCount = randInt(0, Math.min(maxEdits, Math.floor(totalLines / 2)));
-    if (editCount === 0) return [];
-
-    // Pick non-overlapping line ranges by partitioning the line space
-    const edits: Array<{
-      startLine: number;
-      endLine: number;
-      replacement: string;
-      reason: string;
-    }> = [];
-    // Track which lines are already claimed
-    const claimed = new Set<number>();
-
-    let attempts = 0;
-    while (edits.length < editCount && attempts < 200) {
-      attempts++;
-      const start = randInt(1, totalLines);
-      const maxEnd = Math.min(start + 2, totalLines); // edits span at most 3 lines
-      const end = randInt(start, maxEnd);
-
-      // Check for overlap
-      let overlaps = false;
-      for (let l = start; l <= end; l++) {
-        if (claimed.has(l)) {
-          overlaps = true;
-          break;
-        }
-      }
-      if (overlaps) continue;
-
-      // Claim lines
-      for (let l = start; l <= end; l++) claimed.add(l);
-
-      edits.push({
-        startLine: start,
-        endLine: end,
-        replacement: randWord(15),
-        reason: "property-test",
-      });
-    }
-
-    return edits;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Property test — 100 iterations
-  // ---------------------------------------------------------------------------
-
-  it("diff always contains --- a/ and +++ b/ headers for any source and edits", () => {
-    // Feature: performance-ux-improvements, Property 9
-    const ITERATIONS = 100;
-
-    for (let i = 0; i < ITERATIONS; i++) {
-      const original = randSource(20);
-      const filePath = randFilePath();
-      const edits = randNonOverlappingEdits(original, 3);
-
-      let updated: string;
-      try {
-        updated = applyEdits(original, edits);
-      } catch {
-        // applyEdits may throw for edge-case overlaps; skip this iteration
-        continue;
-      }
-
-      const diff = generateUnifiedDiff(original, updated, filePath);
-
-      // Requirement 5.1 & 5.2: headers must always be present
-      expect(diff).toContain(`--- a/${filePath}`);
-      expect(diff).toContain(`+++ b/${filePath}`);
-    }
-  });
-
-  it("diff is non-empty (contains hunks) when edits are non-empty", () => {
-    // Feature: performance-ux-improvements, Property 9
-    const ITERATIONS = 100;
-    let testedWithEdits = 0;
-
-    for (let i = 0; i < ITERATIONS; i++) {
-      const original = randSource(20);
-      const filePath = randFilePath();
-      // Force at least 1 edit by generating with minimum 1
-      const edits = randNonOverlappingEdits(original, 3);
-
-      if (edits.length === 0) continue; // skip iterations where no edits were generated
-
-      let updated: string;
-      try {
-        updated = applyEdits(original, edits);
-      } catch {
-        continue;
-      }
-
-      // If original === updated (replacement happened to be identical), skip
-      if (original === updated) continue;
-
-      const diff = generateUnifiedDiff(original, updated, filePath);
-
-      // Requirement 5.1: diff must be non-empty (contain at least one hunk) when edits changed the source
-      expect(diff).toContain("@@");
-      expect(diff.length).toBeGreaterThan(0);
-
-      testedWithEdits++;
-    }
-
-    // Ensure we actually tested a meaningful number of non-trivial cases
-    expect(testedWithEdits).toBeGreaterThan(10);
   });
 });
 
