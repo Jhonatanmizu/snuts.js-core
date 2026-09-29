@@ -15,9 +15,9 @@ export type ParsedCommand =
       paths: string[];
       format: ReportFormat;
       output?: string;
-      config?: string; // --config <path>
-      watch?: boolean; // --watch
-      smells?: string[]; // --smell <type> (repeatable)
+      config?: string;
+      watch?: boolean;
+      smells?: string[];
     }
   | {
       type: "refactor";

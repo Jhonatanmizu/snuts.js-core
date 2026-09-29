@@ -24,8 +24,6 @@ export class CommentsOnlyLogicTestDetector implements Detector {
         if (node.arguments.length > 1 && t.isArrowFunctionExpression(node.arguments[1])) {
           const body = node.arguments[1].body;
           if (t.isBlockStatement(body) && body.body.length === 0) {
-            // This checks for an empty block statement, e.g., test('name', () => {})
-            // Or a block statement with only comments.
             const start = node.start ?? 0;
             const end = node.end ?? start;
             const loc = node.loc;

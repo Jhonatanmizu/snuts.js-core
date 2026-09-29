@@ -4,7 +4,6 @@ import { loadSnutsConfig } from "./snuts-config";
 
 import { setLogger, silentLogger } from "@/shared/logger";
 
-// Silence library logs by default; individual tests override when needed
 beforeAll(() => {
   setLogger(silentLogger);
 });
@@ -18,10 +17,6 @@ describe("loadSnutsConfig", () => {
     jest.restoreAllMocks();
   });
 
-  // -------------------------------------------------------------------------
-  // Test: valid JSON file returns typed SnutsConfig
-  // Requirements: 6.4
-  // -------------------------------------------------------------------------
   it("returns a typed SnutsConfig when the file contains valid JSON", () => {
     const config = {
       thresholds: {
@@ -56,10 +51,6 @@ describe("loadSnutsConfig", () => {
     expect(result.thresholds).toBeUndefined();
   });
 
-  // -------------------------------------------------------------------------
-  // Test: missing file throws with descriptive message
-  // Requirements: 6.5
-  // -------------------------------------------------------------------------
   it("throws a descriptive error when the file does not exist", () => {
     const configPath = "/nonexistent/snuts.config.json";
     const fsError = new Error("ENOENT: no such file or directory");
@@ -103,10 +94,6 @@ describe("loadSnutsConfig", () => {
     expect(thrownError?.message).toContain(configPath);
   });
 
-  // -------------------------------------------------------------------------
-  // Test: invalid JSON throws with parse error message
-  // Requirements: 6.5
-  // -------------------------------------------------------------------------
   it("throws a descriptive error when the file contains invalid JSON", () => {
     const configPath = "/some/path/snuts.config.json";
 
@@ -142,10 +129,6 @@ describe("loadSnutsConfig", () => {
     expect(() => loadSnutsConfig(configPath)).toThrow(/Failed to parse config file/);
   });
 
-  // -------------------------------------------------------------------------
-  // Test: unknown smell key logs a warning and does not throw
-  // Requirements: 6.6
-  // -------------------------------------------------------------------------
   it("does not throw when thresholds contain an unknown smell key", () => {
     const config = {
       thresholds: {
@@ -180,7 +163,6 @@ describe("loadSnutsConfig", () => {
 
     expect(warnMock).toHaveBeenCalledTimes(2);
 
-    // Restore silent logger after this test
     setLogger(silentLogger);
   });
 
@@ -205,7 +187,6 @@ describe("loadSnutsConfig", () => {
     loadSnutsConfig("/some/path/snuts.config.json");
 
     const warnCall = warnMock.mock.calls[0];
-    // The logger.warn is called with (obj, msg) — check either the obj or the message
     const callArgs = warnCall.flat().join(" ");
     expect(callArgs).toContain(unknownKey);
 

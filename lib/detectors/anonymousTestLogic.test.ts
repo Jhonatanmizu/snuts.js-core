@@ -91,7 +91,6 @@ describe("AnonymousTestLogicDetector", () => {
   });
 
   it("flags description at exact word count boundary", async () => {
-    // Build a description with exactly ANONYMOUS_TEST_MAX_DESCRIPTION_WORD_COUNT words
     const words = Array.from(
       { length: ANONYMOUS_TEST_MAX_DESCRIPTION_WORD_COUNT },
       (_, i) => `word${i}`,
@@ -109,7 +108,6 @@ describe("AnonymousTestLogicDetector", () => {
   });
 
   it("does not flag description one word above boundary", async () => {
-    // Build a description with exactly ANONYMOUS_TEST_MAX_DESCRIPTION_WORD_COUNT + 1 words
     const words = Array.from(
       { length: ANONYMOUS_TEST_MAX_DESCRIPTION_WORD_COUNT + 1 },
       (_, i) => `word${i}`,

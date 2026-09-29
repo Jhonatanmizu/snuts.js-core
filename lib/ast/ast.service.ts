@@ -91,12 +91,8 @@ export class AstService {
    * Query the AST using esquery.
    */
   public query(ast: t.Node, selector: string): t.Node[] {
-    return esquery(ast as any, selector) as t.Node[];
+    return esquery(ast as unknown as Parameters<typeof esquery>[0], selector) as t.Node[];
   }
-
-  // -----------------------
-  // Test / Suite Detection
-  // -----------------------
 
   public isTestCase(node: t.Node): boolean {
     if (!t.isCallExpression(node)) return false;
@@ -204,11 +200,7 @@ export class AstService {
     return false;
   }
 
-  // -----------------------
-  // Metadata Extraction
-  // -----------------------
-
-  public testInfo(node: t.CallExpression) {
+  public testInfo(node: t.CallExpression): { name: string } | null {
     if (!this.isTestCase(node)) return null;
 
     const args = node.arguments;
@@ -216,13 +208,8 @@ export class AstService {
 
     return {
       name,
-      // TODO: Add back hasAssert, itCount, describeCount
     };
   }
-
-  // -----------------------
-  // Misc Helpers
-  // -----------------------
 
   public hasManyComments(node: t.Node, maxComments: number): boolean {
     const comments = [

@@ -66,7 +66,6 @@ describe("TranscriptingTestDetector", () => {
   });
 
   it("flags test case once with multiple console calls", async () => {
-    // The detector uses Array.some — it flags the test case once regardless of how many console calls exist
     const code = `
       it('multiple console calls', () => {
         console.log('first');

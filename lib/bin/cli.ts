@@ -75,7 +75,6 @@ export async function runCli(argv: string[]): Promise<number> {
       path.resolve(cwd, targetPath),
     );
 
-    // Task 8.3: Load --config if provided
     let snutsConfig: SnutsConfig | undefined;
     if (parsedCommand.config) {
       try {
@@ -86,17 +85,14 @@ export async function runCli(argv: string[]): Promise<number> {
       }
     }
 
-    // Task 9.2: Delegate to watch mode if --watch
     if (parsedCommand.watch) {
       await startWatch(resolvedPaths);
       return 0;
     }
 
-    // Task 8.3: Pass snutsConfig to ProjectAnalyzer
     const projectAnalyzer = new ProjectAnalyzer(createDetectorInstances(), snutsConfig);
     let smells = await projectAnalyzer.analyze(resolvedPaths);
 
-    // Task 9.2: Apply --smell post-analysis filter
     if (parsedCommand.smells && parsedCommand.smells.length > 0) {
       const knownTypes = new Set(Object.keys(SMELL_DESCRIPTIONS));
       for (const s of parsedCommand.smells) {
@@ -139,13 +135,12 @@ export async function runCli(argv: string[]): Promise<number> {
 
     const resolvedFile = path.resolve(process.cwd(), parsedCommand.file);
 
-    // Task 7.2: Read original source before refactoring for diff generation in preview+text mode
     let originalSource: string | undefined;
     if (!parsedCommand.apply && parsedCommand.format === "text") {
       try {
         originalSource = await readFile(resolvedFile, "utf8");
       } catch {
-        // If we can't read the file, we'll fall back to the summary output
+        // Fallback to summary output if original file cannot be read
       }
     }
 
@@ -168,7 +163,6 @@ export async function runCli(argv: string[]): Promise<number> {
     if (parsedCommand.format === "json") {
       outputContent = JSON.stringify(result, null, 2);
     } else if (!parsedCommand.apply && originalSource !== undefined) {
-      // Task 7.2: Generate unified diff for preview mode
       outputContent = generateUnifiedDiff(originalSource, result.updatedContent, result.file);
     } else {
       outputContent = [
@@ -195,7 +189,6 @@ export async function runCli(argv: string[]): Promise<number> {
   return 0;
 }
 
-// Check if this file is run directly (e.g., via `node bin/snuts.js` or `ts-node lib/bin/cli.ts`)
 if (process.argv[1] && process.argv[1].endsWith("snuts.js")) {
   void runCli(process.argv.slice(2)).then(
     (exitCode) => {

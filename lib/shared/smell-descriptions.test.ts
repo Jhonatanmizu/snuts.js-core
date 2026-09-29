@@ -1,6 +1,3 @@
-// Feature: performance-ux-improvements, Property 6
-// Validates: Requirements 4.3
-
 import { SMELL_DESCRIPTIONS } from "@/shared/smell-descriptions";
 
 describe("SMELL_DESCRIPTIONS severity coverage", () => {
@@ -20,7 +17,6 @@ describe("SMELL_DESCRIPTIONS severity coverage", () => {
 
     for (const key of keys) {
       const entry = SMELL_DESCRIPTIONS[key];
-      // Use toContain so the key name appears in the failure message via the matcher
       expect(validSeverities).toContain(entry.severity);
     }
   });

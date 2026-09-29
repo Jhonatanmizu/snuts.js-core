@@ -1,9 +1,5 @@
 import { RefactorEdit, RefactorPatch } from "@/ai/types";
 
-// ---------------------------------------------------------------------------
-// Unified diff generation (LCS-based Myers diff, no external dependencies)
-// ---------------------------------------------------------------------------
-
 /**
  * Compute the Longest Common Subsequence (LCS) of two line arrays using
  * dynamic programming. Returns the LCS as an array of [indexA, indexB] pairs.
@@ -54,27 +50,23 @@ function buildDiffOps(a: string[], b: string[]): DiffOp[] {
   const lcs = computeLcs(a, b);
   const ops: DiffOp[] = [];
 
-  let ia = 0; // current index in a
-  let ib = 0; // current index in b
+  let ia = 0;
+  let ib = 0;
 
   for (const [la, lb] of lcs) {
-    // Lines in `a` before this LCS match are removals
     while (ia < la) {
       ops.push({ op: "remove", lineA: ia, lineB: -1, text: a[ia] ?? "" });
       ia++;
     }
-    // Lines in `b` before this LCS match are additions
     while (ib < lb) {
       ops.push({ op: "add", lineA: -1, lineB: ib, text: b[ib] ?? "" });
       ib++;
     }
-    // The LCS line itself is context
     ops.push({ op: "context", lineA: ia, lineB: ib, text: a[ia] ?? "" });
     ia++;
     ib++;
   }
 
-  // Remaining lines after the last LCS match
   while (ia < a.length) {
     ops.push({ op: "remove", lineA: ia, lineB: -1, text: a[ia] ?? "" });
     ia++;
@@ -90,11 +82,11 @@ function buildDiffOps(a: string[], b: string[]): DiffOp[] {
 const CONTEXT_LINES = 3;
 
 interface Hunk {
-  startA: number; // 1-based start line in original
-  countA: number; // number of lines from original (context + removed)
-  startB: number; // 1-based start line in updated
-  countB: number; // number of lines from updated (context + added)
-  lines: string[]; // formatted diff lines (prefixed with ' ', '-', '+')
+  startA: number;
+  countA: number;
+  startB: number;
+  countB: number;
+  lines: string[];
 }
 
 /**
@@ -102,7 +94,6 @@ interface Hunk {
  * each side of each change region.
  */
 function buildHunks(ops: DiffOp[]): Hunk[] {
-  // Find indices of all non-context ops
   const changeIndices: number[] = [];
   for (let i = 0; i < ops.length; i++) {
     if (ops[i]!.op !== "context") changeIndices.push(i);
@@ -110,7 +101,6 @@ function buildHunks(ops: DiffOp[]): Hunk[] {
 
   if (changeIndices.length === 0) return [];
 
-  // Merge change indices into ranges [start, end] (inclusive) with context
   const ranges: Array<[number, number]> = [];
   let rangeStart = Math.max(0, changeIndices[0]! - CONTEXT_LINES);
   let rangeEnd = Math.min(ops.length - 1, changeIndices[0]! + CONTEXT_LINES);
@@ -121,7 +111,6 @@ function buildHunks(ops: DiffOp[]): Hunk[] {
     const newEnd = Math.min(ops.length - 1, ci + CONTEXT_LINES);
 
     if (newStart <= rangeEnd + 1) {
-      // Overlapping or adjacent — extend current range
       rangeEnd = Math.max(rangeEnd, newEnd);
     } else {
       ranges.push([rangeStart, rangeEnd]);
@@ -131,7 +120,6 @@ function buildHunks(ops: DiffOp[]): Hunk[] {
   }
   ranges.push([rangeStart, rangeEnd]);
 
-  // Build a Hunk for each range
   const hunks: Hunk[] = [];
   for (const [start, end] of ranges) {
     const lines: string[] = [];
@@ -143,18 +131,16 @@ function buildHunks(ops: DiffOp[]): Hunk[] {
     for (let i = start; i <= end; i++) {
       const op = ops[i]!;
       if (op.op === "context") {
-        if (startA === -1) startA = op.lineA + 1; // convert to 1-based
+        if (startA === -1) startA = op.lineA + 1;
         if (startB === -1) startB = op.lineB + 1;
         lines.push(` ${op.text}`);
         countA++;
         countB++;
       } else if (op.op === "remove") {
         if (startA === -1) startA = op.lineA + 1;
-        // startB stays -1 until we see a context or add line
         lines.push(`-${op.text}`);
         countA++;
       } else {
-        // add
         if (startB === -1) startB = op.lineB + 1;
         lines.push(`+${op.text}`);
         countB++;

@@ -13,12 +13,12 @@ jest.mock("node:fs/promises", () => ({
   writeFile: jest.fn(async () => {}),
   stat: jest.fn(async (filePath: string) => {
     if (filePath.includes("mock-test-file.test.ts")) {
-      return { isDirectory: () => false }; // It's a file
+      return { isDirectory: () => false };
     }
     if (filePath.endsWith(path.sep) || !path.extname(filePath)) {
-      return { isDirectory: () => true }; // Heuristic for directory
+      return { isDirectory: () => true };
     }
-    return { isDirectory: () => false }; // Default to file if not specifically mocked as a directory or known file
+    return { isDirectory: () => false };
   }),
   readFile: jest.fn(async (filePath: string) => {
     if (filePath.includes("mock-test-file.test.ts")) {
@@ -34,7 +34,6 @@ const {
   readFile: mockFsReadFile,
 } = jest.requireMock("node:fs/promises");
 
-// Override Anonymous detector only; other detectors use real implementations from the package.
 jest.mock("@/detectors", () => {
   const actual = jest.requireActual("@/detectors") as Record<string, unknown>;
   return {
@@ -344,7 +343,6 @@ describe("runCli", () => {
     expect(exitCode).toBe(0);
     expect(mockRefactorFile).toHaveBeenCalledTimes(1);
     expect(spyStdout).toHaveBeenCalled();
-    // In preview+text mode, output is a unified diff (--- a/ +++ b/ headers)
     const output = spyStdout.mock.calls.at(-1)?.[0] as string;
     expect(output).toContain("--- a/");
     expect(output).toContain("+++ b/");

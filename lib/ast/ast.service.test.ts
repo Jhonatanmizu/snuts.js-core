@@ -37,7 +37,7 @@ describe("astService", () => {
   });
 
   describe("isFunction()", () => {
-    const functionNodes = [
+    const functionNodes: Array<[string, t.Node]> = [
       ["function declaration", AstNodeBuilder.functionDeclaration()],
       ["function expression", AstNodeBuilder.functionExpression()],
       ["arrow function", AstNodeBuilder.arrowFunction()],
@@ -46,19 +46,17 @@ describe("astService", () => {
       ["private class method", AstNodeBuilder.classPrivateMethod()],
     ];
 
-    const nonFunctionNodes = [
+    const nonFunctionNodes: Array<[string, t.Node]> = [
       ["variable declaration", AstNodeBuilder.variableDeclaration()],
       ["string expression", AstNodeBuilder.expressionStatement()],
       ["class declaration", AstNodeBuilder.classDeclaration()],
     ];
 
-    it.each(functionNodes)("should return true for %s", (...args) => {
-      const [, node] = args as [string, t.Node];
+    it.each(functionNodes)("should return true for %s", (_, node) => {
       expect(astService.isFunction(node)).toBe(true);
     });
 
-    it.each(nonFunctionNodes)("should return false for %s", (...args) => {
-      const [, node] = args as [string, t.Node];
+    it.each(nonFunctionNodes)("should return false for %s", (_, node) => {
       expect(astService.isFunction(node)).toBe(false);
     });
   });

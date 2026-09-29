@@ -21,7 +21,7 @@ jest.mock("chokidar", () => ({
 
 jest.mock("glob", () => ({
   __esModule: true,
-  glob: jest.fn<(pattern: string | string[], options?: any) => Promise<string[]>>(),
+  glob: jest.fn<(pattern: string | string[], options?: unknown) => Promise<string[]>>(),
 }));
 
 jest.mock("./detector-runner", () => ({
@@ -126,7 +126,9 @@ describe("Watcher", () => {
     });
     await watcher.watch();
 
-    const addCallback = mockOn.mock.calls.find((call) => call[0] === "add")![1] as Function;
+    const addCallback = mockOn.mock.calls.find((call) => call[0] === "add")![1] as (
+      path: string,
+    ) => void;
     const newFile = "new-file.ts";
     addCallback(newFile);
 
@@ -152,7 +154,9 @@ describe("Watcher", () => {
     });
     await watcher.watch();
 
-    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")![1] as Function;
+    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")![1] as (
+      path: string,
+    ) => void;
     const changedFile = "changed-file.ts";
     changeCallback(changedFile);
 
@@ -188,7 +192,9 @@ describe("Watcher", () => {
     });
     await watcher.watch();
 
-    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")![1] as Function;
+    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")![1] as (
+      path: string,
+    ) => void;
     const changedFile = "changed-file.ts";
     changeCallback(changedFile);
 
@@ -214,7 +220,9 @@ describe("Watcher", () => {
     });
     await watcher.watch();
 
-    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")![1] as Function;
+    const changeCallback = mockOn.mock.calls.find((call) => call[0] === "change")![1] as (
+      path: string,
+    ) => void;
     const changedFile = "changed-file.ts";
     changeCallback(changedFile);
 

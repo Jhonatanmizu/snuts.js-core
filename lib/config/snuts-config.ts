@@ -61,7 +61,6 @@ export function loadSnutsConfig(configPath: string): SnutsConfig {
 
   const config = parsed as SnutsConfig;
 
-  // Warn on any unrecognized smell keys in thresholds
   if (config.thresholds) {
     const knownKeys = new Set(Object.keys(SMELL_DESCRIPTIONS));
     for (const key of Object.keys(config.thresholds)) {

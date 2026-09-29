@@ -5,7 +5,7 @@ import { Smell } from "@/core/detector.interface";
 export class JsonReportGenerator implements ReportGenerator {
   generate(smells: Smell[]): string {
     const reportEntries: ReportEntry[] = smells.map((smell) => ({
-      smellType: smell.message, // Using message as smellType for now, can be refined later
+      smellType: smell.message,
       filePath: smell.file,
       startLine: smell.start.line,
       endLine: smell.end.line,

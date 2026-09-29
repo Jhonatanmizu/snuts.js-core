@@ -1,10 +1,9 @@
-// eslint.config.js
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettier from "eslint-config-prettier";
 import importPlugin from "eslint-plugin-import";
 import eslintPluginPrettier from "eslint-plugin-prettier";
-import babelParser from "@babel/eslint-parser"; // Import the babel parser
+import babelParser from "@babel/eslint-parser";
 
 export default tseslint.config(
   js.configs.recommended,
@@ -33,8 +32,8 @@ export default tseslint.config(
           "newlines-between": "always",
         },
       ],
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unsafe-function-type": "off",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unsafe-function-type": "error",
     },
 
     ignores: [
@@ -49,16 +48,16 @@ export default tseslint.config(
     ],
   },
   {
-    files: ["**/*.js"], // Apply this configuration to all .js files
+    files: ["**/*.js"],
     languageOptions: {
-      parser: babelParser, // Use the imported babel parser
+      parser: babelParser,
       globals: {
         process: "readonly",
       },
       parserOptions: {
-        requireConfigFile: false, // Allow parsing without a Babel config file
+        requireConfigFile: false,
         babelOptions: {
-          presets: ["@babel/preset-env"], // Use a preset for modern JavaScript features
+          presets: ["@babel/preset-env"],
         },
       },
     },

@@ -8,7 +8,7 @@ export class CsvReportGenerator implements ReportGenerator {
     const rows = smells
       .map(
         (smell) =>
-          `"${smell.message}","${smell.file}",${smell.start.line},${smell.end.line},"${smell.message.replace(/"/g, '""')}","${smell.description.replace(/"/g, '""')}","${smell.severity}"`, // Escaping quotes for CSV
+          `"${smell.message}","${smell.file}",${smell.start.line},${smell.end.line},"${smell.message.replace(/"/g, '""')}","${smell.description.replace(/"/g, '""')}","${smell.severity}"`,
       )
       .join("\n");
 

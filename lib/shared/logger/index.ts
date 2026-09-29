@@ -16,10 +16,6 @@ export interface ILogger {
   error(msg: string): void;
 }
 
-// ---------------------------------------------------------------------------
-// Built-in logger implementations
-// ---------------------------------------------------------------------------
-
 /**
  * A no-op logger that silences all output.
  * Drop this in via `setLogger(silentLogger)` to suppress all library logs,
@@ -47,10 +43,6 @@ function createDefaultLogger(): ILogger {
     level: process.env["LOG_LEVEL"] ?? "info",
   });
 }
-
-// ---------------------------------------------------------------------------
-// Active logger + public setter
-// ---------------------------------------------------------------------------
 
 let _activeLogger: ILogger = createDefaultLogger();
 
@@ -95,10 +87,6 @@ export function setLogger(customLogger: ILogger): void {
   _activeLogger = customLogger;
 }
 
-// ---------------------------------------------------------------------------
-// Stable proxy export
-// ---------------------------------------------------------------------------
-
 /**
  * The library-wide logger instance.
  *
@@ -109,7 +97,6 @@ export function setLogger(customLogger: ILogger): void {
  */
 export const logger: ILogger = new Proxy({} as ILogger, {
   get(_target, prop: string) {
-    // Forward any method call to the currently active logger implementation.
     return (...args: unknown[]) =>
       (_activeLogger as unknown as Record<string, (...a: unknown[]) => unknown>)[prop]?.(...args);
   },
