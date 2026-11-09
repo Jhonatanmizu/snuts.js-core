@@ -11,6 +11,8 @@ export type { ReportEntry, ReportGenerator } from "./reporter/report.interface";
 export { CsvReportGenerator } from "./reporter/csv-report-generator";
 export { JsonReportGenerator } from "./reporter/json-report-generator";
 
+export * from "./evaluator";
+
 export * from "./detectors";
 export * as detectors from "./detectors";
 

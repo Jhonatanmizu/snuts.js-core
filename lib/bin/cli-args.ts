@@ -1,3 +1,9 @@
+import {
+  EvaluationGranularity,
+  EvaluationOutputFormat,
+  LineMatchMode,
+} from "@/evaluator/types";
+
 export type ReportFormat = "csv" | "json";
 export type RefactorOutputFormat = "text" | "json";
 export type AIProviderName = "openai" | "google" | "anthropic" | "deepseek" | "kimi";
@@ -33,6 +39,19 @@ export type ParsedCommand =
       maxTokens?: number;
     }
   | {
+      type: "evaluate";
+      oracle: string;
+      toolResults?: string;
+      targetPaths?: string[];
+      granularity: EvaluationGranularity;
+      outputFormat: EvaluationOutputFormat;
+      lineTolerance: number;
+      matchMode: LineMatchMode;
+      onlyOracleFiles: boolean;
+      output?: string;
+      smells?: string[];
+    }
+  | {
       type: "error";
       message: string;
     };
@@ -43,6 +62,7 @@ export function usageText(): string {
     "  snuts watch [path]",
     "  snuts analyze [path] --format <format> [--output <file>]",
     "  snuts refactor <file> --provider <provider> [--model <model>] [--apply]",
+    "  snuts evaluate --oracle <file> (--tool-results <file> | --target <path>) [--granularity <class|fine-grained>] [--output-format <console|json|csv>] [--line-tolerance <n>]",
     "",
     "Examples:",
     "  npx @snutsjs/core watch .",
@@ -50,6 +70,7 @@ export function usageText(): string {
     "  npx @snutsjs/core analyze . --format json",
     "  npx @snutsjs/core analyze src --format csv --output report.csv",
     "  npx @snutsjs/core refactor ./my-test.test.ts --provider openai --format json",
+    "  npx @snutsjs/core evaluate --tool-results=results.json --oracle=oracle.json --granularity=fine-grained --output-format=console --line-tolerance=1",
   ].join("\n");
 }
 
@@ -280,6 +301,170 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
       smellDescriptionFilter,
       temperature,
       maxTokens,
+    };
+  }
+
+  if (command === "evaluate") {
+    let oracle: string | undefined;
+    let toolResults: string | undefined;
+    const targetPaths: string[] = [];
+    let granularity: EvaluationGranularity = "fine-grained";
+    let outputFormat: EvaluationOutputFormat = "console";
+    let lineTolerance = 1;
+    let matchMode: LineMatchMode = "start-line";
+    let onlyOracleFiles = false;
+    let output: string | undefined;
+    const smells: string[] = [];
+
+    // Expand --flag=value tokens into ["--flag", "value"]
+    const normalizedArgs: string[] = [];
+    for (const rawArg of rest) {
+      if (rawArg.startsWith("--") && rawArg.includes("=")) {
+        const eqIdx = rawArg.indexOf("=");
+        normalizedArgs.push(rawArg.slice(0, eqIdx), rawArg.slice(eqIdx + 1));
+      } else {
+        normalizedArgs.push(rawArg);
+      }
+    }
+
+    for (let i = 0; i < normalizedArgs.length; i++) {
+      const arg = normalizedArgs[i] ?? "";
+
+      if (arg === "--oracle") {
+        const value = normalizedArgs[i + 1];
+        if (!value) return { type: "error", message: "Missing value for --oracle." };
+        oracle = value;
+        i++;
+        continue;
+      }
+
+      if (arg === "--tool-results") {
+        const value = normalizedArgs[i + 1];
+        if (!value) return { type: "error", message: "Missing value for --tool-results." };
+        toolResults = value;
+        i++;
+        continue;
+      }
+
+      if (arg === "--target") {
+        const value = normalizedArgs[i + 1];
+        if (!value) return { type: "error", message: "Missing value for --target." };
+        targetPaths.push(value);
+        i++;
+        continue;
+      }
+
+      if (arg === "--granularity") {
+        const value = normalizedArgs[i + 1];
+        if (!value) return { type: "error", message: "Missing value for --granularity." };
+        if (value !== "class" && value !== "fine-grained") {
+          return {
+            type: "error",
+            message: `Invalid granularity: ${value}. Supported values are class and fine-grained.`,
+          };
+        }
+        granularity = value;
+        i++;
+        continue;
+      }
+
+      if (arg === "--output-format" || arg === "--format") {
+        const value = normalizedArgs[i + 1];
+        if (!value) return { type: "error", message: `Missing value for ${arg}.` };
+        if (value !== "console" && value !== "json" && value !== "csv") {
+          return {
+            type: "error",
+            message: `Invalid output format: ${value}. Supported formats are console, json, and csv.`,
+          };
+        }
+        outputFormat = value;
+        i++;
+        continue;
+      }
+
+      if (arg === "--line-tolerance") {
+        const value = normalizedArgs[i + 1];
+        if (!value) return { type: "error", message: "Missing value for --line-tolerance." };
+        const parsed = Number(value);
+        if (!Number.isFinite(parsed) || parsed < 0) {
+          return {
+            type: "error",
+            message: `Invalid value for --line-tolerance: ${value}. Expected a non-negative number.`,
+          };
+        }
+        lineTolerance = parsed;
+        i++;
+        continue;
+      }
+
+      if (arg === "--match-mode") {
+        const value = normalizedArgs[i + 1];
+        if (!value) return { type: "error", message: "Missing value for --match-mode." };
+        if (value !== "start-line" && value !== "range" && value !== "overlap") {
+          return {
+            type: "error",
+            message: `Invalid match mode: ${value}. Supported modes are start-line, range, and overlap.`,
+          };
+        }
+        matchMode = value;
+        i++;
+        continue;
+      }
+
+      if (arg === "--only-oracle-files") {
+        onlyOracleFiles = true;
+        continue;
+      }
+
+      if (arg === "--output") {
+        const value = normalizedArgs[i + 1];
+        if (!value) return { type: "error", message: "Missing value for --output." };
+        output = value;
+        i++;
+        continue;
+      }
+
+      if (arg === "--smell") {
+        const value = normalizedArgs[i + 1];
+        if (!value) return { type: "error", message: "Missing value for --smell." };
+        smells.push(value);
+        i++;
+        continue;
+      }
+
+      if (arg.startsWith("--")) {
+        return { type: "error", message: `Unknown option for evaluate command: ${arg}` };
+      }
+
+      targetPaths.push(arg);
+    }
+
+    if (!oracle) {
+      return {
+        type: "error",
+        message: "Missing oracle path. Use --oracle <path>.",
+      };
+    }
+
+    if (!toolResults && targetPaths.length === 0) {
+      return {
+        type: "error",
+        message: "Missing tool results or target path. Provide --tool-results <path> or --target <dir>.",
+      };
+    }
+
+    return {
+      type: "evaluate",
+      oracle,
+      toolResults,
+      targetPaths: targetPaths.length > 0 ? targetPaths : undefined,
+      granularity,
+      outputFormat,
+      lineTolerance,
+      matchMode,
+      onlyOracleFiles,
+      output,
+      smells: smells.length > 0 ? smells : undefined,
     };
   }
 

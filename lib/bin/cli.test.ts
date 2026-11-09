@@ -24,6 +24,23 @@ jest.mock("node:fs/promises", () => ({
     if (filePath.includes("mock-test-file.test.ts")) {
       return MOCK_TEST_FILE_CONTENT;
     }
+    if (filePath.includes("oracle.json")) {
+      return JSON.stringify([
+        {
+          file: "mock-test-file.test.ts",
+          smells: [{ type: "AnonymousTest", startLine: 1, endLine: 2 }],
+        },
+      ]);
+    }
+    if (filePath.includes("tool-results.json")) {
+      return JSON.stringify([
+        {
+          file: "mock-test-file.test.ts",
+          type: "AnonymousTest",
+          smells: [{ startLine: 1, endLine: 2 }],
+        },
+      ]);
+    }
     throw new Error(`ReadFile not mocked for: ${filePath}`);
   }),
 }));
@@ -276,6 +293,69 @@ describe("parseCliArgs", () => {
       maxTokens: undefined,
     });
   });
+
+  it("parses evaluate command with --flag=value syntax", () => {
+    expect(
+      parseCliArgs([
+        "evaluate",
+        "--tool-results=tool-results.json",
+        "--oracle=oracle.json",
+        "--granularity=fine-grained",
+        "--output-format=console",
+        "--line-tolerance=1",
+      ]),
+    ).toEqual({
+      type: "evaluate",
+      oracle: "oracle.json",
+      toolResults: "tool-results.json",
+      targetPaths: undefined,
+      granularity: "fine-grained",
+      outputFormat: "console",
+      lineTolerance: 1,
+      matchMode: "start-line",
+      onlyOracleFiles: false,
+      output: undefined,
+      smells: undefined,
+    });
+  });
+
+  it("parses evaluate command with space-separated flags and target directory", () => {
+    expect(
+      parseCliArgs([
+        "evaluate",
+        "--oracle",
+        "oracle.json",
+        "--target",
+        "src",
+        "--granularity",
+        "class",
+        "--format",
+        "json",
+        "--only-oracle-files",
+        "--output",
+        "evaluation_results.json",
+      ]),
+    ).toEqual({
+      type: "evaluate",
+      oracle: "oracle.json",
+      toolResults: undefined,
+      targetPaths: ["src"],
+      granularity: "class",
+      outputFormat: "json",
+      lineTolerance: 1,
+      matchMode: "start-line",
+      onlyOracleFiles: true,
+      output: "evaluation_results.json",
+      smells: undefined,
+    });
+  });
+
+  it("returns error when evaluate command is missing --oracle", () => {
+    expect(parseCliArgs(["evaluate", "--tool-results=tool.json"])).toEqual({
+      type: "error",
+      message: "Missing oracle path. Use --oracle <path>.",
+    });
+  });
 });
 
 describe("runCli", () => {
@@ -346,5 +426,55 @@ describe("runCli", () => {
     const output = spyStdout.mock.calls.at(-1)?.[0] as string;
     expect(output).toContain("--- a/");
     expect(output).toContain("+++ b/");
+  });
+
+  it("should run evaluate command with --tool-results and --oracle and output console report", async () => {
+    const exitCode = await runCli([
+      "evaluate",
+      "--tool-results=tool-results.json",
+      "--oracle=oracle.json",
+      "--granularity=fine-grained",
+      "--output-format=console",
+      "--line-tolerance=1",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(spyStdout).toHaveBeenCalledTimes(1);
+    const output = spyStdout.mock.calls[0]?.[0] as string;
+    expect(output).toContain(
+      "SNUTS.js Evaluation Report (Granularity: FINE-GRAINED, Line Tolerance: ±1)",
+    );
+    expect(output).toContain("AnonymousTest (AT)");
+    expect(output).toContain("OVERALL TOTAL");
+  });
+
+  it("should run evaluate command with live --target analysis and write JSON report to file", async () => {
+    const exitCode = await runCli([
+      "evaluate",
+      "--target",
+      mockFilePath,
+      "--oracle",
+      "oracle.json",
+      "--output-format",
+      "json",
+      "--output",
+      "evaluation_results.json",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(mockFsWriteFile).toHaveBeenCalledWith(
+      "evaluation_results.json",
+      expect.any(String),
+      "utf8",
+    );
+    const writtenJson = JSON.parse(mockFsWriteFile.mock.calls[0]?.[1] as string);
+    expect(writtenJson.overall).toMatchObject({
+      tp: 1,
+      fp: 0,
+      fn: 0,
+      precision: 1,
+      recall: 1,
+      f1Score: 1,
+    });
   });
 });

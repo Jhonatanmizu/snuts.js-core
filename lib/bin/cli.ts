@@ -15,6 +15,7 @@ import { createDetectorInstances, startWatch } from "@/runtime/watch-runner";
 import { ProjectAnalyzer } from "@/reporter/project-analyzer";
 import { CsvReportGenerator } from "@/reporter/csv-report-generator";
 import { JsonReportGenerator } from "@/reporter/json-report-generator";
+import { MetricsEvaluator, formatEvaluationReport } from "@/evaluator";
 
 function createCliLogger() {
   const stream = pretty({
@@ -182,6 +183,60 @@ export async function runCli(argv: string[]): Promise<number> {
       writeOutput(`Refactor output successfully written to ${parsedCommand.output}`, "stdout");
     } else {
       writeOutput(outputContent, "stdout");
+    }
+    return 0;
+  }
+
+  if (parsedCommand.type === "evaluate") {
+    const cwd = process.cwd();
+    const oraclePath = path.resolve(cwd, parsedCommand.oracle);
+
+    let rawOracle: unknown;
+    try {
+      const oracleContent = await readFile(oraclePath, "utf8");
+      rawOracle = JSON.parse(oracleContent);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      writeOutput(`Failed to load oracle file (${oraclePath}): ${msg}`, "stderr");
+      return 1;
+    }
+
+    let rawToolInput: unknown;
+    if (parsedCommand.toolResults) {
+      const toolResultsPath = path.resolve(cwd, parsedCommand.toolResults);
+      try {
+        const toolContent = await readFile(toolResultsPath, "utf8");
+        rawToolInput = JSON.parse(toolContent);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        writeOutput(`Failed to load tool results file (${toolResultsPath}): ${msg}`, "stderr");
+        return 1;
+      }
+    } else if (parsedCommand.targetPaths && parsedCommand.targetPaths.length > 0) {
+      const resolvedTargets = parsedCommand.targetPaths.map((p) => path.resolve(cwd, p));
+      const projectAnalyzer = new ProjectAnalyzer(createDetectorInstances());
+      rawToolInput = await projectAnalyzer.analyze(resolvedTargets);
+    }
+
+    const evaluator = new MetricsEvaluator();
+    const evaluationReport = evaluator.evaluate(rawToolInput, rawOracle, {
+      granularity: parsedCommand.granularity,
+      lineTolerance: parsedCommand.lineTolerance,
+      matchMode: parsedCommand.matchMode,
+      onlyOracleFiles: parsedCommand.onlyOracleFiles,
+      smellTypes: parsedCommand.smells,
+    });
+
+    const formattedOutput = formatEvaluationReport(evaluationReport, parsedCommand.outputFormat);
+
+    if (parsedCommand.output) {
+      await writeFile(parsedCommand.output, formattedOutput, "utf8");
+      writeOutput(
+        `Evaluation report successfully written to ${parsedCommand.output}`,
+        "stdout",
+      );
+    } else {
+      writeOutput(formattedOutput, "stdout");
     }
     return 0;
   }
