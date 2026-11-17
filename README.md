@@ -53,12 +53,15 @@ npx @snutsjs/core watch src
 Analyze your project for test smells and generate reports.
 
 ```bash
-npx @snutsjs/core analyze <path> --format <format> [--output <file>]
+npx @snutsjs/core analyze <path> --format <format> [--output <file>] [--config <file>] [--smell <SmellType>] [--watch]
 ```
 
-- `<path>`: The path to the directory or file to analyze (e.g., `.`, `src`, `src/my-test.test.ts`). Defaults to `.` if not provided.
+- `<path>`: One or more paths to directories or files to analyze (e.g., `.`, `src`, `src/my-test.test.ts`). Defaults to `.` if not provided.
 - `--format <format>`: **Required**. The output format for the report. Can be `json` or `csv`.
 - `--output <file>`: **Optional**. The file path to write the report to. If omitted, the report will be printed to `stdout`.
+- `--config <file>`: **Optional**. Path to a JSON configuration file (`SnutsConfig`) with custom per-smell threshold overrides.
+- `--smell <SmellType>`: **Optional** (repeatable). Filter reported smells by canonical smell key (e.g., `--smell AnonymousTest --smell VerboseTest`) or description.
+- `--watch`: **Optional**. Start the interactive file watcher on the resolved target paths.
 
 **Examples:**
 
@@ -80,19 +83,40 @@ Analyze a specific file and output a JSON report to `stdout`:
 npx @snutsjs/core analyze lib/test/mock-test-file.test.ts --format json
 ```
 
+Analyze with a custom threshold config and filter for specific smells:
+
+```bash
+npx @snutsjs/core analyze src --format json --config snuts.config.json --smell VerboseTest --smell AnonymousTest
+```
+
+### Custom Threshold Configuration (`--config`)
+
+You can pass `--config <path>` to `analyze` with a JSON file matching `SnutsConfig` to override per-smell detection thresholds without modifying source code:
+
+```json
+{
+  "thresholds": {
+    "VerboseTest": { "maxStatements": 20 },
+    "ComplexSnapshot": { "maxLines": 30 },
+    "AnonymousTest": { "maxWords": 3 },
+    "OvercommentedTest": { "maxComments": 8 }
+  }
+}
+```
+
 ### `refactor` command (AI-assisted)
 
 Run AI-powered refactoring for a single test file using LangChain-backed providers.
 
 ```bash
-npx @snutsjs/core refactor <file> --provider <provider> [--model <model>] [--apply] [--format <text|json>] [--output <file>]
+npx @snutsjs/core refactor <file> --provider <provider> [--model <model>] [--apply] [--format <text|json>] [--output <file>] [--smell <description>] [--temperature <number>] [--max-tokens <number>]
 ```
 
 - `<file>`: Target file to refactor.
 - `--provider`: Required. One of `openai`, `google`, `anthropic`, `deepseek`, `kimi`.
 - `--model`: Optional model override. If omitted, SNUTS uses a provider-specific default.
-- `--apply`: Optional. When omitted, command runs in preview mode and does not write to the source file.
-- `--format`: Optional output format (`text` or `json`, default: `text`).
+- `--apply`: Optional. When omitted, command runs in preview mode without modifying the source file (emitting a unified diff when `--format text` is used).
+- `--format`: Optional output format (`text` or `json`, default: `text`). In preview mode (`--apply` omitted), `text` outputs a unified diff patch (`generateUnifiedDiff`).
 - `--output <file>`: Optional file path to save the command result.
 - `--smell <description>`: Optional smell description filter to focus refactoring context.
 - `--temperature <number>` and `--max-tokens <number>`: Optional LLM tuning options.
@@ -102,6 +126,49 @@ Examples:
 ```bash
 npx @snutsjs/core refactor lib/test/mock-test-file.test.ts --provider openai
 npx @snutsjs/core refactor lib/test/mock-test-file.test.ts --provider anthropic --apply --format json
+```
+
+### `evaluate` command (Benchmark & Oracle Evaluation)
+
+Evaluate detection precision, recall, and F1 score against a ground-truth oracle file (either by passing precomputed tool results or by analyzing target paths directly).
+
+```bash
+npx @snutsjs/core evaluate --oracle <file> (--tool-results <file> | --target <path>) [options]
+```
+
+- `--oracle <file>`: **Required**. Path to the ground-truth oracle JSON file.
+- `--tool-results <file>`: Path to a JSON file containing tool detection results.
+- `--target <path>`: One or more target directories or files to analyze live before evaluating (alternative to `--tool-results`).
+- `--granularity <class|fine-grained>`: Optional evaluation granularity (default: `fine-grained`).
+  - `fine-grained`: Matches individual smell instances by file, smell type, and line number within `--line-tolerance`.
+  - `class`: Evaluates file-level presence/absence of each smell type.
+- `--output-format <console|json|csv>` (or `--format`): Optional report format (default: `console`).
+- `--line-tolerance <n>`: Optional non-negative integer line tolerance for fine-grained matching (default: `1`).
+- `--match-mode <start-line|range|overlap>`: Optional line matching strategy (default: `start-line`).
+- `--only-oracle-files`: Optional flag to restrict evaluation to files present in the oracle dataset.
+- `--smell <SmellType>`: Optional (repeatable) filter to evaluate only specific smell types.
+- `--output <file>`: Optional file path to save the evaluation report.
+
+**Examples:**
+
+```bash
+npx @snutsjs/core evaluate --tool-results=results.json --oracle=oracle.json --granularity=fine-grained --output-format=console --line-tolerance=1
+npx @snutsjs/core evaluate --oracle=oracle.json --target=src --granularity=class --format=json --output=eval-report.json
+```
+
+You can also use `MetricsEvaluator` and `formatEvaluationReport` programmatically:
+
+```ts
+import { MetricsEvaluator, formatEvaluationReport } from "@snutsjs/core";
+
+const evaluator = new MetricsEvaluator();
+const report = evaluator.evaluate(toolResults, oracleData, {
+  granularity: "fine-grained",
+  lineTolerance: 1,
+  matchMode: "start-line",
+});
+
+console.log(formatEvaluationReport(report, "console"));
 ```
 
 ### AI provider configuration
@@ -153,9 +220,26 @@ Thresholds such as anonymous word count, comment budget, verbose statement count
 
 ```text
 ├── lib/
+│   ├── ai/                 # AI-assisted refactoring services, providers, prompts, and patch utils
+│   │   ├── providers/
+│   │   ├── config.ts
+│   │   ├── context-builder.ts
+│   │   ├── index.ts
+│   │   ├── patch-utils.ts
+│   │   ├── prompt-composer.ts
+│   │   ├── provider.interface.ts
+│   │   ├── refactor-service.ts
+│   │   └── types.ts
 │   ├── ast/                # AST (Abstract Syntax Tree) related services for parsing and querying
 │   │   ├── ast.service.test.ts
 │   │   └── ast.service.ts
+│   ├── bin/                # CLI argument parsing and command execution
+│   │   ├── cli-args.ts
+│   │   ├── cli.test.ts
+│   │   └── cli.ts
+│   ├── config/             # Custom threshold configuration loader (SnutsConfig)
+│   │   ├── snuts-config.test.ts
+│   │   └── snuts-config.ts
 │   ├── core/               # Core logic for detector runner and file watching
 │   │   ├── detector.interface.ts
 │   │   ├── detector-runner.test.ts
@@ -180,12 +264,20 @@ Thresholds such as anonymous word count, comment budget, verbose statement count
 │   │   ├── verboseTestLogic.ts
 │   │   ├── verifyInSetupLogic.ts
 │   │   └── *.test.ts      # Detector unit specs (paired with each logic file)
+│   ├── evaluator/          # Benchmark evaluation engine (Precision, Recall, F1 against oracles)
+│   │   ├── evaluator.test.ts
+│   │   ├── formatters.ts
+│   │   ├── index.ts
+│   │   ├── metrics-evaluator.ts
+│   │   ├── normalizer.ts
+│   │   └── types.ts
 │   ├── reporter/           # Logic for project analysis and report generation
 │   │   ├── project-analyzer.ts
 │   │   ├── csv-report-generator.ts
 │   │   ├── json-report-generator.ts
 │   │   └── report.interface.ts
 │   ├── runtime/
+│   │   ├── watch-runner.ts
 │   │   └── watch.ts
 │   ├── shared/             # Shared utilities, constants, and plugins
 │   │   ├── aliases/        # Module aliases configuration
@@ -193,6 +285,7 @@ Thresholds such as anonymous word count, comment budget, verbose statement count
 │   │   ├── constants.ts
 │   │   ├── selectors/       # Shared esquery selectors / AST matchers
 │   │   │   └── index.ts
+│   │   ├── smell-descriptions.ts
 │   │   ├── logger/         # Logging utility
 │   │   │   └── index.ts
 │   │   └── plugins/        # Plugin system for extensibility
@@ -204,6 +297,7 @@ Thresholds such as anonymous word count, comment budget, verbose statement count
 ├── .gitignore
 ├── .prettierignore
 ├── .prettierrc.json
+├── AGENTS.md
 ├── eslint.config.js
 ├── jest.config.js
 ├── LICENSE

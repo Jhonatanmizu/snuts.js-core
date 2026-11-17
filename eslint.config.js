@@ -34,6 +34,7 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-unsafe-function-type": "error",
+      "no-console": "error",
     },
 
     ignores: [
