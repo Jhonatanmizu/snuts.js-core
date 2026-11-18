@@ -1,5 +1,15 @@
 # @snutsjs/core
 
+## 1.3.0
+
+### Minor Changes
+
+- Implement 7 new test smell detectors (`NonFunctionalStatementDetector`, `OnlyTestDetector`, `SensitiveEqualityDetector`, `SubOptimalAssertDetector`, `TranscriptingTestDetector`, `VerboseTestDetector`, `VerifyInSetupLogicDetector`) for full 15-smell coverage.
+- Add `analyze` CLI command with CSV and JSON report generation.
+- Add `refactor` CLI command powered by LangChain (`openai`, `anthropic`, and `google` providers).
+- Add `evaluate` CLI command and benchmark metrics evaluation module (TP, FP, FN, Precision, Recall, F1).
+- Add React `.jsx` and `.tsx` test file glob patterns.
+
 ## 1.2.3
 
 ### Patch Changes

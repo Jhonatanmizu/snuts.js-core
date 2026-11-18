@@ -6,6 +6,18 @@ import eslintPluginPrettier from "eslint-plugin-prettier";
 import babelParser from "@babel/eslint-parser";
 
 export default tseslint.config(
+  {
+    ignores: [
+      "eslint.config.js",
+      "prettier.config.js",
+      "vite.config.ts",
+      "dist/**",
+      "node_modules/**",
+      "coverage/**",
+      "bin/**",
+      "dumb/**",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   prettier,
@@ -36,17 +48,6 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-function-type": "error",
       "no-console": "error",
     },
-
-    ignores: [
-      "eslint.config.js",
-      "prettier.config.js",
-      "vite.config.ts",
-      "dist/**",
-      "node_modules/**",
-      "coverage/**",
-      "bin/**",
-      "dumb/**",
-    ],
   },
   {
     files: ["**/*.js"],
