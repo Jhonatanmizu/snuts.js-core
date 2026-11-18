@@ -24,6 +24,7 @@ export type ParsedCommand =
   | {
       type: "refactor";
       file: string;
+      paths?: string[];
       provider: AIProviderName;
       model?: string;
       apiKey?: string;
@@ -33,6 +34,7 @@ export type ParsedCommand =
       smellDescriptionFilter?: string;
       temperature?: number;
       maxTokens?: number;
+      concurrency?: number;
     }
   | {
       type: "evaluate";
@@ -57,7 +59,7 @@ export function usageText(): string {
     "Usage:",
     "  snuts watch [path]",
     "  snuts analyze [path] --format <format> [--output <file>]",
-    "  snuts refactor <file> --provider <provider> [--model <model>] [--apply]",
+    "  snuts refactor <file|dir...> --provider <provider> [--model <model>] [--concurrency <n>] [--apply]",
     "  snuts evaluate --oracle <file> (--tool-results <file> | --target <path>) [--granularity <class|fine-grained>] [--output-format <console|json|csv>] [--line-tolerance <n>]",
     "",
     "Examples:",
@@ -66,6 +68,7 @@ export function usageText(): string {
     "  npx @snutsjs/core analyze . --format json",
     "  npx @snutsjs/core analyze src --format csv --output report.csv",
     "  npx @snutsjs/core refactor ./my-test.test.ts --provider openai --format json",
+    "  npx @snutsjs/core refactor ./src --provider openai --concurrency 3 --apply",
     "  npx @snutsjs/core evaluate --tool-results=results.json --oracle=oracle.json --granularity=fine-grained --output-format=console --line-tolerance=1",
   ].join("\n");
 }
@@ -151,7 +154,7 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
   }
 
   if (command === "refactor") {
-    let file: string | undefined;
+    const paths: string[] = [];
     let provider: AIProviderName | undefined;
     let model: string | undefined;
     let apiKey: string | undefined;
@@ -161,6 +164,7 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
     let smellDescriptionFilter: string | undefined;
     let temperature: number | undefined;
     let maxTokens: number | undefined;
+    let concurrency: number | undefined;
 
     for (let i = 0; i < rest.length; i++) {
       const arg = rest[i] ?? "";
@@ -242,6 +246,21 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
         continue;
       }
 
+      if (arg === "--concurrency") {
+        const value = rest[i + 1];
+        if (!value) return { type: "error", message: "Missing value for --concurrency." };
+        const parsed = Number(value);
+        if (!Number.isFinite(parsed) || parsed < 1) {
+          return {
+            type: "error",
+            message: `Invalid value for --concurrency: ${value}. Expected a positive integer.`,
+          };
+        }
+        concurrency = Math.trunc(parsed);
+        i++;
+        continue;
+      }
+
       if (arg === "--apply") {
         apply = true;
         continue;
@@ -251,14 +270,11 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
         return { type: "error", message: `Unknown option for refactor command: ${arg}` };
       }
 
-      if (!file) {
-        file = arg;
-      } else {
-        return { type: "error", message: "Refactor command accepts only one file path." };
-      }
+      paths.push(arg);
     }
 
-    if (!file) {
+    const firstFile = paths[0];
+    if (!firstFile) {
       return {
         type: "error",
         message: "Missing file path. Usage: snuts refactor <file> --provider <provider>.",
@@ -287,7 +303,8 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
 
     return {
       type: "refactor",
-      file,
+      file: firstFile,
+      ...(paths.length > 1 ? { paths } : {}),
       provider,
       model,
       apiKey,
@@ -297,6 +314,7 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
       smellDescriptionFilter,
       temperature,
       maxTokens,
+      ...(concurrency !== undefined ? { concurrency } : {}),
     };
   }
 

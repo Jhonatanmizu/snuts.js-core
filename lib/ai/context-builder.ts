@@ -7,15 +7,19 @@ export interface RefactorContext {
   smells: Smell[];
 }
 
+export function filterSmellsByDescription(smells: Smell[], filterDescription?: string): Smell[] {
+  const normalizedFilter = filterDescription?.trim().toLowerCase();
+  if (!normalizedFilter || normalizedFilter.length === 0) {
+    return smells;
+  }
+
+  return smells.filter((smell) => smell.description.toLowerCase().includes(normalizedFilter));
+}
+
 export class SmellContextBuilder {
   async build(file: string, smells: Smell[], filterDescription?: string): Promise<RefactorContext> {
     const sourceCode = await readFile(file, "utf8");
-    const normalizedFilter = filterDescription?.trim().toLowerCase();
-
-    const filteredSmells =
-      normalizedFilter && normalizedFilter.length > 0
-        ? smells.filter((smell) => smell.description.toLowerCase().includes(normalizedFilter))
-        : smells;
+    const filteredSmells = filterSmellsByDescription(smells, filterDescription);
 
     return {
       sourceCode,

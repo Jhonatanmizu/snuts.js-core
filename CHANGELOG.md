@@ -5,8 +5,8 @@
 ### Minor Changes
 
 - Implement 7 new test smell detectors (`NonFunctionalStatementDetector`, `OnlyTestDetector`, `SensitiveEqualityDetector`, `SubOptimalAssertDetector`, `TranscriptingTestDetector`, `VerboseTestDetector`, `VerifyInSetupLogicDetector`) for full 15-smell coverage.
-- Add `analyze` CLI command with CSV and JSON report generation.
-- Add `refactor` CLI command powered by LangChain (`openai`, `anthropic`, and `google` providers).
+- Add `analyze` CLI command with parallel batch analysis, CSV, and JSON report generation.
+- Add `refactor` CLI command and `RefactorService.refactorBatch` powered by LangChain (`openai`, `anthropic`, `google`, `deepseek`, and `kimi` providers) with bounded concurrency and per-file error isolation.
 - Add `evaluate` CLI command and benchmark metrics evaluation module (TP, FP, FN, Precision, Recall, F1).
 - Add React `.jsx` and `.tsx` test file glob patterns.
 

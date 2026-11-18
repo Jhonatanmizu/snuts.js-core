@@ -6,6 +6,10 @@ export type {
   RefactorEdit,
   RefactorDiagnostics,
   RefactorProgressEvent,
+  BatchRefactorProgressEvent,
+  BatchRefactorRequest,
+  BatchRefactorResult,
+  BatchFileFailure,
   RollbackToken,
 } from "./types";
 

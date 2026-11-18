@@ -1,5 +1,5 @@
 import path from "node:path";
-import { writeFile, readFile } from "node:fs/promises";
+import { writeFile, readFile, stat } from "node:fs/promises";
 
 import pino from "pino";
 import pretty from "pino-pretty";
@@ -134,7 +134,64 @@ export async function runCli(argv: string[]): Promise<number> {
       maxTokens: parsedCommand.maxTokens,
     });
 
-    const resolvedFile = path.resolve(process.cwd(), parsedCommand.file);
+    const targetPaths = parsedCommand.paths ?? [parsedCommand.file];
+    const resolvedPaths = targetPaths.map((p) => path.resolve(process.cwd(), p));
+    const resolvedFile = resolvedPaths[0]!;
+
+    let isBatchMode = resolvedPaths.length > 1;
+    if (!isBatchMode) {
+      try {
+        const fileStats = await stat(resolvedFile);
+        isBatchMode = fileStats.isDirectory();
+      } catch {
+        isBatchMode = false;
+      }
+    }
+
+    const service = new RefactorService(createDetectorInstances(), new LangChainProviderRegistry());
+
+    if (isBatchMode) {
+      const batchResult = await service.refactorBatch({
+        paths: resolvedPaths,
+        apply: parsedCommand.apply,
+        provider: refactorConfig.provider,
+        model: refactorConfig.model,
+        apiKey: refactorConfig.apiKey,
+        temperature: refactorConfig.temperature,
+        maxTokens: refactorConfig.maxTokens,
+        concurrency: parsedCommand.concurrency,
+        smellDescriptionFilter: parsedCommand.smellDescriptionFilter,
+        onProgress: ({ stage, message }) => {
+          writeOutput(`[${stage}] ${message}`, "stderr");
+        },
+      });
+
+      const outputContent =
+        parsedCommand.format === "json"
+          ? JSON.stringify(batchResult, null, 2)
+          : [
+              `Mode: ${parsedCommand.apply ? "apply" : "preview"} (batch)`,
+              `Provider: ${refactorConfig.provider}`,
+              `Model: ${refactorConfig.model}`,
+              `Files discovered: ${batchResult.totalFilesDiscovered}`,
+              `Files with smells: ${batchResult.filesWithSmells}`,
+              `Files refactored: ${batchResult.filesRefactored}`,
+              `Files unchanged: ${batchResult.filesUnchanged}`,
+              `Files failed: ${batchResult.filesFailed}`,
+              ...batchResult.results.map(
+                (item) => `  - ${item.file}: ${item.summary} (${item.patch.edits.length} edits)`,
+              ),
+              ...batchResult.failures.map((item) => `  ! ${item.file}: ${item.error}`),
+            ].join("\n");
+
+      if (parsedCommand.output) {
+        await writeFile(parsedCommand.output, outputContent, "utf8");
+        writeOutput(`Refactor output successfully written to ${parsedCommand.output}`, "stdout");
+      } else {
+        writeOutput(outputContent, "stdout");
+      }
+      return batchResult.filesFailed > 0 && batchResult.filesRefactored === 0 ? 1 : 0;
+    }
 
     let originalSource: string | undefined;
     if (!parsedCommand.apply && parsedCommand.format === "text") {
@@ -145,7 +202,6 @@ export async function runCli(argv: string[]): Promise<number> {
       }
     }
 
-    const service = new RefactorService(createDetectorInstances(), new LangChainProviderRegistry());
     const result = await service.refactorFile({
       file: resolvedFile,
       apply: parsedCommand.apply,

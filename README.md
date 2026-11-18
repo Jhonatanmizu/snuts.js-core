@@ -104,19 +104,20 @@ You can pass `--config <path>` to `analyze` with a JSON file matching `SnutsConf
 }
 ```
 
-### `refactor` command (AI-assisted)
+### `refactor` command (AI-assisted single-file & batch refactoring)
 
-Run AI-powered refactoring for a single test file using LangChain-backed providers.
+Run AI-powered refactoring for a single test file or in batch across multiple files and directories using LangChain-backed providers.
 
 ```bash
-npx @snutsjs/core refactor <file> --provider <provider> [--model <model>] [--apply] [--format <text|json>] [--output <file>] [--smell <description>] [--temperature <number>] [--max-tokens <number>]
+npx @snutsjs/core refactor <file|dir...> --provider <provider> [--model <model>] [--concurrency <n>] [--apply] [--format <text|json>] [--output <file>] [--smell <description>] [--temperature <number>] [--max-tokens <number>]
 ```
 
-- `<file>`: Target file to refactor.
+- `<file|dir...>`: One or more target test files or directories to refactor. When directories or multiple files are given, SNUTS runs in batch mode—automatically pre-filtering to only test files that contain matching smells.
 - `--provider`: Required. One of `openai`, `google`, `anthropic`, `deepseek`, `kimi`.
 - `--model`: Optional model override. If omitted, SNUTS uses a provider-specific default.
-- `--apply`: Optional. When omitted, command runs in preview mode without modifying the source file (emitting a unified diff when `--format text` is used).
-- `--format`: Optional output format (`text` or `json`, default: `text`). In preview mode (`--apply` omitted), `text` outputs a unified diff patch (`generateUnifiedDiff`).
+- `--concurrency <n>`: Optional bounded concurrency for batch refactoring (default: `3`).
+- `--apply`: Optional. When omitted, command runs in preview mode without modifying the source file(s).
+- `--format`: Optional output format (`text` or `json`, default: `text`).
 - `--output <file>`: Optional file path to save the command result.
 - `--smell <description>`: Optional smell description filter to focus refactoring context.
 - `--temperature <number>` and `--max-tokens <number>`: Optional LLM tuning options.
@@ -125,6 +126,7 @@ Examples:
 
 ```bash
 npx @snutsjs/core refactor lib/test/mock-test-file.test.ts --provider openai
+npx @snutsjs/core refactor src/ tests/ --provider openai --concurrency 3 --apply
 npx @snutsjs/core refactor lib/test/mock-test-file.test.ts --provider anthropic --apply --format json
 ```
 

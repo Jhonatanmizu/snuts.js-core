@@ -93,6 +93,34 @@ const mockRefactorFile = jest.fn(async () => ({
   updatedContent: "const x = 1;",
 }));
 
+const mockRefactorBatch = jest.fn(async () => ({
+  totalFilesDiscovered: 2,
+  filesWithSmells: 1,
+  filesRefactored: 1,
+  filesUnchanged: 0,
+  filesFailed: 0,
+  results: [
+    {
+      file: mockFilePath,
+      apply: false,
+      summary: "Batch refactor summary",
+      smells: [],
+      patch: {
+        summary: "Batch refactor summary",
+        edits: [{ startLine: 1, endLine: 1, replacement: "x", reason: "r" }],
+      },
+      diagnostics: {
+        smellsDetected: 1,
+        smellsUsedInPrompt: 1,
+        provider: "openai",
+        model: "gpt-4.1-mini",
+      },
+      updatedContent: "const x = 1;",
+    },
+  ],
+  failures: [],
+}));
+
 jest.mock("@/ai", () => ({
   resolveAIConfig: jest.fn((input: { provider: string; model?: string; apiKey?: string }) => ({
     provider: input.provider,
@@ -104,6 +132,7 @@ jest.mock("@/ai", () => ({
   LangChainProviderRegistry: jest.fn(),
   RefactorService: jest.fn(() => ({
     refactorFile: mockRefactorFile,
+    refactorBatch: mockRefactorBatch,
   })),
 }));
 
@@ -294,6 +323,34 @@ describe("parseCliArgs", () => {
     });
   });
 
+  it("parses refactor command with multiple paths and concurrency flag", () => {
+    expect(
+      parseCliArgs([
+        "refactor",
+        "src/a.test.ts",
+        "src/b.test.ts",
+        "--provider",
+        "openai",
+        "--concurrency",
+        "4",
+      ]),
+    ).toEqual({
+      type: "refactor",
+      file: "src/a.test.ts",
+      paths: ["src/a.test.ts", "src/b.test.ts"],
+      provider: "openai",
+      model: undefined,
+      apiKey: undefined,
+      apply: false,
+      output: undefined,
+      format: "text",
+      smellDescriptionFilter: undefined,
+      temperature: undefined,
+      maxTokens: undefined,
+      concurrency: 4,
+    });
+  });
+
   it("parses evaluate command with --flag=value syntax", () => {
     expect(
       parseCliArgs([
@@ -426,6 +483,21 @@ describe("runCli", () => {
     const output = spyStdout.mock.calls.at(-1)?.[0] as string;
     expect(output).toContain("--- a/");
     expect(output).toContain("+++ b/");
+  });
+
+  it("should run refactor command in batch mode when multiple paths are passed", async () => {
+    const exitCode = await runCli([
+      "refactor",
+      mockFilePath,
+      "other.test.ts",
+      "--provider",
+      "openai",
+    ]);
+
+    expect(exitCode).toBe(0);
+    expect(mockRefactorBatch).toHaveBeenCalledTimes(1);
+    const output = spyStdout.mock.calls.at(-1)?.[0] as string;
+    expect(output).toContain("Files refactored: 1");
   });
 
   it("should run evaluate command with --tool-results and --oracle and output console report", async () => {

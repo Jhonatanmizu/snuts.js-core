@@ -15,6 +15,14 @@ export interface RefactorProgressEvent {
   message: string;
 }
 
+export interface BatchRefactorProgressEvent {
+  file: string;
+  completedFiles: number;
+  totalFiles: number;
+  stage: RefactorProgressStage;
+  message: string;
+}
+
 export interface RefactorEdit {
   startLine: number;
   endLine: number;
@@ -62,4 +70,32 @@ export interface RefactorResult {
   diagnostics: RefactorDiagnostics;
   updatedContent: string;
   rollbackToken?: RollbackToken;
+}
+
+export interface BatchFileFailure {
+  file: string;
+  error: string;
+}
+
+export interface BatchRefactorRequest {
+  paths: string[];
+  apply: boolean;
+  provider: AIProviderName;
+  model: string;
+  apiKey: string;
+  temperature?: number;
+  maxTokens?: number;
+  concurrency?: number;
+  smellDescriptionFilter?: string;
+  onProgress?: (event: BatchRefactorProgressEvent) => void;
+}
+
+export interface BatchRefactorResult {
+  totalFilesDiscovered: number;
+  filesWithSmells: number;
+  filesRefactored: number;
+  filesUnchanged: number;
+  filesFailed: number;
+  results: RefactorResult[];
+  failures: BatchFileFailure[];
 }
