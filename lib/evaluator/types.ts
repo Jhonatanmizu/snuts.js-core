@@ -97,4 +97,3 @@ export interface EvaluationReport {
   };
   macroAverage: MacroAverageMetrics;
 }
-

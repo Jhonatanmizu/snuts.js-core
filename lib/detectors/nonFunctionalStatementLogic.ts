@@ -38,7 +38,6 @@ export class NonFunctionalStatementDetector implements Detector {
           codeBlock: sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET,
           description: SMELL_DESCRIPTIONS.NonFunctionalStatement.description,
           explanation: SMELL_DESCRIPTIONS.NonFunctionalStatement.explanation,
-          severity: SMELL_DESCRIPTIONS.NonFunctionalStatement.severity,
         });
       }
     } catch (err) {

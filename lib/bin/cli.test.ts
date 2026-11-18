@@ -455,6 +455,8 @@ describe("runCli", () => {
       mockFilePath,
       "--oracle",
       "oracle.json",
+      "--smell",
+      "AnonymousTest",
       "--output-format",
       "json",
       "--output",

@@ -38,7 +38,6 @@ export class VerifyInSetupDetector implements Detector {
           codeBlock: sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET,
           description: SMELL_DESCRIPTIONS.VerifyInSetup.description,
           explanation: SMELL_DESCRIPTIONS.VerifyInSetup.explanation,
-          severity: SMELL_DESCRIPTIONS.VerifyInSetup.severity,
         });
       }
     } catch (err) {

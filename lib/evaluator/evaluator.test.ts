@@ -75,7 +75,6 @@ describe("Normalizer", () => {
         endLine: 45,
         message: "Overcommented test detected",
         description: "Overcommented Test",
-        severity: "low",
       },
     ];
 
@@ -431,4 +430,3 @@ describe("MetricsEvaluator", () => {
     });
   });
 });
-

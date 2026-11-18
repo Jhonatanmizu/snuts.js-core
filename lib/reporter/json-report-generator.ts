@@ -11,7 +11,6 @@ export class JsonReportGenerator implements ReportGenerator {
       endLine: smell.end.line,
       message: smell.message,
       description: smell.description,
-      severity: smell.severity,
     }));
 
     return JSON.stringify(reportEntries, null, 2);

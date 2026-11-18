@@ -70,7 +70,6 @@ export class TranscriptingTestDetector implements Detector {
           codeBlock: sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET,
           description: SMELL_DESCRIPTIONS.TranscriptingTest.description,
           explanation: SMELL_DESCRIPTIONS.TranscriptingTest.explanation,
-          severity: SMELL_DESCRIPTIONS.TranscriptingTest.severity,
         });
       }
     } catch (err) {

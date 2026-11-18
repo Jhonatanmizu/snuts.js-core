@@ -55,10 +55,7 @@ export function formatEvaluationConsole(report: EvaluationReport): string {
     );
   }
 
-  const overallPrecision = formatPercentage(
-    report.overall.precision,
-    report.overall.hasActivity,
-  );
+  const overallPrecision = formatPercentage(report.overall.precision, report.overall.hasActivity);
   const overallRecall = formatPercentage(report.overall.recall, report.overall.hasActivity);
   const overallF1 = formatF1(report.overall.f1Score, report.overall.hasActivity);
 
@@ -134,4 +131,3 @@ export function formatEvaluationReport(
   }
   return formatEvaluationConsole(report);
 }
-

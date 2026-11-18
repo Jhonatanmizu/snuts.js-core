@@ -75,7 +75,7 @@ logger.info(
     rule: rule.name,
     nodeType: node.type,
   },
-  "Rule triggered"
+  "Rule triggered",
 );
 ```
 

@@ -42,4 +42,3 @@ export type {
   SmellEvaluationMetrics,
   SmellLineRange,
 } from "./types";
-

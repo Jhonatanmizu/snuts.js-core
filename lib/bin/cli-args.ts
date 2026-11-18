@@ -1,8 +1,4 @@
-import {
-  EvaluationGranularity,
-  EvaluationOutputFormat,
-  LineMatchMode,
-} from "@/evaluator/types";
+import { EvaluationGranularity, EvaluationOutputFormat, LineMatchMode } from "@/evaluator/types";
 
 export type ReportFormat = "csv" | "json";
 export type RefactorOutputFormat = "text" | "json";
@@ -449,7 +445,8 @@ export function parseCliArgs(argv: string[]): ParsedCommand {
     if (!toolResults && targetPaths.length === 0) {
       return {
         type: "error",
-        message: "Missing tool results or target path. Provide --tool-results <path> or --target <dir>.",
+        message:
+          "Missing tool results or target path. Provide --tool-results <path> or --target <dir>.",
       };
     }
 

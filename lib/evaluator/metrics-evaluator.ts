@@ -75,8 +75,7 @@ export function isInstanceMatch(
 
   if (matchMode === "overlap") {
     return (
-      tool.startLine <= oracle.endLine + tolerance &&
-      oracle.startLine <= tool.endLine + tolerance
+      tool.startLine <= oracle.endLine + tolerance && oracle.startLine <= tool.endLine + tolerance
     );
   }
 
@@ -282,8 +281,7 @@ export class MetricsEvaluator {
     const macroAverage: MacroAverageMetrics =
       activeSmells.length > 0
         ? {
-            precision:
-              activeSmells.reduce((sum, s) => sum + s.precision, 0) / activeSmells.length,
+            precision: activeSmells.reduce((sum, s) => sum + s.precision, 0) / activeSmells.length,
             recall: activeSmells.reduce((sum, s) => sum + s.recall, 0) / activeSmells.length,
             f1Score: activeSmells.reduce((sum, s) => sum + s.f1Score, 0) / activeSmells.length,
             activeSmellCount: activeSmells.length,
@@ -315,4 +313,3 @@ export class MetricsEvaluator {
     };
   }
 }
-

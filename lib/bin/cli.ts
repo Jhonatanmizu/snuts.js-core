@@ -231,10 +231,7 @@ export async function runCli(argv: string[]): Promise<number> {
 
     if (parsedCommand.output) {
       await writeFile(parsedCommand.output, formattedOutput, "utf8");
-      writeOutput(
-        `Evaluation report successfully written to ${parsedCommand.output}`,
-        "stdout",
-      );
+      writeOutput(`Evaluation report successfully written to ${parsedCommand.output}`, "stdout");
     } else {
       writeOutput(formattedOutput, "stdout");
     }

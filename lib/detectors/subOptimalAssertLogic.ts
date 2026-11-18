@@ -99,7 +99,6 @@ export class SubOptimalAssertDetector implements Detector {
       codeBlock: sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET,
       description: SMELL_DESCRIPTIONS.SubOptimalAssert.description,
       explanation: SMELL_DESCRIPTIONS.SubOptimalAssert.explanation,
-      severity: SMELL_DESCRIPTIONS.SubOptimalAssert.severity,
     };
   }
 }

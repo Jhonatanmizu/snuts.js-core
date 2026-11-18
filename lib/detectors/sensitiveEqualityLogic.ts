@@ -72,7 +72,6 @@ export class SensitiveEqualityDetector implements Detector {
       codeBlock: sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET,
       description: SMELL_DESCRIPTIONS.SensitiveEquality.description,
       explanation: SMELL_DESCRIPTIONS.SensitiveEquality.explanation,
-      severity: SMELL_DESCRIPTIONS.SensitiveEquality.severity,
     };
   }
 }

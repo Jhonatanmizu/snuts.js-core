@@ -35,7 +35,6 @@ export class OnlyTestDetector implements Detector {
           codeBlock: sourceCode.slice(start, end) || UNABLE_TO_EXTRACT_CODE_SNIPPET,
           description: SMELL_DESCRIPTIONS.OnlyTest.description,
           explanation: SMELL_DESCRIPTIONS.OnlyTest.explanation,
-          severity: SMELL_DESCRIPTIONS.OnlyTest.severity,
         });
       }
     } catch (err) {

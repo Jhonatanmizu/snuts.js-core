@@ -258,8 +258,7 @@ export function normalizeToolInput(raw: unknown): NormalizedSmellInstance[] {
         if (!isRecord(smellItem)) {
           continue;
         }
-        const rawSmellType =
-          typeof smellItem["type"] === "string" ? smellItem["type"] : groupType;
+        const rawSmellType = typeof smellItem["type"] === "string" ? smellItem["type"] : groupType;
         if (!rawSmellType) {
           continue;
         }
@@ -401,4 +400,3 @@ export function normalizeOracleInput(raw: unknown): NormalizedOracleData {
 
   return { instances, oracleFiles };
 }
-

@@ -47,7 +47,6 @@ export class AnonymousTestLogicDetector implements Detector {
             codeBlock,
             description: SMELL_DESCRIPTIONS.AnonymousTest.description,
             explanation: SMELL_DESCRIPTIONS.AnonymousTest.explanation,
-            severity: SMELL_DESCRIPTIONS.AnonymousTest.severity,
           });
         }
       }

@@ -16,7 +16,6 @@ describe("PromptComposer", () => {
           codeBlock: "",
           description: "Anonymous Test",
           explanation: "Too short",
-          severity: "low" as const,
         },
       ],
     );
