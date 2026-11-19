@@ -93,4 +93,82 @@ export const SMELL_DESCRIPTIONS = {
     explanation:
       "Assertions placed inside lifecycle hooks (such as `beforeEach`) combine setup with verification, making failures harder to trace to a specific test case. Prefer arranging state in hooks and asserting inside individual tests.",
   },
+
+  AssertionRoulette: {
+    description: "Assertion Roulette",
+    explanation:
+      "A test case containing multiple assertions without explanatory failure messages makes it difficult to identify which specific check failed. Add descriptive failure messages or split unrelated assertions into dedicated test cases.",
+  },
+
+  DependentTest: {
+    description: "Dependent Test",
+    explanation:
+      "A test case that relies on state mutated by a previous test case (without being reset in `beforeEach`) violates test isolation and can fail unpredictably when test execution order changes.",
+  },
+
+  DuplicateAssert: {
+    description: "Duplicate Assert",
+    explanation:
+      "Repeating the exact same assertion multiple times within a single test case adds redundancy without increasing test coverage. Remove duplicate assertions or split distinct state transitions into separate test cases.",
+  },
+
+  EagerTest: {
+    description: "Eager Test",
+    explanation:
+      "A single test case that invokes multiple distinct methods on the object under test verifies too many behaviors at once. Split eager tests into focused unit tests that verify one behavior per test.",
+  },
+
+  ExceptionHandling: {
+    description: "Exception Handling",
+    explanation:
+      "Manually catching or throwing exceptions via `try/catch` or `throw` inside a test case obscures failure semantics and can cause tests to pass silently when an expected error is not thrown. Use framework assertion helpers like `expect(() => ...).toThrow()` or `expect(...).rejects`.",
+  },
+
+  IgnoredTest: {
+    description: "Ignored Test",
+    explanation:
+      "Skipped or placeholder tests (`it.skip`, `test.skip`, `describe.skip`, `xit`, `xtest`, `it.todo`) suppress test execution and accumulate stale or unverified code. Fix and re-enable the test or remove it if obsolete.",
+  },
+
+  LazyTest: {
+    description: "Lazy Test",
+    explanation:
+      "Multiple test cases in the same suite that invoke the exact same single method on the system under test often indicate fragmented verification that can be consolidated or parameterized.",
+  },
+
+  MagicNumberTest: {
+    description: "Magic Number Test",
+    explanation:
+      "Using unexplained raw numeric literals inside assertions makes it difficult to understand the business rule or domain meaning behind the expected value. Extract magic numbers into well-named constants.",
+  },
+
+  MysteryGuest: {
+    description: "Mystery Guest",
+    explanation:
+      "A test that directly accesses external resources (such as the file system, network sockets, HTTP clients, or browser storage) depends on hidden external state and can become slow or flaky. Mock external dependencies or use in-memory fixtures.",
+  },
+
+  RedundantAssertion: {
+    description: "Redundant Assertion",
+    explanation:
+      "An assertion comparing identical literals or identifiers (such as `expect(true).toBe(true)` or `assert.strictEqual(x, x)`) is tautological and cannot detect regressions. Assert actual computed output against expected values.",
+  },
+
+  ResourceOptimism: {
+    description: "Resource Optimism",
+    explanation:
+      "A test case that reads, writes, or deletes external files or paths without verifying their existence or availability makes optimistic assumptions about the environment. Check or provision resources explicitly before use, or mock the file system.",
+  },
+
+  SleepyTest: {
+    description: "Sleepy Test",
+    explanation:
+      "Using explicit time delays (`setTimeout` or timer-based sleeps) inside a test case slows down test execution and leads to non-deterministic, flaky failures. Use fake timers, event callbacks, or deterministic condition polling instead.",
+  },
+
+  UnknownTest: {
+    description: "Unknown Test",
+    explanation:
+      "A test case with executable statements but no assertions (`expect`, `assert`, or expected-error matchers) does not verify any outcome, making its intent unclear and allowing regressions to go unnoticed.",
+  },
 } as const satisfies Record<string, SmellDescription>;

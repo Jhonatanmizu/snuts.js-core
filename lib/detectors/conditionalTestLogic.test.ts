@@ -135,4 +135,57 @@ describe("ConditionalTestLogicDetector", () => {
     expect(smells[0]?.message).toBe("Conditional logic inside test case detected: IfStatement");
     expect(smells[1]?.message).toBe("Conditional logic inside test case detected: IfStatement");
   });
+
+  it("should detect for, for-of, for-in, while, and do-while loops inside a test case", async () => {
+    const code = `
+      describe('loop suite', () => {
+        it('should detect loops inside test', () => {
+          for (let i = 0; i < 2; i++) {
+            expect(i).toBeDefined();
+          }
+          for (const item of [1, 2]) {
+            expect(item).toBeDefined();
+          }
+          for (const key in { a: 1 }) {
+            expect(key).toBeDefined();
+          }
+          while (false) {
+            expect(1).toBe(1);
+          }
+          do {
+            expect(1).toBe(1);
+          } while (false);
+        });
+      });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+    const expectedCount = 5;
+    expect(smells).toHaveLength(expectedCount);
+    expect(smells.map((s) => s.message)).toEqual([
+      "Conditional logic inside test case detected: ForStatement",
+      "Conditional logic inside test case detected: ForOfStatement",
+      "Conditional logic inside test case detected: ForInStatement",
+      "Conditional logic inside test case detected: WhileStatement",
+      "Conditional logic inside test case detected: DoWhileStatement",
+    ]);
+  });
+
+  it("should detect ternary conditional expressions and member-expression test calls", async () => {
+    const code = `
+      describe('parameterized suite', () => {
+        it.each([1, 2])('checks value %s correctly', (val) => {
+          const result = val > 1 ? 'high' : 'low';
+          expect(result).toBeDefined();
+        });
+      });
+    `;
+    const ast = astService.parseToAst(code);
+    const smells = await detector.detect(ast, code, filePath);
+
+    expect(smells).toHaveLength(1);
+    expect(smells[0]?.message).toBe(
+      "Conditional logic inside test case detected: ConditionalExpression",
+    );
+  });
 });

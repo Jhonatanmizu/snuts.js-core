@@ -12,7 +12,7 @@ describe("SMELL_DESCRIPTIONS metadata coverage", () => {
     ).toBe(true);
   });
 
-  it("covers all 15 expected smell keys", () => {
+  it("covers all 28 expected smell keys", () => {
     const expectedKeys = [
       "AnonymousTest",
       "CommentsOnlyTest",
@@ -29,6 +29,19 @@ describe("SMELL_DESCRIPTIONS metadata coverage", () => {
       "TranscriptingTest",
       "VerboseTest",
       "VerifyInSetup",
+      "AssertionRoulette",
+      "DependentTest",
+      "DuplicateAssert",
+      "EagerTest",
+      "ExceptionHandling",
+      "IgnoredTest",
+      "LazyTest",
+      "MagicNumberTest",
+      "MysteryGuest",
+      "RedundantAssertion",
+      "ResourceOptimism",
+      "SleepyTest",
+      "UnknownTest",
     ];
 
     expect(Object.keys(SMELL_DESCRIPTIONS)).toEqual(expectedKeys);

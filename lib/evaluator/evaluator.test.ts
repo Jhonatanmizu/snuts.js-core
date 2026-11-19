@@ -11,23 +11,45 @@ import {
 } from "./index";
 
 describe("Normalizer", () => {
-  it("normalizes canonical names, prompt legacy names, short codes, and human descriptions", () => {
+  it("normalizes canonical SNUTS.js smell names, short codes, and descriptions", () => {
     expect(normalizeSmellType("AnonymousTest")).toBe("AnonymousTest");
     expect(normalizeSmellType("AT")).toBe("AnonymousTest");
     expect(normalizeSmellType("Anonymous Test")).toBe("AnonymousTest");
     expect(normalizeSmellType("AnonymousTestLogic")).toBe("AnonymousTest");
-
     expect(normalizeSmellType("Overcommented")).toBe("OvercommentedTest");
     expect(normalizeSmellType("OvercommentedTest")).toBe("OvercommentedTest");
     expect(normalizeSmellType("OT")).toBe("OvercommentedTest");
     expect(normalizeSmellType("Overcommented Test")).toBe("OvercommentedTest");
-
     expect(normalizeSmellType("GF")).toBe("GeneralFixture");
     expect(normalizeSmellType("SE")).toBe("SensitiveEquality");
     expect(normalizeSmellType("TWD")).toBe("TestWithoutDescription");
     expect(normalizeSmellType("COT")).toBe("CommentsOnlyTest");
     expect(normalizeSmellType("Comments-Only Test")).toBe("CommentsOnlyTest");
     expect(normalizeSmellType("TT")).toBe("TranscriptingTest");
+  });
+
+  it("normalizes JNose smell names and aliases to canonical types", () => {
+    expect(normalizeSmellType("ConstructorInitialization")).toBe("GeneralFixture");
+    expect(normalizeSmellType("DefaultTest")).toBe("AnonymousTest");
+    expect(normalizeSmellType("EmptyTest")).toBe("CommentsOnlyTest");
+    expect(normalizeSmellType("PrintStatement")).toBe("TranscriptingTest");
+    expect(normalizeSmellType("AssertionRoulette")).toBe("AssertionRoulette");
+    expect(normalizeSmellType("DuplicateAssert")).toBe("DuplicateAssert");
+    expect(normalizeSmellType("EagerTest")).toBe("EagerTest");
+    expect(normalizeSmellType("ExceptionHandling")).toBe("ExceptionHandling");
+    expect(normalizeSmellType("IgnoredTest")).toBe("IgnoredTest");
+    expect(normalizeSmellType("LazyTest")).toBe("LazyTest");
+    expect(normalizeSmellType("MagicNumberTest")).toBe("MagicNumberTest");
+    expect(normalizeSmellType("MysteryGuest")).toBe("MysteryGuest");
+    expect(normalizeSmellType("RedundantAssertion")).toBe("RedundantAssertion");
+  });
+
+  it("normalizes remaining JNose smell names and short codes", () => {
+    expect(normalizeSmellType("AR")).toBe("AssertionRoulette");
+    expect(normalizeSmellType("ResourceOptimism")).toBe("ResourceOptimism");
+    expect(normalizeSmellType("SleepyTest")).toBe("SleepyTest");
+    expect(normalizeSmellType("UnknownTest")).toBe("UnknownTest");
+    expect(normalizeSmellType("DependentTest")).toBe("DependentTest");
   });
 
   it("matches relative and absolute POSIX/Windows file paths", () => {

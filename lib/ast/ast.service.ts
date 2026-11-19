@@ -100,19 +100,51 @@ export class AstService {
     const callee = node.callee;
     const args = node.arguments;
 
-    const testName = t.isIdentifier(callee)
-      ? callee.name
-      : t.isMemberExpression(callee) && t.isIdentifier(callee.object)
-        ? callee.object.name
-        : null;
+    const testName = this.extractTestRootIdentifierName(callee);
 
     return (
       !!testName &&
       JEST_TEST_ALIAS_NAME_SET.has(testName) &&
       args.length > 1 &&
-      t.isStringLiteral(args[0]) &&
+      (t.isStringLiteral(args[0]) || t.isTemplateLiteral(args[0])) &&
       this.isFunction(args[1] as t.Node)
     );
+  }
+
+  public getTestCallback(
+    node: t.CallExpression,
+  ): t.FunctionExpression | t.ArrowFunctionExpression | null {
+    if (!this.isTestCase(node)) {
+      return null;
+    }
+
+    const callbackArg = node.arguments[1];
+    if (
+      callbackArg &&
+      (t.isFunctionExpression(callbackArg) || t.isArrowFunctionExpression(callbackArg))
+    ) {
+      return callbackArg;
+    }
+
+    return null;
+  }
+
+  private extractTestRootIdentifierName(
+    callee: t.Expression | t.V8IntrinsicIdentifier,
+  ): string | null {
+    if (t.isIdentifier(callee)) {
+      return callee.name;
+    }
+
+    if (t.isMemberExpression(callee)) {
+      return this.extractTestRootIdentifierName(callee.object);
+    }
+
+    if (t.isCallExpression(callee)) {
+      return this.extractTestRootIdentifierName(callee.callee);
+    }
+
+    return null;
   }
 
   public isDescribe(node: t.Node): boolean {
