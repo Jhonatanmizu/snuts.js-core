@@ -1,5 +1,12 @@
 # @snutsjs/core
 
+## 1.4.0
+
+### Minor Changes
+
+- Implement 13 new test smell detectors (`AssertionRouletteDetector`, `DependentTestDetector`, `DuplicateAssertDetector`, `EagerTestDetector`, `ExceptionHandlingDetector`, `IgnoredTestDetector`, `LazyTestDetector`, `MagicNumberTestDetector`, `MysteryGuestDetector`, `RedundantAssertionDetector`, `ResourceOptimismDetector`, `SleepyTestDetector`, `UnknownTestDetector`), expanding coverage to 28 built-in detectors.
+- Support markdown-fenced JSON code blocks in `parseRefactorPatch` for reliable AI refactoring patch extraction.
+
 ## 1.3.0
 
 ### Minor Changes

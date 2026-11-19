@@ -15,13 +15,34 @@ npm install @snutsjs/core
 ## 🚀 Library Usage (Extension-Friendly)
 
 ```ts
-import { DetectorRunner, detectors } from "@snutsjs/core";
+import {
+  createDetectorInstances,
+  DetectorRunner,
+  ProjectAnalyzer,
+  RefactorService,
+  LangChainProviderRegistry,
+} from "@snutsjs/core";
 
-const detectorInstances = Object.values(detectors).map((DetectorClass) => new DetectorClass());
-const runner = new DetectorRunner(detectorInstances);
+const detectors = createDetectorInstances();
 
-const smells = await runner.run("/absolute/path/to/example.test.ts");
-console.log(smells);
+// 1. Single-file AST analysis
+const runner = new DetectorRunner(detectors);
+const fileSmells = await runner.run("/absolute/path/to/example.test.ts");
+
+// 2. Parallel batch analysis across files and directories
+const projectAnalyzer = new ProjectAnalyzer(detectors);
+const projectSmells = await projectAnalyzer.analyze(["./src", "./tests"]);
+
+// 3. Single-file or batch AI refactoring
+const refactorService = new RefactorService(detectors, new LangChainProviderRegistry());
+const batchResult = await refactorService.refactorBatch({
+  paths: ["./src"],
+  apply: false,
+  provider: "openai",
+  model: "gpt-4.1-mini",
+  apiKey: process.env.OPENAI_API_KEY!,
+  concurrency: 3,
+});
 ```
 
 ## 👀 Runtime Watcher Entry
@@ -192,9 +213,9 @@ Optional shared defaults:
 
 ---
 
-## 🧷 Built-in test smell detectors
+## 🧷 Built-in Test Smell Detectors (28 Detectors)
 
-These ship with the library (see `lib/detectors`). Import them individually or instantiate everything from `import * as detectors from "@snutsjs/core"` (`Object.values(detectors)` gives each constructor). Report entries expose a human-readable **`description`** (`Smell.description`); JSON/CSV also duplicate the detector **`message`** in both **`message`** and **`smellType`**.
+These 28 detectors ship with the library (see `lib/detectors`). Instantiate all of them via `createDetectorInstances()` or import individual detector classes from `@snutsjs/core` / `@snutsjs/core/detectors`. Report entries expose a human-readable **`description`** (`Smell.description`) and **`explanation`** (`Smell.explanation`); JSON/CSV exports also include the detector **`message`** in both **`message`** and **`smellType`**.
 
 | Report `description`     | Exported detector                       | What it catches                                                                                                                              |
 | ------------------------ | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -261,21 +282,34 @@ Thresholds such as anonymous word count, comment budget, verbose statement count
 │   │   ├── detector-runner.ts
 │   │   ├── watcher.test.ts
 │   │   └── watcher.ts
-│   ├── detectors/          # Collection of predefined test smell detectors
+│   ├── detectors/          # Collection of 28 built-in test smell detectors
 │   │   ├── anonymousTestLogic.ts
+│   │   ├── assertionRouletteLogic.ts
 │   │   ├── commentsOnlyTestLogic.ts
 │   │   ├── complexSnapshotTestLogic.ts
 │   │   ├── conditionalTestLogic.ts
+│   │   ├── dependentTestLogic.ts
+│   │   ├── duplicateAssertLogic.ts
+│   │   ├── eagerTestLogic.ts
+│   │   ├── exceptionHandlingLogic.ts
 │   │   ├── generalFixtureTestLogic.ts
 │   │   ├── identicalDescriptionTestLogic.ts
+│   │   ├── ignoredTestLogic.ts
 │   │   ├── index.ts
+│   │   ├── lazyTestLogic.ts
+│   │   ├── magicNumberTestLogic.ts
+│   │   ├── mysteryGuestLogic.ts
 │   │   ├── nonFunctionalStatementLogic.ts
 │   │   ├── onlyTestLogic.ts
 │   │   ├── overcommentedTestLogic.ts
+│   │   ├── redundantAssertionLogic.ts
+│   │   ├── resourceOptimismLogic.ts
 │   │   ├── sensitiveEqualityLogic.ts
+│   │   ├── sleepyTestLogic.ts
 │   │   ├── subOptimalAssertLogic.ts
 │   │   ├── testWithoutDescriptionLogic.ts
 │   │   ├── transcriptingTestLogic.ts
+│   │   ├── unknownTestLogic.ts
 │   │   ├── verboseTestLogic.ts
 │   │   ├── verifyInSetupLogic.ts
 │   │   └── *.test.ts      # Detector unit specs (paired with each logic file)
@@ -330,11 +364,11 @@ Thresholds such as anonymous word count, comment budget, verbose statement count
 ### ⚛️ Core
 
 - **TypeScript**: Primary language for the project.
-- **@babel/parser**: Used for parsing JavaScript/TypeScript code into an AST.
-- **@babel/types**: Utilities for working with Babel AST nodes.
-- **esquery**: Powerful tool for querying ASTs with CSS-like selectors.
-- **chokidar**: File system watcher for real-time monitoring of file changes.
-- **commander**: Node.js command-line interfaces made easy.
+- **@babel/parser & @babel/types**: Used for parsing JavaScript/TypeScript/JSX/TSX test files into an AST and inspecting nodes.
+- **esquery**: Querying ASTs with CSS-like selectors.
+- **@langchain/core, @langchain/openai, @langchain/anthropic, @langchain/google-genai**: Multi-provider AI refactoring engine (OpenAI, Google Gemini, Anthropic Claude, DeepSeek, and Moonshot Kimi).
+- **chokidar & glob**: Real-time file watching and test file discovery.
+- **pino & pino-pretty**: Structured logging with custom logger injection (`setLogger`) for IDE hosts.
 
 ### 🧪 Testing
 
