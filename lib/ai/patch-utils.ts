@@ -218,10 +218,26 @@ function isValidEdit(edit: Partial<RefactorEdit>): edit is RefactorEdit {
   );
 }
 
+function extractJsonPayload(rawContent: string): string {
+  const trimmed = rawContent.trim();
+  const fencedMatch = /^```(?:json|JSON)?\s*\r?\n([\s\S]*?)\r?\n```\s*$/.exec(trimmed);
+  if (fencedMatch && fencedMatch[1]) {
+    return fencedMatch[1].trim();
+  }
+
+  const firstBrace = trimmed.indexOf("{");
+  const lastBrace = trimmed.lastIndexOf("}");
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    return trimmed.slice(firstBrace, lastBrace + 1);
+  }
+
+  return trimmed;
+}
+
 export function parseRefactorPatch(jsonContent: string): RefactorPatch {
   let raw: unknown;
   try {
-    raw = JSON.parse(jsonContent);
+    raw = JSON.parse(extractJsonPayload(jsonContent));
   } catch (error) {
     throw new Error(`Model returned invalid JSON: ${String(error)}`);
   }

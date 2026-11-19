@@ -295,6 +295,20 @@ describe("parseRefactorPatch", () => {
     expect(patch.edits).toHaveLength(1);
   });
 
+  it("parses a valid patch wrapped in markdown json fences", () => {
+    const fencedJson = [
+      "```json",
+      JSON.stringify({
+        summary: "fenced summary",
+        edits: [{ startLine: 1, endLine: 1, replacement: "x", reason: "r" }],
+      }),
+      "```",
+    ].join("\n");
+    const patch = parseRefactorPatch(fencedJson);
+    expect(patch.summary).toBe("fenced summary");
+    expect(patch.edits).toHaveLength(1);
+  });
+
   it("throws on invalid JSON", () => {
     expect(() => parseRefactorPatch("{bad}")).toThrow("invalid JSON");
   });
