@@ -1,0 +1,96 @@
+---
+import { getCollection, getEntry } from "astro:content";
+import AiRefactor from "@/components/AiRefactor.astro";
+import CliSdkSection from "@/components/CliSdkSection.astro";
+import CtaFooter from "@/components/CtaFooter.astro";
+import type { DetectorItem } from "@/components/DetectorsCatalog";
+import DetectorsSection from "@/components/DetectorsSection.astro";
+import Hero from "@/components/Hero.astro";
+import Nav from "@/components/Nav.astro";
+import VsCodeSection from "@/components/VsCodeSection.astro";
+import Workflow from "@/components/Workflow.astro";
+import Layout from "@/layouts/Layout.astro";
+
+const siteEntry = await getEntry("sections", "site");
+const heroEntry = await getEntry("sections", "hero");
+const workflowEntry = await getEntry("sections", "workflow");
+const detectorsSectionEntry = await getEntry("sections", "detectors-section");
+const aiRefactorEntry = await getEntry("sections", "ai-refactor");
+const cliSdkEntry = await getEntry("sections", "cli-sdk");
+const vscodeEntry = await getEntry("sections", "vscode");
+const ctaEntry = await getEntry("sections", "cta");
+
+if (
+  !siteEntry ||
+  siteEntry.data.sectionType !== "site" ||
+  !heroEntry ||
+  heroEntry.data.sectionType !== "hero" ||
+  !workflowEntry ||
+  workflowEntry.data.sectionType !== "workflow" ||
+  !detectorsSectionEntry ||
+  detectorsSectionEntry.data.sectionType !== "detectors-section" ||
+  !aiRefactorEntry ||
+  aiRefactorEntry.data.sectionType !== "ai-refactor" ||
+  !cliSdkEntry ||
+  cliSdkEntry.data.sectionType !== "cli-sdk" ||
+  !vscodeEntry ||
+  vscodeEntry.data.sectionType !== "vscode" ||
+  !ctaEntry ||
+  ctaEntry.data.sectionType !== "cta"
+) {
+  throw new Error("Missing or invalid section Markdown files in site/src/content/sections/");
+}
+
+const detectorEntries = await getCollection("detectors");
+const sortedDetectors: DetectorItem[] = detectorEntries
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((entry) => ({
+    order: entry.data.order,
+    name: entry.data.name,
+    category: entry.data.category,
+    categoryVariant: entry.data.categoryVariant,
+    description: entry.body.trim(),
+    trigger: entry.data.trigger,
+    threshold: entry.data.threshold,
+    featured: entry.data.featured,
+    mobileFeatured: entry.data.mobileFeatured,
+    chipRow: entry.data.chipRow,
+  }));
+
+const siteData = siteEntry.data;
+const heroData = heroEntry.data;
+const workflowData = workflowEntry.data;
+const detectorsSectionData = detectorsSectionEntry.data;
+const aiRefactorData = aiRefactorEntry.data;
+const cliSdkData = cliSdkEntry.data;
+const vscodeData = vscodeEntry.data;
+const ctaData = ctaEntry.data;
+---
+
+<Layout
+  title={`${siteData.brandName} — ${heroData.desktopH1Line1} ${heroData.desktopH1Line2}`}
+  description={heroData.desktopSubhead}
+>
+  <Nav
+    brandName={siteData.brandName}
+    version={siteData.version}
+    githubUrl={siteData.githubUrl}
+    githubStars={siteData.githubStars}
+    getStartedLabel={siteData.getStartedLabel}
+    getStartedHref={siteData.getStartedHref}
+    navLinks={siteData.navLinks}
+  />
+  <main class="flex w-full flex-col">
+    <Hero data={heroData} />
+    <Workflow data={workflowData} />
+    <DetectorsSection data={detectorsSectionData} detectors={sortedDetectors} />
+    <AiRefactor data={aiRefactorData} />
+    <CliSdkSection data={cliSdkData} />
+    <VsCodeSection
+      data={vscodeData}
+      marketplaceUrl={siteData.vscodeMarketplaceUrl}
+      repoUrl={siteData.vscodeRepoUrl}
+    />
+    <CtaFooter cta={ctaData} site={siteData} />
+  </main>
+</Layout>

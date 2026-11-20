@@ -1,0 +1,302 @@
+---
+import { ArrowRight, Braces, Check, Code, Scale, Terminal } from "lucide-react";
+import { CopyCommandPill } from "@/components/CopyCommandPill";
+import { GithubIcon } from "@/components/icons/GithubIcon";
+import { withBase } from "@/lib/utils";
+
+export interface CompatibilityPill {
+  icon: "check" | "braces" | "terminal" | "code" | "scale";
+  label: string;
+}
+
+export interface CtaSectionData {
+  eyebrow: string;
+  title: string;
+  desktopSub: string;
+  mobileSub: string;
+  desktopCliPrefix: string;
+  desktopCliPkg: string;
+  desktopCliArgs: string;
+  mobileCliArgs: string;
+  primaryCta: { label: string; href: string };
+  secondaryCta: { label: string; href: string };
+  compatibilityPills: CompatibilityPill[];
+}
+
+export interface FooterColumn {
+  heading: string;
+  showOnMobile: boolean;
+  links: {
+    desktopLabel: string;
+    mobileLabel: string;
+    href: string;
+  }[];
+}
+
+export interface SiteFooterData {
+  brandName: string;
+  fullVersion: string;
+  npmInstallCmd: string;
+  githubUrl: string;
+  githubRepoShort: string;
+  footerTagline: string;
+  footerCopyright: string;
+  footerColumns: FooterColumn[];
+}
+
+export interface Props {
+  cta: CtaSectionData;
+  site: SiteFooterData;
+}
+
+const { cta, site } = Astro.props;
+const mascotUrl = withBase("assets/mascot.png");
+const mascotPoseDUrl = withBase("assets/mascot-pose-d.svg");
+const fullCliCommand = `${cta.desktopCliPrefix}${cta.desktopCliPkg}${cta.desktopCliArgs}`;
+---
+
+<section class="w-full">
+  <!-- Desktop Section 8 · CTA + Footer (HRgjU / qSsQd) -->
+  <div class="hidden w-full flex-col lg:flex">
+    <!-- CTA Area -->
+    <div class="mx-auto flex w-full max-w-[1440px] flex-col px-8 py-[88px] xl:px-[120px]">
+      <div class="relative flex w-full flex-col items-center justify-center gap-[26px] overflow-hidden rounded-[20px] border border-snuts-border bg-snuts-espresso px-[48px] py-[54px]">
+        <!-- Mascot Pose D (x: 1048 / right: 54px, y: 26) -->
+        <div class="
+          absolute right-[48px] top-[26px] h-[98px] w-[98px] overflow-hidden
+          rounded-[16px] border border-snuts-border bg-snuts-espresso
+        ">
+          <img
+            src={mascotPoseDUrl}
+            alt="SNUTS.js Mascot Pose D"
+            class="h-full w-full object-contain"
+          />
+        </div>
+
+        <span class="inline-flex items-center rounded-pill bg-snuts-accent-14 px-[14px] py-[6px] font-mono text-[11.5px] font-medium tracking-[1.4px] text-snuts-text">
+          {cta.eyebrow}
+        </span>
+
+        <h2 class="w-[760px] text-center font-display text-[40px] font-bold leading-[1.15] tracking-[-1.2px] text-snuts-heading">
+          {cta.title}
+        </h2>
+
+        <p class="w-[660px] text-center font-body text-[16.5px] font-normal leading-[1.6] text-snuts-muted">
+          {cta.desktopSub}
+        </p>
+
+        <CopyCommandPill
+          client:load
+          command={fullCliCommand}
+          variant="cta-desktop"
+          prefixToken={cta.desktopCliPrefix}
+          pkgToken={cta.desktopCliPkg}
+          argsToken={cta.desktopCliArgs}
+        />
+
+        <div class="flex items-center gap-[14px]">
+          <a
+            href={cta.primaryCta.href}
+            class="inline-flex items-center justify-center gap-[9px] rounded-[10px] bg-snuts-accent px-[26px] py-[15px] font-body text-[15px] font-bold text-[#261B1F] transition-colors hover:bg-snuts-accent-hover"
+          >
+            <span>{cta.primaryCta.label}</span>
+            <ArrowRight className="h-[16px] w-[16px] text-[#261B1F]" />
+          </a>
+          <a
+            href={cta.secondaryCta.href}
+            target="_blank"
+            rel="noreferrer"
+            class="inline-flex items-center justify-center gap-[9px] rounded-[10px] border border-snuts-border bg-snuts-card px-[24px] py-[14px] font-body text-[15px] font-semibold text-snuts-text transition-colors hover:bg-snuts-card-hover"
+          >
+            <GithubIcon className="h-[16px] w-[16px] text-snuts-text" />
+            <span>{cta.secondaryCta.label}</span>
+          </a>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-[10px]">
+          {
+            cta.compatibilityPills.map((pill) => (
+              <div class="inline-flex items-center gap-[7px] rounded-pill border border-snuts-border bg-snuts-card px-[14px] py-[8px]">
+                {pill.icon === "check" && <Check className="h-[13px] w-[13px] text-snuts-ok" />}
+                {pill.icon === "braces" && <Braces className="h-[13px] w-[13px] text-snuts-ok" />}
+                {pill.icon === "terminal" && (
+                  <Terminal className="h-[13px] w-[13px] text-snuts-ok" />
+                )}
+                {pill.icon === "code" && <Code className="h-[13px] w-[13px] text-snuts-ok" />}
+                {pill.icon === "scale" && <Scale className="h-[13px] w-[13px] text-snuts-ok" />}
+                <span class="font-body text-[12.5px] font-medium text-snuts-muted">
+                  {pill.label}
+                </span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop Footer -->
+    <footer class="w-full border-t border-snuts-border">
+      <div class="mx-auto flex w-full max-w-[1440px] flex-col gap-[34px] px-8 pt-[52px] pb-[40px] xl:px-[120px]">
+        <div class="flex w-full items-start gap-[72px]">
+          <!-- Brand (330px) -->
+          <div class="flex w-[330px] shrink-0 flex-col gap-[15px]">
+            <div class="flex items-center gap-[11px]">
+              <div class="h-[34px] w-[34px] overflow-hidden rounded-[10px]">
+                <img src={mascotUrl} alt={site.brandName} class="h-full w-full object-contain" />
+              </div>
+              <span class="font-display text-[18px] font-bold tracking-[-0.4px] text-snuts-heading">
+                {site.brandName}
+              </span>
+            </div>
+            <p class="font-body text-[13.5px] font-normal leading-[1.6] text-snuts-muted">
+              {site.footerTagline}
+            </p>
+            <div class="inline-flex self-start items-center gap-[8px] rounded-pill border border-snuts-border bg-snuts-well px-[13px] py-[7px]">
+              <span class="font-mono text-[11.5px] text-snuts-ok">{site.npmInstallCmd}</span>
+              <span class="font-mono text-[11.5px] font-medium text-snuts-muted">
+                {site.fullVersion}
+              </span>
+            </div>
+          </div>
+
+          <div class="flex-1"></div>
+
+          {
+            site.footerColumns.map((col) => (
+              <div class="flex w-[190px] flex-col gap-[14px]">
+                <span class="font-mono text-[11px] font-semibold tracking-[1.5px] text-snuts-muted">
+                  {col.heading}
+                </span>
+                <div class="flex flex-col gap-[11px]">
+                  {col.links.map((link) => (
+                    <a
+                      href={link.href}
+                      class="font-body text-[13.5px] font-normal text-snuts-text transition-colors hover:text-snuts-accent-hover"
+                    >
+                      {link.desktopLabel}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))
+          }
+        </div>
+
+        <div class="flex w-full flex-col gap-[16px]">
+          <div class="h-[1px] w-full bg-snuts-border"></div>
+          <div class="flex w-full items-center justify-between gap-[8px]">
+            <span class="font-body text-[12.5px] text-snuts-muted">{site.footerCopyright}</span>
+            <a
+              href={site.githubUrl}
+              target="_blank"
+              rel="noreferrer"
+              class="font-mono text-[11.5px] text-snuts-muted transition-colors hover:text-snuts-text"
+            >
+              {site.githubRepoShort}
+            </a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Mobile Section 8 · CTA + Footer (KpfL5 / Zu2nN) -->
+  <div class="flex w-full flex-col border-t border-snuts-border px-[20px] pt-[46px] pb-[32px] lg:hidden">
+    <div class="relative flex w-full flex-col items-center gap-[18px] overflow-hidden rounded-[18px] border border-snuts-border bg-snuts-espresso px-[20px] py-[40px]">
+      <div class="
+        absolute right-[18px] top-[14px] h-[66px] w-[66px] overflow-hidden
+        rounded-[16px] border border-snuts-border bg-snuts-espresso
+      ">
+        <img
+          src={mascotPoseDUrl}
+          alt="SNUTS.js Mascot Pose D"
+          class="h-full w-full object-contain"
+        />
+      </div>
+
+      <span class="text-center font-mono text-[10px] font-medium tracking-[1.2px] text-snuts-accent-hover">
+        {cta.eyebrow}
+      </span>
+
+      <h2 class="w-[290px] text-center font-display text-[27px] font-bold leading-[1.16] tracking-[-0.9px] text-snuts-heading">
+        {cta.title}
+      </h2>
+
+      <p class="w-[290px] text-center font-body text-[13px] font-normal leading-[1.6] text-snuts-muted">
+        {cta.mobileSub}
+      </p>
+
+      <div class="flex w-[290px] items-center gap-[7px] rounded-[10px] border border-snuts-border bg-snuts-well px-[12px] py-[11px]">
+        <span class="font-mono text-[10.5px] text-snuts-ok">$</span>
+        <div class="flex items-center font-mono text-[10.5px] whitespace-pre">
+          <span class="text-snuts-rose">{cta.desktopCliPrefix}</span>
+          <span class="text-snuts-accent">{cta.desktopCliPkg}</span>
+          <span class="text-snuts-text">{cta.mobileCliArgs}</span>
+        </div>
+      </div>
+
+      <div class="flex w-[290px] flex-col gap-[9px]">
+        <a
+          href={cta.primaryCta.href}
+          class="flex h-[46px] w-full items-center justify-center gap-[8px] rounded-[10px] bg-snuts-accent px-[18px] py-[13px] font-body text-[14px] font-bold text-[#261B1F]"
+        >
+          <span>{cta.primaryCta.label}</span>
+          <ArrowRight className="h-[15px] w-[15px] text-[#261B1F]" />
+        </a>
+        <a
+          href={cta.secondaryCta.href}
+          target="_blank"
+          rel="noreferrer"
+          class="flex h-[44px] w-full items-center justify-center gap-[8px] rounded-[10px] border border-snuts-border bg-snuts-card font-body text-[13.5px] font-semibold text-snuts-text"
+        >
+          <GithubIcon className="h-[14px] w-[14px] text-snuts-text" />
+          <span>{cta.secondaryCta.label}</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Mobile Footer -->
+    <footer class="flex w-full flex-col gap-[26px] pt-[36px]">
+      <div class="flex w-full items-center gap-[9px]">
+        <div class="h-[30px] w-[30px] overflow-hidden rounded-[9px]">
+          <img src={mascotUrl} alt={site.brandName} class="h-full w-full object-contain" />
+        </div>
+        <span class="font-display text-[17px] font-bold tracking-[-0.4px] text-snuts-heading">
+          {site.brandName}
+        </span>
+      </div>
+
+      <p class="font-body text-[12.5px] font-normal leading-[1.6] text-snuts-muted">
+        {site.footerTagline}
+      </p>
+
+      <div class="flex w-full items-start gap-[20px]">
+        {
+          site.footerColumns
+            .filter((col) => col.showOnMobile)
+            .map((col) => (
+              <div class="flex w-[160px] flex-col gap-[10px]">
+                <span class="font-mono text-[10px] font-semibold tracking-[1.2px] text-snuts-muted">
+                  {col.heading}
+                </span>
+                <div class="flex flex-col gap-[9px]">
+                  {col.links.map((link) => (
+                    <a
+                      href={link.href}
+                      class="font-body text-[12px] font-normal text-snuts-text"
+                    >
+                      {link.mobileLabel}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))
+        }
+      </div>
+
+      <div class="h-[1px] w-full bg-snuts-border"></div>
+
+      <span class="font-body text-[11.5px] text-snuts-muted">{site.footerCopyright}</span>
+    </footer>
+  </div>
+</section>

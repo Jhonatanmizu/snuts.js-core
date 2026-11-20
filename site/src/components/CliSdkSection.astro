@@ -1,0 +1,57 @@
+---
+import { CliSdkTabs, type CliSdkTabItem } from "@/components/CliSdkTabs";
+
+export interface CliSdkSectionData {
+  desktopTitle: string;
+  desktopSub: string;
+  mobileTitle: string;
+  mobileSub: string;
+  tabs: CliSdkTabItem[];
+  desktopSafeNote: string;
+  mobileSafeNote: string;
+}
+
+export interface Props {
+  data: CliSdkSectionData;
+}
+
+const { data } = Astro.props;
+---
+
+<section id="cli-sdk" class="w-full">
+  <!-- Desktop Section 6 · CLI & SDK (HRgjU / gUqqk) -->
+  <div class="mx-auto hidden w-full max-w-[1440px] flex-col gap-[34px] px-8 py-[88px] lg:flex xl:px-[120px]">
+    <div class="flex w-full flex-col gap-[13px]">
+      <h2 class="font-display text-[38px] font-bold leading-[1.15] tracking-[-1.1px] text-snuts-heading">
+        {data.desktopTitle}
+      </h2>
+      <p class="font-body text-[16.5px] font-normal leading-[1.6] text-snuts-muted">
+        {data.desktopSub}
+      </p>
+    </div>
+
+    <CliSdkTabs
+      client:load
+      tabs={data.tabs}
+      desktopSafeNote={data.desktopSafeNote}
+      mobileSafeNote={data.mobileSafeNote}
+    />
+  </div>
+
+  <!-- Mobile Section 6 · CLI & SDK (KpfL5 / zOYxy) -->
+  <div class="flex w-full flex-col gap-[18px] border-y border-snuts-border bg-snuts-espresso px-[20px] py-[46px] lg:hidden">
+    <h2 class="font-display text-[24px] font-bold leading-[1.16] tracking-[-0.8px] text-snuts-heading">
+      {data.mobileTitle}
+    </h2>
+    <p class="font-body text-[13px] font-normal leading-[1.6] text-snuts-muted">
+      {data.mobileSub}
+    </p>
+
+    <CliSdkTabs
+      client:load
+      tabs={data.tabs}
+      desktopSafeNote={data.desktopSafeNote}
+      mobileSafeNote={data.mobileSafeNote}
+    />
+  </div>
+</section>

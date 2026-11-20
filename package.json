@@ -65,7 +65,12 @@
     "version-packages": "changeset version",
     "release": "changeset publish",
     "prepublishOnly": "npm run lint && npm run test && npm run typecheck && npm run build && npm pack --dry-run",
-    "prepare": "husky"
+    "prepare": "husky",
+    "site:install": "yarn --cwd site install",
+    "site:dev": "yarn --cwd site dev",
+    "site:build": "yarn --cwd site build",
+    "site:preview": "yarn --cwd site preview",
+    "site:check": "yarn --cwd site run check"
   },
   "lint-staged": {
     "*.{ts,js,json,md}": [

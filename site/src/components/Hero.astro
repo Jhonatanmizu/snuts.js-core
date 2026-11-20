@@ -1,0 +1,366 @@
+---
+import { ArrowRight, Check, Code, Sparkles } from "lucide-react";
+import { CopyCommandPill } from "@/components/CopyCommandPill";
+import { GithubIcon } from "@/components/icons/GithubIcon";
+
+export interface CodeToken {
+  text: string;
+  color: "accent-hover" | "text" | "ok" | "rose" | "warn" | "muted" | "accent";
+}
+
+export interface CodeLine {
+  ln: string;
+  tokens: CodeToken[];
+  diagnostic?: {
+    label: string;
+    variant: "warn" | "accent";
+  };
+}
+
+export interface HeroData {
+  desktopEyebrow: string;
+  mobileEyebrow: string;
+  desktopH1Line1: string;
+  desktopH1Line2: string;
+  mobileH1: string;
+  desktopSubhead: string;
+  mobileSubhead: string;
+  installCommand: string;
+  installChip: string;
+  desktopPrimaryCta: { label: string; href: string };
+  desktopSecondaryCta: { label: string; href: string };
+  mobilePrimaryCta: { label: string; href: string };
+  mobileSecondaryCta: { label: string; href: string };
+  trustStrip: string[];
+  desktopCodeWindow: {
+    fileName: string;
+    detectedBadge: string;
+    beforeTag: string;
+    beforeHint: string;
+    beforeCountBadge: string;
+    beforeLines: CodeLine[];
+    aiToolbar: {
+      title: string;
+      model: string;
+      actionLabel: string;
+    };
+    afterLines: CodeLine[];
+    footerPill: string;
+    footerMeta: string;
+  };
+  mobileCodeWindow: {
+    fileName: string;
+    detectedBadge: string;
+    beforeLabel: string;
+    beforeLines: string[];
+    afterLabel: string;
+    afterLines: string[];
+  };
+}
+
+export interface Props {
+  data: HeroData;
+}
+
+const { data } = Astro.props;
+
+const tokenColorMap: Record<CodeToken["color"], string> = {
+  "accent-hover": "text-snuts-accent-hover",
+  text: "text-snuts-text",
+  ok: "text-snuts-ok",
+  rose: "text-snuts-rose",
+  warn: "text-snuts-warn",
+  muted: "text-snuts-muted",
+  accent: "text-snuts-accent",
+};
+---
+
+<section class="w-full">
+  <!-- Desktop Hero (HRgjU / b4AoyP) -->
+  <div class="mx-auto hidden w-full max-w-[1440px] flex-col gap-[56px] px-8 pt-[88px] pb-[96px] lg:flex xl:px-[120px]">
+    <div class="flex w-full items-start gap-[40px]">
+      <!-- Hero Copy (600px) -->
+      <div class="flex w-[540px] xl:w-[600px] shrink-0 flex-col gap-[24px]">
+        <div class="inline-flex self-start items-center gap-[9px] rounded-pill border border-snuts-border bg-transparent px-[15px] py-[7px]">
+          <span class="h-[7px] w-[7px] rounded-full bg-snuts-accent"></span>
+          <span class="font-body text-[12.5px] font-medium text-snuts-muted">
+            {data.desktopEyebrow}
+          </span>
+        </div>
+
+        <h1 class="flex flex-col gap-[2px]">
+          <span class="font-display text-[48px] xl:text-[54px] font-bold leading-[1.06] tracking-[-1.6px] text-snuts-heading">
+            {data.desktopH1Line1}
+          </span>
+          <span class="font-display text-[48px] xl:text-[54px] font-bold leading-[1.06] tracking-[-1.6px] text-snuts-accent">
+            {data.desktopH1Line2}
+          </span>
+        </h1>
+
+        <p class="font-body text-[18px] font-normal leading-[1.6] text-snuts-muted">
+          {data.desktopSubhead}
+        </p>
+
+        <CopyCommandPill
+          client:load
+          command={data.installCommand}
+          chip={data.installChip}
+          variant="hero"
+        />
+
+        <div class="flex w-full items-center gap-[14px]">
+          <a
+            href={data.desktopPrimaryCta.href}
+            class="inline-flex flex-1 items-center justify-center gap-[8px] rounded-[10px] bg-snuts-accent px-[26px] py-[15px] font-body text-[15.5px] font-bold text-[#261B1F] transition-colors hover:bg-snuts-accent-hover"
+          >
+            <span>{data.desktopPrimaryCta.label}</span>
+            <ArrowRight className="h-[16px] w-[16px] text-[#261B1F]" />
+          </a>
+          <a
+            href={data.desktopSecondaryCta.href}
+            class="inline-flex flex-1 items-center justify-center gap-[9px] rounded-[10px] border border-snuts-border bg-snuts-card px-[22px] py-[14px] font-body text-[15px] font-semibold text-snuts-text transition-colors hover:bg-snuts-card-hover"
+          >
+            <Code className="h-[16px] w-[16px] text-snuts-text" />
+            <span>{data.desktopSecondaryCta.label}</span>
+          </a>
+        </div>
+
+        <div class="flex w-full flex-wrap items-center gap-[9px]">
+          {
+            data.trustStrip.map((item, idx) => (
+              <>
+                <span class="font-body text-[11.5px] font-medium text-snuts-muted">{item}</span>
+                {idx < data.trustStrip.length - 1 && (
+                  <span class="h-[3px] w-[3px] rounded-full bg-snuts-chestnut" />
+                )}
+              </>
+            ))
+          }
+        </div>
+      </div>
+
+      <!-- Hero Visual -->
+      <div class="relative flex min-w-0 flex-1 flex-col">
+        <div
+          class="pointer-events-none absolute left-[40px] top-[20px] h-[360px] w-[440px] rounded-full opacity-90 blur-[90px]"
+          style="background: radial-gradient(circle, #DC678159 0%, #DC678100 100%);"
+        >
+        </div>
+        <div
+          class="pointer-events-none absolute left-[150px] top-[180px] h-[320px] w-[380px] rounded-full opacity-90 blur-[90px]"
+          style="background: radial-gradient(circle, #885C5242 0%, #885C5200 100%);"
+        >
+        </div>
+
+        <div class="relative z-10 flex w-full flex-col overflow-hidden rounded-[14px] border border-snuts-accent-35 bg-snuts-well">
+          <!-- Window Bar -->
+          <div class="flex w-full items-center gap-[12px] bg-snuts-espresso px-[14px] py-[11px]">
+            <div class="flex items-center gap-[6px]">
+              <span class="h-[10px] w-[10px] rounded-full bg-snuts-err"></span>
+              <span class="h-[10px] w-[10px] rounded-full bg-snuts-warn"></span>
+              <span class="h-[10px] w-[10px] rounded-full bg-snuts-ok"></span>
+            </div>
+            <div class="flex-1"></div>
+            <div class="rounded-[6px] bg-snuts-card px-[11px] py-[5px] font-mono text-[11.5px] text-snuts-text">
+              {data.desktopCodeWindow.fileName}
+            </div>
+            <div class="rounded-pill bg-snuts-accent-14 px-[11px] py-[5px] font-mono text-[10.5px] font-medium text-snuts-text">
+              {data.desktopCodeWindow.detectedBadge}
+            </div>
+          </div>
+
+          <div class="h-[1px] w-full bg-snuts-border"></div>
+
+          <!-- Pane Before -->
+          <div class="flex w-full flex-col gap-[9px] px-[16px] py-[15px]">
+            <div class="flex w-full items-center gap-[8px]">
+              <span class="rounded-[6px] bg-snuts-err-14 px-[9px] py-[3px] font-mono text-[10px] font-medium tracking-[0.8px] text-snuts-err">
+                {data.desktopCodeWindow.beforeTag}
+              </span>
+              <span class="font-body text-[11.5px] text-snuts-muted">
+                {data.desktopCodeWindow.beforeHint}
+              </span>
+              <div class="flex-1"></div>
+              <span class="rounded-pill bg-snuts-warn-14 px-[9px] py-[3px] font-mono text-[10px] font-medium text-snuts-warn">
+                {data.desktopCodeWindow.beforeCountBadge}
+              </span>
+            </div>
+
+            {
+              data.desktopCodeWindow.beforeLines.map((line) => (
+                <div class="flex h-[24px] w-full items-center">
+                  <div class="flex w-full items-center gap-[10px]">
+                    <span class="w-[12px] text-right font-mono text-[11.5px] text-snuts-muted">
+                      {line.ln}
+                    </span>
+                    <div class="flex items-center font-mono text-[13px] whitespace-pre">
+                      {line.tokens.map((tok) => (
+                        <span class={tokenColorMap[tok.color]}>{tok.text}</span>
+                      ))}
+                    </div>
+                    <div class="flex-1" />
+                    {line.diagnostic && (
+                      <span
+                        class:list={[
+                          "rounded-[6px] px-[9px] py-[3px] font-mono text-[10px] font-medium",
+                          line.diagnostic.variant === "warn"
+                            ? "bg-snuts-warn-14 text-snuts-warn"
+                            : "bg-snuts-accent-14 text-snuts-accent-hover",
+                        ]}
+                      >
+                        {line.diagnostic.label}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+
+          <div class="h-[1px] w-full bg-snuts-border"></div>
+
+          <!-- Pane After -->
+          <div class="flex w-full flex-col">
+            <!-- AI Toolbar -->
+            <div class="flex w-full items-center gap-[10px] bg-[#2A1D22] px-[14px] py-[10px]">
+              <Sparkles className="h-[14px] w-[14px] text-snuts-accent" />
+              <span class="font-body text-[12.5px] font-semibold text-snuts-heading">
+                {data.desktopCodeWindow.aiToolbar.title}
+              </span>
+              <div class="flex-1"></div>
+              <div class="inline-flex items-center gap-[6px] rounded-pill border border-snuts-border bg-snuts-card px-[10px] py-[4px]">
+                <span class="h-[6px] w-[6px] rounded-full bg-snuts-ok"></span>
+                <span class="font-mono text-[10.5px] text-snuts-muted">
+                  {data.desktopCodeWindow.aiToolbar.model}
+                </span>
+              </div>
+              <span class="inline-flex items-center rounded-[8px] bg-snuts-accent px-[13px] py-[7px] font-body text-[12px] font-bold text-[#261B1F]">
+                {data.desktopCodeWindow.aiToolbar.actionLabel}
+              </span>
+            </div>
+
+            <!-- Code Body -->
+            <div class="flex w-full flex-col gap-[9px] px-[16px] py-[15px]">
+              {
+                data.desktopCodeWindow.afterLines.map((line) => (
+                  <div class="flex h-[24px] w-full items-center">
+                    <div class="h-full w-[3px] bg-snuts-ok" />
+                    <div class="flex w-full items-center gap-[10px] pl-[11px]">
+                      <span class="w-[12px] text-right font-mono text-[11.5px] text-snuts-muted">
+                        {line.ln}
+                      </span>
+                      <div class="flex items-center font-mono text-[13px] whitespace-pre">
+                        {line.tokens.map((tok) => (
+                          <span class={tokenColorMap[tok.color]}>{tok.text}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+
+            <!-- Footer -->
+            <div class="flex w-full items-center gap-[10px] bg-[#2A1D22] px-[14px] py-[11px]">
+              <div class="inline-flex items-center gap-[6px] rounded-pill bg-snuts-ok-12 px-[11px] py-[5px]">
+                <Check className="h-[12px] w-[12px] text-snuts-ok" />
+                <span class="font-mono text-[11px] font-medium text-snuts-ok">
+                  {data.desktopCodeWindow.footerPill}
+                </span>
+              </div>
+              <div class="flex-1"></div>
+              <span class="font-mono text-[10.5px] text-snuts-muted">
+                {data.desktopCodeWindow.footerMeta}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Hero (KpfL5 / cI95g) -->
+  <div class="flex w-full flex-col gap-[24px] px-[20px] pt-[42px] pb-[52px] lg:hidden">
+    <div class="inline-flex self-start items-center gap-[8px] rounded-pill bg-snuts-accent-14 px-[13px] py-[7px]">
+      <span class="h-[6px] w-[6px] rounded-full bg-snuts-accent"></span>
+      <span class="font-mono text-[10px] font-medium tracking-[0.8px] text-snuts-accent-hover">
+        {data.mobileEyebrow}
+      </span>
+    </div>
+
+    <h1 class="font-display text-[33px] font-bold leading-[1.12] tracking-[-1.1px] text-snuts-heading">
+      {data.mobileH1}
+    </h1>
+
+    <p class="font-body text-[15px] font-normal leading-[1.62] text-snuts-muted">
+      {data.mobileSubhead}
+    </p>
+
+    <div class="flex w-full flex-col gap-[11px]">
+      <a
+        href={data.mobilePrimaryCta.href}
+        class="flex h-[48px] w-full items-center justify-center gap-[8px] rounded-[10px] bg-snuts-accent px-[20px] py-[14px] font-body text-[15px] font-bold text-[#261B1F]"
+      >
+        <span>{data.mobilePrimaryCta.label}</span>
+        <ArrowRight className="h-[16px] w-[16px] text-[#261B1F]" />
+      </a>
+      <a
+        href={data.mobileSecondaryCta.href}
+        target="_blank"
+        rel="noreferrer"
+        class="flex h-[44px] w-full items-center justify-center gap-[9px] rounded-[10px] border border-snuts-border bg-snuts-card font-body text-[14px] font-semibold text-snuts-text"
+      >
+        <GithubIcon className="h-[16px] w-[16px] text-snuts-text" />
+        <span>{data.mobileSecondaryCta.label}</span>
+      </a>
+    </div>
+
+    <!-- Mobile Code Window -->
+    <div class="flex w-full flex-col overflow-hidden rounded-[14px] border border-snuts-border bg-snuts-well">
+      <div class="flex w-full items-center gap-[9px] bg-snuts-espresso px-[12px] py-[10px]">
+        <span class="h-[8px] w-[8px] rounded-full bg-snuts-err"></span>
+        <span class="h-[8px] w-[8px] rounded-full bg-snuts-warn"></span>
+        <span class="h-[8px] w-[8px] rounded-full bg-snuts-ok"></span>
+        <span class="rounded-[6px] bg-snuts-card px-[8px] py-[4px] font-mono text-[10px] text-snuts-text">
+          {data.mobileCodeWindow.fileName}
+        </span>
+        <div class="flex-1"></div>
+        <span class="rounded-pill bg-snuts-err-14 px-[8px] py-[4px] font-mono text-[11px] text-snuts-text">
+          {data.mobileCodeWindow.detectedBadge}
+        </span>
+      </div>
+
+      <div class="flex w-full flex-col gap-[1px] py-[10px]">
+        <div class="flex w-full items-center gap-[6px] px-[10px] pb-[5px]">
+          <span class="font-mono text-[11px] font-medium tracking-[1px] text-snuts-err">
+            {data.mobileCodeWindow.beforeLabel}
+          </span>
+        </div>
+        {
+          data.mobileCodeWindow.beforeLines.map((line) => (
+            <div class="flex h-[21px] w-full items-center gap-[8px] bg-snuts-err-14 px-[10px] font-mono text-[10.5px]">
+              <span class="font-medium text-snuts-err">-</span>
+              <span class="whitespace-pre text-snuts-err">{line}</span>
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="flex w-full flex-col gap-[1px] pt-[4px] pb-[12px]">
+        <div class="flex w-full items-center gap-[6px] px-[10px] pb-[5px]">
+          <span class="font-mono text-[11px] font-medium tracking-[1px] text-snuts-ok">
+            {data.mobileCodeWindow.afterLabel}
+          </span>
+        </div>
+        {
+          data.mobileCodeWindow.afterLines.map((line) => (
+            <div class="flex h-[21px] w-full items-center gap-[8px] bg-snuts-ok-12 px-[10px] font-mono text-[10.5px]">
+              <span class="font-medium text-snuts-ok">+</span>
+              <span class="whitespace-pre text-snuts-ok">{line}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>

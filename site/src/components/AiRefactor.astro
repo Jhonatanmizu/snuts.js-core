@@ -1,0 +1,280 @@
+---
+import { Eye, Info, Layers, Sparkles, Target } from "lucide-react";
+import { withBase } from "@/lib/utils";
+
+export interface AiProviderItem {
+  name: string;
+  mobileName: string;
+  model: string;
+  dotColor: string;
+}
+
+export interface DiffLineItem {
+  sign: string;
+  code: string;
+  type: "remove" | "add" | "neutral";
+}
+
+export interface CapabilityItem {
+  icon: "eye" | "layers" | "target";
+  title: string;
+  desc: string;
+}
+
+export interface AiRefactorData {
+  desktopEyebrow: string;
+  mobileEyebrow: string;
+  desktopTitle: string;
+  mobileTitle: string;
+  mobileSub: string;
+  providers: AiProviderItem[];
+  diffFileName: string;
+  diffSmellsBadge: string;
+  desktopDiffLines: DiffLineItem[];
+  desktopFooterNote: string;
+  mobileBeforeHeader: string;
+  mobileBeforeLines: string[];
+  mobileRefactorChip: string;
+  mobileAfterHeader: string;
+  mobileAfterBadge: string;
+  mobileAfterLines: string[];
+  mobileFooterNote: string;
+  capabilities: CapabilityItem[];
+}
+
+export interface Props {
+  data: AiRefactorData;
+}
+
+const { data } = Astro.props;
+const mascotPoseCUrl = withBase("assets/mascot-pose-c.svg");
+const mobileProvidersRow1 = data.providers.slice(0, 3);
+const mobileProvidersRow2 = data.providers.slice(3, 5);
+---
+
+<section id="ai-refactor" class="w-full">
+  <!-- Desktop Section 5 · AI Refactor (HRgjU / fm6iO) -->
+  <div class="mx-auto hidden w-full max-w-[1440px] flex-col gap-[34px] px-8 py-[88px] lg:flex xl:px-[120px]">
+    <div class="flex w-full items-center justify-between gap-[8px]">
+      <div class="flex w-[940px] flex-col gap-[14px]">
+        <span class="inline-flex self-start items-center rounded-pill bg-snuts-accent-14 px-[14px] py-[6px] font-body text-[12.5px] font-semibold text-snuts-accent-hover">
+          {data.desktopEyebrow}
+        </span>
+        <h2 class="font-display text-[38px] font-bold leading-[1.15] tracking-[-1.1px] text-snuts-heading">
+          {data.desktopTitle}
+        </h2>
+      </div>
+      <div class="h-[196px] w-[196px] shrink-0 overflow-hidden rounded-[16px] border border-snuts-border bg-snuts-espresso">
+        <img
+          src={mascotPoseCUrl}
+          alt="SNUTS.js Mascot Pose C"
+          class="h-full w-full object-contain"
+        />
+      </div>
+    </div>
+
+    <!-- Provider Strip -->
+    <div class="flex w-full items-center gap-[12px]">
+      {
+        data.providers.map((provider) => (
+          <div class="flex flex-1 items-center gap-[9px] rounded-pill border border-snuts-border bg-snuts-card px-[16px] py-[10px]">
+            <span
+              class="h-[8px] w-[8px] shrink-0 rounded-full"
+              style={`background-color: ${provider.dotColor};`}
+            />
+            <div class="flex flex-col gap-[2px]">
+              <span class="font-body text-[13.5px] font-semibold text-snuts-text">
+                {provider.name}
+              </span>
+              <span class="font-mono text-[11px] font-normal text-snuts-muted">
+                {provider.model}
+              </span>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <!-- Content Row -->
+    <div class="flex w-full items-start gap-[28px]">
+      <!-- Diff Panel (660px) -->
+      <div class="flex w-[600px] xl:w-[660px] shrink-0 flex-col overflow-hidden rounded-[14px] border border-snuts-border bg-snuts-well">
+        <div class="flex w-full items-center gap-[12px] bg-snuts-espresso px-[14px] py-[11px]">
+          <div class="flex items-center gap-[6px]">
+            <span class="h-[10px] w-[10px] rounded-full bg-snuts-err"></span>
+            <span class="h-[10px] w-[10px] rounded-full bg-snuts-warn"></span>
+            <span class="h-[10px] w-[10px] rounded-full bg-snuts-ok"></span>
+          </div>
+          <div class="flex-1"></div>
+          <span class="rounded-[6px] bg-snuts-card px-[11px] py-[5px] font-mono text-[11.5px] text-snuts-text">
+            {data.diffFileName}
+          </span>
+          <span class="rounded-pill bg-snuts-err-14 px-[11px] py-[5px] font-mono text-[10.5px] font-medium text-snuts-text">
+            {data.diffSmellsBadge}
+          </span>
+        </div>
+
+        <div class="flex w-full flex-col gap-[1px] py-[14px]">
+          {
+            data.desktopDiffLines.map((line) => (
+              <div
+                class:list={[
+                  "flex h-[25px] w-full items-center gap-[12px] px-[14px] font-mono text-[12.5px]",
+                  line.type === "remove" && "bg-snuts-err-14 text-snuts-err",
+                  line.type === "add" && "bg-snuts-ok-12 text-snuts-ok",
+                  line.type === "neutral" && "bg-transparent text-snuts-muted",
+                ]}
+              >
+                <span class="w-[8px] font-medium">{line.sign}</span>
+                <span class="whitespace-pre font-normal">{line.code}</span>
+              </div>
+            ))
+          }
+        </div>
+
+        <div class="flex w-full items-center gap-[8px] bg-snuts-espresso px-[14px] py-[11px]">
+          <Info className="h-[13px] w-[13px] text-snuts-meta" />
+          <span class="font-mono text-[11px] font-normal text-snuts-muted">
+            {data.desktopFooterNote}
+          </span>
+        </div>
+      </div>
+
+      <!-- Capabilities -->
+      <div class="flex flex-1 flex-col gap-[16px]">
+        {
+          data.capabilities.map((cap) => (
+            <div class="flex w-full flex-col gap-[13px] rounded-[16px] border border-snuts-border bg-snuts-card p-[22px]">
+              <div class="flex h-[38px] w-[38px] items-center justify-center rounded-[11px] bg-snuts-accent-14">
+                {cap.icon === "eye" && <Eye className="h-[18px] w-[18px] text-snuts-accent" />}
+                {cap.icon === "layers" && <Layers className="h-[18px] w-[18px] text-snuts-accent" />}
+                {cap.icon === "target" && <Target className="h-[18px] w-[18px] text-snuts-accent" />}
+              </div>
+              <h3 class="font-display text-[18px] font-semibold tracking-[-0.2px] text-snuts-heading">
+                {cap.title}
+              </h3>
+              <p class="font-body text-[13.5px] font-normal leading-[1.55] text-snuts-muted">
+                {cap.desc}
+              </p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Section 5 · AI Refactor (KpfL5 / H6DTi) -->
+  <div class="flex w-full flex-col gap-[19px] px-[20px] py-[46px] lg:hidden">
+    <div class="flex w-full items-center justify-between gap-[8px]">
+      <div class="flex w-[255px] flex-col gap-[10px]">
+        <span class="inline-flex self-start items-center rounded-pill bg-snuts-accent-14 px-[11px] py-[5px] font-body text-[10px] font-semibold text-snuts-accent-hover">
+          {data.mobileEyebrow}
+        </span>
+        <h2 class="font-display text-[24px] font-bold leading-[1.16] tracking-[-0.8px] text-snuts-heading">
+          {data.mobileTitle}
+        </h2>
+      </div>
+      <div class="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-[16px] border border-snuts-border bg-snuts-espresso">
+        <img
+          src={mascotPoseCUrl}
+          alt="SNUTS.js Mascot Pose C"
+          class="h-full w-full object-contain"
+        />
+      </div>
+    </div>
+
+    <p class="font-body text-[13px] font-normal leading-[1.6] text-snuts-muted">
+      {data.mobileSub}
+    </p>
+
+    <div class="flex w-full items-center gap-[8px]">
+      {
+        mobileProvidersRow1.map((provider) => (
+          <div class="inline-flex items-center gap-[6px] rounded-pill border border-snuts-border bg-snuts-card px-[11px] py-[7px]">
+            <span
+              class="h-[6px] w-[6px] rounded-full"
+              style={`background-color: ${provider.dotColor};`}
+            />
+            <span class="font-body text-[11px] font-medium text-snuts-text">
+              {provider.mobileName}
+            </span>
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="flex w-full items-center gap-[8px]">
+      {
+        mobileProvidersRow2.map((provider) => (
+          <div class="inline-flex items-center gap-[6px] rounded-pill border border-snuts-border bg-snuts-card px-[11px] py-[7px]">
+            <span
+              class="h-[6px] w-[6px] rounded-full"
+              style={`background-color: ${provider.dotColor};`}
+            />
+            <span class="font-body text-[11px] font-medium text-snuts-text">
+              {provider.mobileName}
+            </span>
+          </div>
+        ))
+      }
+    </div>
+
+    <!-- Mobile Before Panel -->
+    <div class="flex w-full flex-col overflow-hidden rounded-[12px] border border-snuts-border bg-snuts-well">
+      <div class="flex w-full items-center gap-[8px] bg-snuts-espresso px-[11px] py-[9px]">
+        <span class="font-mono text-[10px] text-snuts-muted">{data.mobileBeforeHeader}</span>
+        <div class="flex-1"></div>
+        <span class="rounded-pill bg-snuts-err-14 px-[8px] py-[3px] font-mono text-[11px] text-snuts-text">
+          {data.diffSmellsBadge}
+        </span>
+      </div>
+      <div class="flex w-full flex-col gap-[1px] py-[8px]">
+        {
+          data.mobileBeforeLines.map((line) => (
+            <div class="flex h-[21px] w-full items-center gap-[8px] bg-snuts-err-14 px-[10px] font-mono text-[10.5px]">
+              <span class="font-medium text-snuts-err">-</span>
+              <span class="whitespace-pre text-snuts-err">{line}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- Mobile Refactor Chip -->
+    <div class="inline-flex self-start items-center gap-[7px] rounded-pill bg-snuts-accent-14 px-[13px] py-[7px]">
+      <Sparkles className="h-[13px] w-[13px] text-snuts-accent" />
+      <span class="font-body text-[11.5px] font-semibold text-snuts-accent-hover">
+        {data.mobileRefactorChip}
+      </span>
+    </div>
+
+    <!-- Mobile After Panel -->
+    <div class="flex w-full flex-col overflow-hidden rounded-[12px] border border-snuts-border bg-snuts-well">
+      <div class="flex w-full items-center gap-[8px] bg-snuts-espresso px-[11px] py-[9px]">
+        <span class="font-mono text-[10px] text-snuts-muted">{data.mobileAfterHeader}</span>
+        <div class="flex-1"></div>
+        <span class="rounded-pill bg-snuts-ok-12 px-[8px] py-[3px] font-mono text-[11px] text-snuts-ok">
+          {data.mobileAfterBadge}
+        </span>
+      </div>
+      <div class="flex w-full flex-col gap-[1px] py-[8px]">
+        {
+          data.mobileAfterLines.map((line) => (
+            <div class="flex h-[21px] w-full items-center gap-[8px] bg-snuts-ok-12 px-[10px] font-mono text-[10.5px]">
+              <span class="font-medium text-snuts-ok">+</span>
+              <span class="whitespace-pre text-snuts-ok">{line}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- Mobile Note -->
+    <div class="flex w-full items-center gap-[7px] rounded-[10px] border border-snuts-border bg-snuts-espresso px-[12px] py-[10px]">
+      <Info className="h-[12px] w-[12px] shrink-0 text-snuts-meta" />
+      <span class="font-body text-[11.5px] font-normal leading-[1.5] text-snuts-muted">
+        {data.mobileFooterNote}
+      </span>
+    </div>
+  </div>
+</section>

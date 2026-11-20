@@ -16,6 +16,7 @@ export default tseslint.config(
       "coverage/**",
       "bin/**",
       "dumb/**",
+      "site/**",
     ],
   },
   js.configs.recommended,

@@ -570,3 +570,50 @@ If the file watcher (`chokidar`) doesn't seem to be picking up changes:
 
 - Ensure you are running `yarn start` from the project's root directory.
 - Check for any system-level file watch limits (e.g., `fs.inotify.max_user_watches` on Linux) that might be preventing `chokidar` from functioning correctly in large projects).
+
+---
+
+## 🌐 Astro Landing Page & GitHub Pages (`site/`)
+
+The official SNUTS.js landing page lives inside [`site/`](./site) and is built with **Astro**, **Tailwind CSS**, and **shadcn/ui** components. It is completely isolated from the `@snutsjs/core` npm library build and tarball.
+
+### Local Development & Build Commands
+
+From the repository root:
+
+```bash
+# Install landing page dependencies
+yarn site:install
+
+# Start local Astro development server (http://localhost:4321)
+yarn site:dev
+
+# Run Astro & TypeScript strict checks
+yarn site:check
+
+# Build static production output into site/dist
+yarn site:build
+
+# Preview the production build locally
+yarn site:preview
+```
+
+### Editing Content via Markdown
+
+All landing page text, navigation links, code comparison windows, workflow steps, the 28 built-in test smell detectors, AI refactoring diffs/providers, CLI & SDK tabs, VS Code showcase items, and CTA/footer links are stored in validated Markdown files under [`site/src/content/`](./site/src/content):
+
+- **`site/src/content/sections/`**:
+  - `site.md` — Brand metadata, version badge, navigation links, and footer columns
+  - `hero.md` — Hero headlines, install command, CTAs, trust strip, and `auth.test.ts` / `payment.spec.ts` code windows
+  - `workflow.md` — 3-step AST workflow (`01 Parse AST`, `02 Detect 28 Smells`, `03 Report or Refactor`)
+  - `detectors-section.md` — Detector catalog titles, category filter tabs, and expandable bar labels
+  - `ai-refactor.md` — Multi-provider LLM pills, `payment.spec.ts` diff lines, and capability cards
+  - `cli-sdk.md` — Interactive 5-tab CLI & TypeScript SDK commands and configuration snippets
+  - `vscode.md` — Official VS Code extension features and editor mockup data
+  - `cta.md` — Final call-to-action card and compatibility badges
+- **`site/src/content/detectors/`**:
+  - `01-conditional-test-logic.md` through `28-unknown-test.md` — Individual Markdown files for each of the 28 built-in detectors (`name`, `category`, `trigger`, `threshold`, `featured`, and Markdown description body).
+
+### Deploying to GitHub Pages
+
+Pushes to `main` that modify `site/**` (or manual triggers via `workflow_dispatch`) automatically trigger [`.github/workflows/deploy-pages.yml`](./.github/workflows/deploy-pages.yml), which configures the GitHub Pages base URL (`ASTRO_SITE` and `ASTRO_BASE`), builds `site/dist`, and deploys the static artifact via `actions/deploy-pages`.

@@ -1,0 +1,483 @@
+---
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  Code,
+  Download,
+  ExternalLink,
+  FileCode,
+  Folder,
+  LayoutPanelLeft,
+  Lightbulb,
+  Search,
+  Settings,
+  Sparkles,
+} from "lucide-react";
+import type { CodeLine, CodeToken } from "@/components/Hero.astro";
+import { withBase } from "@/lib/utils";
+
+export interface VsCodeFeature {
+  desktopTitle: string;
+  desktopDesc: string;
+  mobileTitle: string;
+  mobileDesc: string;
+  showOnMobile: boolean;
+}
+
+export interface VsCodeSectionData {
+  desktopBadge: string;
+  mobileBadge: string;
+  desktopHeading: string;
+  mobileKicker: string;
+  mobileHeading: string;
+  features: VsCodeFeature[];
+  primaryCtaLabel: string;
+  secondaryCtaLabel: string;
+  mockup: {
+    windowTitle: string;
+    mobileWindowTitle: string;
+    projectName: string;
+    explorerItems: {
+      name: string;
+      kind: "folder" | "file";
+      active: boolean;
+    }[];
+    editorTabs: {
+      name: string;
+      active: boolean;
+    }[];
+    codeLines: CodeLine[];
+    problemsCount: string;
+    problems: {
+      dot: "warn" | "accent" | "err";
+      msg: string;
+      file: string;
+      loc: string;
+      showOnMobile: boolean;
+    }[];
+    contextMenu: {
+      icon: "sparkles" | "download";
+      label: string;
+      active: boolean;
+    }[];
+    quickFixTitle: string;
+    quickFixMenu: {
+      icon: "sparkles" | "check";
+      label: string;
+      active: boolean;
+    }[];
+  };
+}
+
+export interface Props {
+  data: VsCodeSectionData;
+  marketplaceUrl: string;
+  repoUrl: string;
+}
+
+const { data, marketplaceUrl, repoUrl } = Astro.props;
+const mascotPoseDUrl = withBase("assets/mascot-pose-d.svg");
+
+const tokenColorMap: Record<CodeToken["color"], string> = {
+  "accent-hover": "text-snuts-accent-hover",
+  text: "text-snuts-text",
+  ok: "text-snuts-ok",
+  rose: "text-snuts-rose",
+  warn: "text-snuts-warn",
+  muted: "text-snuts-muted",
+  accent: "text-snuts-accent",
+};
+
+const dotColorMap: Record<"warn" | "accent" | "err", string> = {
+  warn: "bg-snuts-warn",
+  accent: "bg-snuts-accent",
+  err: "bg-snuts-err",
+};
+---
+
+<section id="vscode" class="w-full">
+  <!-- Desktop Section 7 · VS Code (HRgjU / FQKoc) -->
+  <div class="mx-auto hidden w-full max-w-[1440px] flex-col gap-[8px] px-8 py-[88px] lg:flex xl:px-[120px]">
+    <div class="flex w-full flex-col gap-[34px] overflow-hidden rounded-[20px] border border-snuts-border bg-snuts-espresso p-[46px]">
+      <div class="h-[3px] w-full bg-snuts-accent"></div>
+
+      <div class="flex w-full items-start gap-[44px]">
+        <!-- Copy Column (470px) -->
+        <div class="flex w-[430px] xl:w-[470px] shrink-0 flex-col gap-[20px]">
+          <div class="inline-flex self-start items-center gap-[9px] rounded-pill bg-snuts-accent-14 px-[15px] py-[8px]">
+            <Code className="h-[14px] w-[14px] text-snuts-accent" />
+            <span class="font-body text-[12.5px] font-semibold text-snuts-text">
+              {data.desktopBadge}
+            </span>
+          </div>
+
+          <h2 class="font-display text-[31px] font-bold leading-[1.18] tracking-[-0.9px] text-snuts-heading">
+            {data.desktopHeading}
+          </h2>
+
+          <div class="flex w-full flex-col gap-[17px]">
+            {
+              data.features.map((feat) => (
+                <div class="flex w-full items-start gap-[12px]">
+                  <div class="flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-pill bg-snuts-ok-12">
+                    <Check className="h-[14px] w-[14px] text-snuts-ok" />
+                  </div>
+                  <div class="flex flex-1 flex-col gap-[4px]">
+                    <h3 class="font-body text-[15px] font-semibold text-snuts-heading">
+                      {feat.desktopTitle}
+                    </h3>
+                    <p class="font-body text-[13.5px] font-normal leading-[1.55] text-snuts-muted">
+                      {feat.desktopDesc}
+                    </p>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+
+          <div class="flex w-full items-center gap-[16px]">
+            <div class="flex flex-1 flex-col gap-[12px]">
+              <a
+                href={marketplaceUrl}
+                target="_blank"
+                rel="noreferrer"
+                class="inline-flex w-full items-center justify-center gap-[8px] rounded-[10px] bg-snuts-accent px-[22px] py-[14px] font-body text-[14.5px] font-bold text-[#261B1F] transition-colors hover:bg-snuts-accent-hover"
+              >
+                <span>{data.primaryCtaLabel}</span>
+                <ArrowRight className="h-[15px] w-[15px] text-[#261B1F]" />
+              </a>
+              <a
+                href={repoUrl}
+                target="_blank"
+                rel="noreferrer"
+                class="inline-flex items-center gap-[7px] px-[2px] py-[6px] font-body text-[13.5px] font-medium text-snuts-muted transition-colors hover:text-snuts-text"
+              >
+                <ExternalLink className="h-[13px] w-[13px] text-snuts-muted" />
+                <span>{data.secondaryCtaLabel}</span>
+              </a>
+            </div>
+            <div class="h-[92px] w-[92px] shrink-0 overflow-hidden rounded-[16px] border border-snuts-border bg-snuts-espresso">
+              <img
+                src={mascotPoseDUrl}
+                alt="SNUTS.js Mascot Pose D"
+                class="h-full w-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- VS Code Mockup (500px height) -->
+        <div class="relative flex h-[500px] min-w-0 flex-1 flex-col overflow-hidden rounded-[14px] border border-snuts-border bg-snuts-well">
+          <!-- Title Bar -->
+          <div class="flex w-full items-center gap-[10px] bg-[#2A1D22] px-[13px] py-[8px]">
+            <div class="flex items-center gap-[6px]">
+              <span class="h-[9px] w-[9px] rounded-full bg-snuts-err"></span>
+              <span class="h-[9px] w-[9px] rounded-full bg-snuts-warn"></span>
+              <span class="h-[9px] w-[9px] rounded-full bg-snuts-ok"></span>
+            </div>
+            <div class="flex-1"></div>
+            <span class="font-body text-[11px] font-normal text-snuts-muted">
+              {data.mockup.windowTitle}
+            </span>
+            <div class="flex-1"></div>
+            <LayoutPanelLeft className="h-[13px] w-[13px] text-snuts-meta" />
+            <Search className="h-[13px] w-[13px] text-snuts-meta" />
+            <Settings className="h-[13px] w-[13px] text-snuts-meta" />
+          </div>
+
+          <!-- Main Area (Explorer + Editor) -->
+          <div class="flex min-h-0 flex-1 w-full">
+            <!-- Explorer (176px) -->
+            <div class="flex h-full w-[176px] shrink-0 flex-col gap-[5px] bg-[#231719] px-[8px] py-[10px]">
+              <span class="font-body text-[9.5px] font-semibold tracking-[1.2px] text-snuts-muted">
+                EXPLORER
+              </span>
+              <div class="flex w-full items-center gap-[5px] px-[4px] py-[3px]">
+                <ChevronDown className="h-[11px] w-[11px] text-snuts-meta" />
+                <span class="font-body text-[10.5px] font-semibold text-snuts-text">
+                  {data.mockup.projectName}
+                </span>
+              </div>
+              {
+                data.mockup.explorerItems.map((item) => (
+                  <div
+                    class:list={[
+                      "flex w-full items-center gap-[6px] rounded-[5px] px-[6px] py-[4px]",
+                      item.active ? "bg-snuts-accent-14" : "bg-transparent",
+                    ]}
+                  >
+                    {item.kind === "folder" ? (
+                      <Folder className="h-[12px] w-[12px] text-snuts-meta" />
+                    ) : (
+                      <FileCode
+                        className={`h-[12px] w-[12px] ${
+                          item.active ? "text-snuts-accent" : "text-snuts-meta"
+                        }`}
+                      />
+                    )}
+                    <span
+                      class:list={[
+                        "font-body text-[11.5px] font-normal",
+                        item.active ? "text-snuts-text" : "text-snuts-muted",
+                      ]}
+                    >
+                      {item.name}
+                    </span>
+                  </div>
+                ))
+              }
+            </div>
+
+            <!-- Editor -->
+            <div class="flex h-full flex-1 flex-col">
+              <!-- Tabs -->
+              <div class="flex w-full items-center bg-[#231719]">
+                {
+                  data.mockup.editorTabs.map((tab) => (
+                    <div
+                      class:list={[
+                        "flex flex-col gap-[6px] px-[14px] py-[8px]",
+                        tab.active ? "bg-snuts-well" : "bg-transparent",
+                      ]}
+                    >
+                      <span
+                        class:list={[
+                          "font-mono text-[11px]",
+                          tab.active ? "text-snuts-text" : "text-snuts-muted",
+                        ]}
+                      >
+                        {tab.name}
+                      </span>
+                      <span
+                        class:list={[
+                          "h-[2px] w-full",
+                          tab.active ? "bg-snuts-accent" : "bg-transparent",
+                        ]}
+                      />
+                    </div>
+                  ))
+                }
+              </div>
+
+              <!-- Code Lines -->
+              <div class="flex w-full flex-col gap-[7px] px-[14px] py-[12px]">
+                {
+                  data.mockup.codeLines.map((line) => (
+                    <div class="flex w-full items-center gap-[12px]">
+                      <span class="font-mono text-[11px] text-snuts-muted">{line.ln}</span>
+                      <div class="flex items-center font-mono text-[12px] whitespace-pre">
+                        {line.tokens.map((tok) => (
+                          <span class={tokenColorMap[tok.color]}>{tok.text}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Problems Panel (118px) -->
+          <div class="flex h-[118px] w-full shrink-0 flex-col gap-[6px] border-t border-snuts-border bg-[#231719] px-[12px] py-[9px]">
+            <div class="flex w-full items-center gap-[10px]">
+              <span class="font-body text-[9.5px] font-semibold tracking-[1.2px] text-snuts-muted">
+                PROBLEMS
+              </span>
+              <span class="rounded-pill bg-snuts-err-14 px-[7px] py-[1px] font-mono text-[9.5px] font-medium text-snuts-err">
+                {data.mockup.problemsCount}
+              </span>
+            </div>
+            {
+              data.mockup.problems.map((prob) => (
+                <div class="flex w-full items-center gap-[8px]">
+                  <span class:list={["h-[7px] w-[7px] rounded-full", dotColorMap[prob.dot]]} />
+                  <span class="font-body text-[11.5px] text-snuts-text">{prob.msg}</span>
+                  <div class="flex-1" />
+                  <span class="font-mono text-[10.5px] text-snuts-muted">{prob.file}</span>
+                  <span class="font-mono text-[10.5px] text-snuts-muted">{prob.loc}</span>
+                </div>
+              ))
+            }
+          </div>
+
+          <!-- Floating Context Menu (x: 14, y: 150) -->
+          <div class="
+            absolute left-[14px] top-[150px] flex w-[200px] flex-col gap-[2px]
+            overflow-hidden rounded-[8px] border border-snuts-border bg-[#2E2025] p-[6px] shadow-xl
+          ">
+            {
+              data.mockup.contextMenu.map((item) => (
+                <div
+                  class:list={[
+                    "flex w-full items-center gap-[8px] rounded-[5px] px-[9px] py-[7px]",
+                    item.active ? "bg-snuts-accent-14" : "bg-transparent",
+                  ]}
+                >
+                  {item.icon === "sparkles" ? (
+                    <Sparkles className="h-[12px] w-[12px] text-snuts-accent" />
+                  ) : (
+                    <Download className="h-[12px] w-[12px] text-snuts-muted" />
+                  )}
+                  <span
+                    class:list={[
+                      "font-body text-[11.5px]",
+                      item.active
+                        ? "font-semibold text-snuts-accent-hover"
+                        : "font-normal text-snuts-text",
+                    ]}
+                  >
+                    {item.label}
+                  </span>
+                </div>
+              ))
+            }
+          </div>
+
+          <!-- Floating Quick Fix Menu (x: 246, y: 186) -->
+          <div class="
+            absolute left-[246px] top-[186px] flex w-[272px] flex-col gap-[2px]
+            overflow-hidden rounded-[8px] border border-snuts-accent-35 bg-[#2E2025] p-[6px] shadow-xl
+          ">
+            <div class="flex w-full items-center gap-[8px] px-[9px] py-[6px]">
+              <Lightbulb className="h-[13px] w-[13px] text-snuts-warn" />
+              <span class="font-body text-[10.5px] font-semibold tracking-[0.6px] text-snuts-warn">
+                {data.mockup.quickFixTitle}
+              </span>
+            </div>
+            {
+              data.mockup.quickFixMenu.map((item) => (
+                <div
+                  class:list={[
+                    "flex w-full items-center gap-[8px] rounded-[5px] px-[9px] py-[7px]",
+                    item.active ? "bg-snuts-accent-14" : "bg-transparent",
+                  ]}
+                >
+                  {item.icon === "sparkles" ? (
+                    <Sparkles className="h-[12px] w-[12px] text-snuts-accent" />
+                  ) : (
+                    <Check className="h-[12px] w-[12px] text-snuts-muted" />
+                  )}
+                  <span
+                    class:list={[
+                      "font-body text-[11.5px]",
+                      item.active ? "font-semibold text-snuts-text" : "font-normal text-snuts-muted",
+                    ]}
+                  >
+                    {item.label}
+                  </span>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Section 7 · VS Code (KpfL5 / SWQaU) -->
+  <div class="flex w-full flex-col gap-[18px] px-[20px] py-[46px] lg:hidden">
+    <div class="flex w-full items-center justify-between gap-[8px]">
+      <div class="flex w-[250px] flex-col gap-[9px]">
+        <span class="font-mono text-[10px] font-medium tracking-[1.2px] text-snuts-accent">
+          {data.mobileKicker}
+        </span>
+        <h2 class="font-display text-[24px] font-bold leading-[1.16] tracking-[-0.8px] text-snuts-heading">
+          {data.mobileHeading}
+        </h2>
+      </div>
+      <div class="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-[16px] border border-snuts-border bg-snuts-espresso">
+        <img
+          src={mascotPoseDUrl}
+          alt="SNUTS.js Mascot Pose D"
+          class="h-full w-full object-contain"
+        />
+      </div>
+    </div>
+
+    <div class="inline-flex self-start items-center gap-[7px] rounded-pill bg-snuts-accent-14 px-[12px] py-[7px]">
+      <Code className="h-[12px] w-[12px] text-snuts-accent" />
+      <span class="font-body text-[11px] font-semibold text-snuts-accent-hover">
+        {data.mobileBadge}
+      </span>
+    </div>
+
+    {
+      data.features
+        .filter((f) => f.showOnMobile)
+        .map((feat) => (
+          <div class="flex w-full items-start gap-[10px]">
+            <div class="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-pill bg-snuts-ok-12">
+              <Check className="h-[12px] w-[12px] text-snuts-ok" />
+            </div>
+            <div class="flex flex-1 flex-col gap-[3px]">
+              <h3 class="font-body text-[12.5px] font-semibold text-snuts-heading">
+                {feat.mobileTitle}
+              </h3>
+              <p class="font-body text-[11.5px] font-normal leading-[1.5] text-snuts-muted">
+                {feat.mobileDesc}
+              </p>
+            </div>
+          </div>
+        ))
+    }
+
+    <!-- Mobile VS Code Mock -->
+    <div class="flex w-full flex-col overflow-hidden rounded-[12px] border border-snuts-border bg-snuts-well">
+      <div class="flex w-full items-center gap-[6px] bg-[#2A1D22] px-[10px] py-[8px]">
+        <span class="h-[7px] w-[7px] rounded-full bg-snuts-err"></span>
+        <span class="h-[7px] w-[7px] rounded-full bg-snuts-warn"></span>
+        <span class="h-[7px] w-[7px] rounded-full bg-snuts-ok"></span>
+        <span class="font-mono text-[11px] text-snuts-muted">
+          {data.mockup.mobileWindowTitle}
+        </span>
+        <div class="flex-1"></div>
+      </div>
+
+      <div class="flex w-full flex-col gap-[5px] px-[11px] py-[10px]">
+        {
+          data.mockup.codeLines.map((line) => (
+            <div class="flex w-full items-center font-mono text-[10px] whitespace-pre">
+              {line.tokens.map((tok) => (
+                <span class={tokenColorMap[tok.color]}>{tok.text}</span>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="flex w-full flex-col gap-[5px] border-t border-snuts-border bg-[#231719] px-[11px] py-[9px]">
+        <div class="flex w-full items-center gap-[8px]">
+          <span class="font-body text-[11px] font-semibold tracking-[1px] text-snuts-muted">
+            PROBLEMS
+          </span>
+          <span class="rounded-pill bg-snuts-err-14 px-[6px] py-[1px] font-mono text-[11px] text-snuts-err">
+            {data.mockup.problemsCount}
+          </span>
+        </div>
+        {
+          data.mockup.problems
+            .filter((p) => p.showOnMobile)
+            .map((prob) => (
+              <div class="flex w-full items-center gap-[7px]">
+                <span class:list={["h-[6px] w-[6px] rounded-full", dotColorMap[prob.dot]]} />
+                <span class="font-body text-[10.5px] text-snuts-text">{prob.msg}</span>
+                <div class="flex-1" />
+                <span class="font-mono text-[11px] text-snuts-muted">{prob.loc}</span>
+              </div>
+            ))
+        }
+      </div>
+    </div>
+
+    <a
+      href={marketplaceUrl}
+      target="_blank"
+      rel="noreferrer"
+      class="flex h-[44px] w-full items-center justify-center gap-[7px] rounded-[10px] bg-snuts-accent px-[18px] py-[13px] font-body text-[13.5px] font-bold text-[#261B1F]"
+    >
+      <span>{data.primaryCtaLabel}</span>
+      <ArrowRight className="h-[15px] w-[15px] text-[#261B1F]" />
+    </a>
+  </div>
+</section>

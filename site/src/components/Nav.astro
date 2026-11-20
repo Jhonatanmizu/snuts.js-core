@@ -1,0 +1,91 @@
+---
+import { ArrowRight } from "lucide-react";
+import { GithubIcon } from "@/components/icons/GithubIcon";
+import { MobileNav, type NavLinkItem } from "@/components/MobileNav";
+import { withBase } from "@/lib/utils";
+
+export interface Props {
+  brandName: string;
+  version: string;
+  githubUrl: string;
+  githubStars: string;
+  getStartedLabel: string;
+  getStartedHref: string;
+  navLinks: NavLinkItem[];
+}
+
+const {
+  brandName,
+  version,
+  githubUrl,
+  githubStars,
+  getStartedLabel,
+  getStartedHref,
+  navLinks,
+} = Astro.props;
+
+const mascotUrl = withBase("assets/mascot.png");
+---
+
+<header class="sticky top-0 z-40 w-full">
+  <div class="hidden lg:block w-full border-b border-snuts-border bg-[#261B1FD9] backdrop-blur-[24px]">
+    <div class="mx-auto flex h-[72px] w-full max-w-[1440px] items-center justify-between px-8 xl:px-[120px]">
+      <a href="#" class="flex items-center gap-[11px]">
+        <div class="h-[40px] w-[40px] overflow-hidden rounded-[12px]">
+          <img src={mascotUrl} alt={`${brandName} mascot`} class="h-full w-full object-contain" />
+        </div>
+        <span class="font-display text-[19px] font-bold tracking-[-0.4px] text-snuts-text">
+          {brandName}
+        </span>
+        <span class="inline-flex items-center rounded-pill bg-snuts-accent-14 px-[9px] py-[3px] font-mono text-[11px] font-medium text-snuts-accent-hover">
+          {version}
+        </span>
+      </a>
+
+      <nav class="flex items-center gap-[28px]" aria-label="Main Navigation">
+        {
+          navLinks.map((link) => (
+            <a
+              href={link.href}
+              class="font-body text-[14px] font-medium text-snuts-muted transition-colors hover:text-snuts-text"
+            >
+              {link.label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <div class="flex items-center gap-[10px]">
+        <a
+          href={githubUrl}
+          target="_blank"
+          rel="noreferrer"
+          class="inline-flex items-center gap-[8px] rounded-[10px] border border-snuts-border bg-snuts-card px-[16px] py-[10px] transition-colors hover:bg-snuts-card-hover"
+        >
+          <GithubIcon className="h-[16px] w-[16px] text-snuts-text" />
+          <span class="font-body text-[14px] font-medium text-snuts-text">GitHub</span>
+          <span class="inline-flex items-center rounded-pill bg-snuts-accent-14 px-[7px] py-[2px] font-mono text-[10px] font-medium text-snuts-text">
+            {githubStars}
+          </span>
+        </a>
+        <a
+          href={getStartedHref}
+          class="inline-flex items-center gap-[7px] rounded-[10px] bg-snuts-accent px-[18px] py-[11px] font-body text-[14px] font-semibold text-[#261B1F] transition-colors hover:bg-snuts-accent-hover"
+        >
+          <span>{getStartedLabel}</span>
+          <ArrowRight className="h-[15px] w-[15px] text-[#261B1F]" />
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <MobileNav
+    client:load
+    brandName={brandName}
+    mascotUrl={mascotUrl}
+    githubUrl={githubUrl}
+    getStartedLabel={getStartedLabel}
+    getStartedHref={getStartedHref}
+    navLinks={navLinks}
+  />
+</header>

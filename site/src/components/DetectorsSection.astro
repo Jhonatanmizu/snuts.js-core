@@ -1,0 +1,100 @@
+---
+import {
+  DetectorsCatalog,
+  type DetectorCategoryTab,
+  type DetectorItem,
+} from "@/components/DetectorsCatalog";
+import { withBase } from "@/lib/utils";
+
+export interface DetectorsSectionData {
+  kicker: string;
+  desktopTitle: string;
+  mobileTitle: string;
+  desktopSub: string;
+  mobileSub: string;
+  searchPlaceholder: string;
+  categories: DetectorCategoryTab[];
+  moreHeaderLabel: string;
+  viewAllLabel: string;
+  mobileMoreLabel: string;
+}
+
+export interface Props {
+  data: DetectorsSectionData;
+  detectors: DetectorItem[];
+}
+
+const { data, detectors } = Astro.props;
+const mascotPoseBUrl = withBase("assets/mascot-pose-b.svg");
+---
+
+<section id="detectors" class="w-full">
+  <!-- Desktop Section 4 (HRgjU / x9SvK) -->
+  <div class="mx-auto hidden w-full max-w-[1440px] flex-col gap-[34px] px-8 py-[88px] lg:flex xl:px-[120px]">
+    <div class="flex w-full items-center justify-between gap-[8px]">
+      <div class="flex w-[740px] flex-col gap-[14px]">
+        <span class="font-mono text-[12px] font-medium tracking-[1.6px] text-snuts-accent">
+          {data.kicker}
+        </span>
+        <h2 class="font-display text-[38px] font-bold leading-[1.15] tracking-[-1.1px] text-snuts-heading">
+          {data.desktopTitle}
+        </h2>
+        <p class="font-body text-[16px] font-normal leading-[1.6] text-snuts-muted">
+          {data.desktopSub}
+        </p>
+      </div>
+      <div class="h-[196px] w-[196px] shrink-0 overflow-hidden rounded-[16px] border border-snuts-border bg-snuts-espresso">
+        <img
+          src={mascotPoseBUrl}
+          alt="SNUTS.js Mascot Pose B"
+          class="h-full w-full object-contain"
+        />
+      </div>
+    </div>
+
+    <DetectorsCatalog
+      client:load
+      categories={data.categories}
+      searchPlaceholder={data.searchPlaceholder}
+      moreHeaderLabel={data.moreHeaderLabel}
+      viewAllLabel={data.viewAllLabel}
+      mobileMoreLabel={data.mobileMoreLabel}
+      detectors={detectors}
+    />
+  </div>
+
+  <!-- Mobile Section 4 (KpfL5 / Niy3X) -->
+  <div class="flex w-full flex-col gap-[20px] px-[20px] py-[46px] lg:hidden">
+    <div class="flex w-full items-center justify-between gap-[8px]">
+      <div class="flex w-[245px] flex-col gap-[9px]">
+        <span class="font-mono text-[10px] font-medium tracking-[1.2px] text-snuts-accent">
+          {data.kicker}
+        </span>
+        <h2 class="font-display text-[25px] font-bold leading-[1.16] tracking-[-0.8px] text-snuts-heading">
+          {data.mobileTitle}
+        </h2>
+      </div>
+      <div class="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-[16px] border border-snuts-border bg-snuts-espresso">
+        <img
+          src={mascotPoseBUrl}
+          alt="SNUTS.js Mascot Pose B"
+          class="h-full w-full object-contain"
+        />
+      </div>
+    </div>
+
+    <p class="font-body text-[13px] font-normal leading-[1.6] text-snuts-muted">
+      {data.mobileSub}
+    </p>
+
+    <DetectorsCatalog
+      client:load
+      categories={data.categories}
+      searchPlaceholder={data.searchPlaceholder}
+      moreHeaderLabel={data.moreHeaderLabel}
+      viewAllLabel={data.viewAllLabel}
+      mobileMoreLabel={data.mobileMoreLabel}
+      detectors={detectors}
+    />
+  </div>
+</section>

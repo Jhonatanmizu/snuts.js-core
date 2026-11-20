@@ -1,0 +1,126 @@
+---
+import { Bug, Layers, Sparkles } from "lucide-react";
+import { withBase } from "@/lib/utils";
+
+export interface WorkflowStep {
+  num: string;
+  title: string;
+  icon: "layers" | "bug" | "sparkles";
+  desktopDesc: string;
+  mobileDesc: string;
+}
+
+export interface WorkflowData {
+  kicker: string;
+  desktopTitle: string;
+  mobileTitle: string;
+  steps: WorkflowStep[];
+}
+
+export interface Props {
+  data: WorkflowData;
+}
+
+const { data } = Astro.props;
+const mascotUrl = withBase("assets/mascot.png");
+---
+
+<section id="workflow" class="w-full border-y border-snuts-border bg-snuts-espresso">
+  <!-- Desktop Workflow (HRgjU / QfuKs) -->
+  <div class="mx-auto hidden w-full max-w-[1440px] flex-col gap-[44px] px-8 py-[88px] lg:flex xl:px-[120px]">
+    <div class="flex w-full items-center justify-between gap-[8px]">
+      <div class="flex w-[760px] flex-col gap-[14px]">
+        <span class="font-mono text-[12px] font-medium tracking-[1.6px] text-snuts-accent-hover">
+          {data.kicker}
+        </span>
+        <h2 class="font-display text-[38px] font-bold leading-[1.15] tracking-[-1.1px] text-snuts-heading">
+          {data.desktopTitle}
+        </h2>
+      </div>
+      <div class="h-[132px] w-[132px] shrink-0 overflow-hidden rounded-[18px] border border-snuts-border">
+        <img src={mascotUrl} alt="SNUTS.js Mascot Pose A" class="h-full w-full object-contain" />
+      </div>
+    </div>
+
+    <div class="flex w-full items-center gap-[24px]">
+      {
+        data.steps.map((step, index) => (
+          <>
+            <div class="flex h-[256px] flex-1 flex-col gap-[15px] rounded-[16px] border border-snuts-border bg-snuts-card p-[24px]">
+              <div class="flex w-full items-center justify-between gap-[8px]">
+                <span class="font-mono text-[14px] font-medium tracking-[1px] text-snuts-accent-hover">
+                  {step.num}
+                </span>
+                <div class="flex h-[36px] w-[36px] items-center justify-center rounded-[10px] bg-snuts-accent-14">
+                  {step.icon === "layers" && <Layers className="h-[17px] w-[17px] text-snuts-accent" />}
+                  {step.icon === "bug" && <Bug className="h-[17px] w-[17px] text-snuts-accent" />}
+                  {step.icon === "sparkles" && (
+                    <Sparkles className="h-[17px] w-[17px] text-snuts-accent" />
+                  )}
+                </div>
+              </div>
+              <h3 class="font-display text-[21px] font-semibold tracking-[-0.3px] text-snuts-heading">
+                {step.title}
+              </h3>
+              <p class="font-body text-[14.5px] font-normal leading-[1.62] text-snuts-muted">
+                {step.desktopDesc}
+              </p>
+            </div>
+            {index < data.steps.length - 1 && (
+              <div class="flex w-[48px] shrink-0 items-center justify-center gap-[5px]">
+                <span class="h-[2px] w-[5px] rounded-[1px] bg-snuts-chestnut" />
+                <span class="h-[2px] w-[5px] rounded-[1px] bg-snuts-chestnut" />
+                <span class="h-[2px] w-[5px] rounded-[1px] bg-snuts-chestnut" />
+                <span class="h-[2px] w-[5px] rounded-[1px] bg-snuts-chestnut" />
+                <span class="h-[2px] w-[5px] rounded-[1px] bg-snuts-chestnut" />
+              </div>
+            )}
+          </>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- Mobile Workflow (KpfL5 / wMMZi) -->
+  <div class="flex w-full flex-col gap-[22px] px-[20px] py-[46px] lg:hidden">
+    <div class="flex w-full items-center justify-between gap-[8px]">
+      <div class="flex w-[245px] flex-col gap-[10px]">
+        <span class="font-mono text-[10px] font-medium tracking-[1.2px] text-snuts-accent-hover">
+          {data.kicker}
+        </span>
+        <h2 class="font-display text-[25px] font-bold leading-[1.16] tracking-[-0.8px] text-snuts-heading">
+          {data.mobileTitle}
+        </h2>
+      </div>
+      <div class="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-[16px] border border-snuts-border">
+        <img src={mascotUrl} alt="SNUTS.js Mascot Pose A" class="h-full w-full object-contain" />
+      </div>
+    </div>
+
+    {
+      data.steps.map((step) => (
+        <div class="flex w-full flex-col gap-[10px] rounded-[14px] border border-snuts-border bg-snuts-card p-[17px]">
+          <div class="flex w-full items-center gap-[10px]">
+            <span class="inline-flex items-center rounded-[8px] bg-snuts-accent-14 px-[9px] py-[5px] font-mono text-[11px] font-medium text-snuts-text">
+              {step.num}
+            </span>
+            <h3 class="font-display text-[17px] font-semibold tracking-[-0.3px] text-snuts-heading">
+              {step.title}
+            </h3>
+            <div class="flex-1" />
+            <div class="flex h-[30px] w-[30px] items-center justify-center rounded-[9px] bg-snuts-chestnut-10">
+              {step.icon === "layers" && <Layers className="h-[15px] w-[15px] text-snuts-text" />}
+              {step.icon === "bug" && <Bug className="h-[15px] w-[15px] text-snuts-text" />}
+              {step.icon === "sparkles" && (
+                <Sparkles className="h-[15px] w-[15px] text-snuts-text" />
+              )}
+            </div>
+          </div>
+          <p class="font-body text-[12.5px] font-normal leading-[1.55] text-snuts-muted">
+            {step.mobileDesc}
+          </p>
+        </div>
+      ))
+    }
+  </div>
+</section>

@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --snuts-canvas: #261B1F;
+  --snuts-espresso: #35262B;
+  --snuts-card: #3F2D33;
+  --snuts-card-hover: #4A363D;
+  --snuts-well: #1D1417;
+  --snuts-border: #543E45;
+  --snuts-accent: #DC6781;
+  --snuts-rose: #CD6E80;
+  --snuts-accent-hover: #EA7E96;
+  --snuts-chestnut: #885C52;
+  --snuts-heading: #FCE7D8;
+  --snuts-text: #F0DAC6;
+  --snuts-muted: #B8A39B;
+  --snuts-meta: #856F6A;
+  --snuts-ok: #89C7A1;
+  --snuts-warn: #E8B46D;
+  --snuts-err: #E56B7A;
+  --snuts-accent-14: #DC678124;
+  --snuts-ok-12: #89C7A11F;
+  --snuts-warn-14: #E8B46D24;
+  --snuts-err-14: #E56B7A24;
+  --snuts-accent-35: #DC678159;
+  --snuts-accent-12: #DC67811F;
+  --snuts-chestnut-10: #885C521A;
+
+  --snuts-font-display: "Space Grotesk";
+  --snuts-font-body: "Inter";
+  --snuts-font-mono: "JetBrains Mono";
+
+  --snuts-r-card: 16px;
+  --snuts-r-code: 14px;
+  --snuts-r-btn: 10px;
+  --snuts-r-pill: 999px;
+
+  --background: var(--snuts-canvas);
+  --foreground: var(--snuts-text);
+  --card: var(--snuts-card);
+  --card-foreground: var(--snuts-text);
+  --popover: var(--snuts-espresso);
+  --popover-foreground: var(--snuts-text);
+  --primary: var(--snuts-accent);
+  --primary-foreground: #261B1F;
+  --secondary: var(--snuts-card);
+  --secondary-foreground: var(--snuts-text);
+  --muted: var(--snuts-espresso);
+  --muted-foreground: var(--snuts-muted);
+  --accent: var(--snuts-accent-14);
+  --accent-foreground: var(--snuts-accent-hover);
+  --destructive: var(--snuts-err);
+  --destructive-foreground: var(--snuts-heading);
+  --border: var(--snuts-border);
+  --input: var(--snuts-border);
+  --ring: var(--snuts-accent);
+}
+
+@layer base {
+  html {
+    background-color: var(--snuts-canvas);
+    color: var(--snuts-text);
+    font-family: var(--snuts-font-body), sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--snuts-canvas);
+    color: var(--snuts-text);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
