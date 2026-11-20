@@ -10,6 +10,7 @@ import Nav from "@/components/Nav.astro";
 import VsCodeSection from "@/components/VsCodeSection.astro";
 import Workflow from "@/components/Workflow.astro";
 import Layout from "@/layouts/Layout.astro";
+import { extractGitHubRepoSlug, fetchGitHubStars } from "@/lib/github";
 
 const siteEntry = await getEntry("sections", "site");
 const heroEntry = await getEntry("sections", "hero");
@@ -65,6 +66,8 @@ const aiRefactorData = aiRefactorEntry.data;
 const cliSdkData = cliSdkEntry.data;
 const vscodeData = vscodeEntry.data;
 const ctaData = ctaEntry.data;
+const repoSlug = extractGitHubRepoSlug(siteData.githubUrl);
+const initialGithubStars = await fetchGitHubStars(repoSlug, siteData.githubStars);
 ---
 
 <Layout
@@ -75,7 +78,7 @@ const ctaData = ctaEntry.data;
     brandName={siteData.brandName}
     version={siteData.version}
     githubUrl={siteData.githubUrl}
-    githubStars={siteData.githubStars}
+    githubStars={initialGithubStars}
     getStartedLabel={siteData.getStartedLabel}
     getStartedHref={siteData.getStartedHref}
     navLinks={siteData.navLinks}

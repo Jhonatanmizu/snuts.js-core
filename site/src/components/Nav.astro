@@ -1,7 +1,9 @@
 ---
 import { ArrowRight } from "lucide-react";
+import { GitHubStarsBadge } from "@/components/GitHubStarsBadge";
 import { GithubIcon } from "@/components/icons/GithubIcon";
 import { MobileNav, type NavLinkItem } from "@/components/MobileNav";
+import { extractGitHubRepoSlug } from "@/lib/github";
 import { withBase } from "@/lib/utils";
 
 export interface Props {
@@ -25,6 +27,7 @@ const {
 } = Astro.props;
 
 const mascotUrl = withBase("assets/mascot.png");
+const repoSlug = extractGitHubRepoSlug(githubUrl);
 ---
 
 <header class="sticky top-0 z-40 w-full">
@@ -64,9 +67,7 @@ const mascotUrl = withBase("assets/mascot.png");
         >
           <GithubIcon className="h-[16px] w-[16px] text-snuts-text" />
           <span class="font-body text-[14px] font-medium text-snuts-text">GitHub</span>
-          <span class="inline-flex items-center rounded-pill bg-snuts-accent-14 px-[7px] py-[2px] font-mono text-[10px] font-medium text-snuts-text">
-            {githubStars}
-          </span>
+          <GitHubStarsBadge client:load repoSlug={repoSlug} initialStars={githubStars} />
         </a>
         <a
           href={getStartedHref}
